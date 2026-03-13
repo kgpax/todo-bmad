@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>todo-bmad — Design Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Plus+Jakarta+Sans:wght@400;500;600&family=Nunito+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --nav-bg: #2d2926;
+    --nav-text: #f5f0eb;
+    --nav-active: #d4956a;
+    --showcase-bg: #e8e2db;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: var(--showcase-bg);
+    color: #3d3530;
+    min-height: 100vh;
+  }
+
+  .showcase-header {
+    background: var(--nav-bg);
+    color: var(--nav-text);
+    padding: 20px 32px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.15);
+  }
+
+  .showcase-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+  }
+
+  .showcase-header p {
+    font-size: 13px;
+    opacity: 0.7;
+  }
+
+  .direction-nav {
+    display: flex;
+    gap: 4px;
+    margin-top: 14px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+  }
+
+  .direction-nav button {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--nav-text);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+
+  .direction-nav button:hover {
+    background: rgba(255,255,255,0.15);
+  }
+
+  .direction-nav button.active {
+    background: var(--nav-active);
+    color: #1a1614;
+    border-color: var(--nav-active);
+    font-weight: 500;
+  }
+
+  .directions-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+
+  .direction-panel {
+    display: none;
+  }
+
+  .direction-panel.active {
+    display: block;
+  }
+
+  .direction-meta {
+    margin-bottom: 32px;
+  }
+
+  .direction-meta h2 {
+    font-size: 24px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: #2d2926;
+  }
+
+  .direction-meta p {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #6b5e54;
+    max-width: 640px;
+  }
+
+  .direction-meta .tags {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .direction-meta .tag {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background: rgba(0,0,0,0.06);
+    color: #6b5e54;
+  }
+
+  .states-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+    gap: 24px;
+  }
+
+  .state-card {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+
+  .state-card-label {
+    font-size: 12px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 12px 20px;
+    background: #f8f5f1;
+    color: #9b8e83;
+    border-bottom: 1px solid #efe9e3;
+  }
+
+  .mockup-frame {
+    padding: 32px 0;
+    min-height: 420px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  /* ============================
+     DIRECTION 1: Warm Minimal
+     ============================ */
+  .d1 { --bg: #faf7f4; --surface: #ffffff; --text: #3d3530; --text-secondary: #a39690; --placeholder: #c4bab3; --accent: #d4956a; --accent-hover: #c4845a; --complete-text: #c4bab3; --error: #c47a6a; --border: #ede7e1; --checkbox-border: #d4ccc5; --radius: 12px; --font: 'DM Sans', system-ui, sans-serif; }
+
+  .d1 .app-shell { width: 100%; max-width: 480px; padding: 48px 24px; font-family: var(--font); background: var(--bg); min-height: 380px; }
+  .d1 .input-area { margin-bottom: 32px; }
+  .d1 .input-row { display: flex; gap: 12px; align-items: center; }
+  .d1 .todo-input { flex: 1; padding: 14px 18px; border: 2px solid var(--border); border-radius: var(--radius); font-size: 16px; font-family: var(--font); color: var(--text); background: var(--surface); outline: none; transition: border-color 0.2s ease; }
+  .d1 .todo-input::placeholder { color: var(--placeholder); }
+  .d1 .todo-input:focus { border-color: var(--accent); }
+  .d1 .todo-list { list-style: none; display: flex; flex-direction: column; gap: 2px; }
+  .d1 .todo-item { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: var(--radius); transition: background 0.15s ease; cursor: pointer; }
+  .d1 .todo-item:hover { background: rgba(0,0,0,0.02); }
+  .d1 .checkbox { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--checkbox-border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+  .d1 .todo-item.completed .checkbox { background: var(--accent); border-color: var(--accent); }
+  .d1 .checkmark { color: white; font-size: 12px; opacity: 0; transition: opacity 0.2s ease; }
+  .d1 .todo-item.completed .checkmark { opacity: 1; }
+  .d1 .todo-text { font-size: 16px; color: var(--text); line-height: 1.4; flex: 1; }
+  .d1 .todo-item.completed .todo-text { color: var(--complete-text); text-decoration: line-through; text-decoration-color: var(--complete-text); }
+  .d1 .todo-time { font-size: 12px; color: var(--text-secondary); white-space: nowrap; }
+  .d1 .delete-btn { opacity: 0; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; font-size: 16px; transition: all 0.15s ease; }
+  .d1 .todo-item:hover .delete-btn { opacity: 1; }
+  .d1 .delete-btn:hover { color: var(--error); }
+  .d1 .empty-state { text-align: center; padding: 64px 24px; color: var(--text-secondary); }
+  .d1 .empty-state .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
+  .d1 .empty-state p { font-size: 15px; line-height: 1.5; }
+  .d1 .error-state { padding: 14px 18px; background: #fdf5f3; border: 1px solid #f0ddd8; border-radius: var(--radius); color: var(--error); font-size: 14px; margin-top: 12px; display: flex; align-items: center; gap: 10px; }
+  .d1 .error-state .retry { background: none; border: none; color: var(--accent); font-family: var(--font); font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .d1 .skeleton { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+  .d1 .skeleton .skel-check { width: 22px; height: 22px; border-radius: 6px; background: var(--border); animation: breathe 2s ease-in-out infinite; }
+  .d1 .skeleton .skel-text { height: 16px; border-radius: 8px; background: var(--border); animation: breathe 2s ease-in-out infinite; animation-delay: 0.3s; }
+
+  /* ============================
+     DIRECTION 2: Soft Rounded
+     ============================ */
+  .d2 { --bg: #fdf9f5; --surface: #ffffff; --text: #40352e; --text-secondary: #b0a49a; --placeholder: #c8bcb2; --accent: #c88650; --accent-hover: #b87840; --complete-text: #c8bcb2; --error: #c07060; --border: #f0e8e0; --checkbox-border: #ddd4cb; --radius: 20px; --font: 'Nunito Sans', system-ui, sans-serif; }
+
+  .d2 .app-shell { width: 100%; max-width: 480px; padding: 48px 24px; font-family: var(--font); background: var(--bg); min-height: 380px; }
+  .d2 .input-area { margin-bottom: 32px; }
+  .d2 .input-row { display: flex; gap: 10px; align-items: center; }
+  .d2 .todo-input { flex: 1; padding: 16px 22px; border: none; border-radius: var(--radius); font-size: 16px; font-family: var(--font); color: var(--text); background: var(--surface); outline: none; box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 0 0 2px transparent; transition: box-shadow 0.2s ease; }
+  .d2 .todo-input::placeholder { color: var(--placeholder); }
+  .d2 .todo-input:focus { box-shadow: 0 2px 8px rgba(0,0,0,0.04), 0 0 0 2px var(--accent); }
+  .d2 .submit-btn { width: 48px; height: 48px; border-radius: 50%; background: var(--accent); border: none; color: white; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: 0 2px 8px rgba(200,134,80,0.3); }
+  .d2 .submit-btn:hover { background: var(--accent-hover); transform: scale(1.05); }
+  .d2 .todo-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+  .d2 .todo-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-radius: 16px; background: var(--surface); box-shadow: 0 1px 4px rgba(0,0,0,0.03); transition: all 0.2s ease; cursor: pointer; }
+  .d2 .todo-item:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+  .d2 .checkbox { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--checkbox-border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+  .d2 .todo-item.completed .checkbox { background: var(--accent); border-color: var(--accent); }
+  .d2 .checkmark { color: white; font-size: 12px; opacity: 0; transition: opacity 0.2s ease; }
+  .d2 .todo-item.completed .checkmark { opacity: 1; }
+  .d2 .todo-content { flex: 1; }
+  .d2 .todo-text { font-size: 16px; color: var(--text); line-height: 1.4; }
+  .d2 .todo-item.completed .todo-text { color: var(--complete-text); text-decoration: line-through; }
+  .d2 .todo-time { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+  .d2 .delete-btn { opacity: 0; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 6px; font-size: 14px; border-radius: 50%; transition: all 0.15s ease; }
+  .d2 .todo-item:hover .delete-btn { opacity: 1; }
+  .d2 .delete-btn:hover { background: #fdf0ec; color: var(--error); }
+  .d2 .empty-state { text-align: center; padding: 64px 24px; color: var(--text-secondary); }
+  .d2 .empty-state .empty-icon { font-size: 40px; margin-bottom: 16px; opacity: 0.3; }
+  .d2 .empty-state p { font-size: 15px; line-height: 1.5; }
+  .d2 .error-state { padding: 16px 20px; background: var(--surface); border-radius: 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.03); color: var(--error); font-size: 14px; margin-top: 12px; display: flex; align-items: center; gap: 12px; }
+  .d2 .error-state .retry { background: var(--accent); border: none; color: white; font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px 14px; border-radius: 20px; }
+  .d2 .skeleton .skel-check { width: 24px; height: 24px; border-radius: 50%; }
+
+  /* ============================
+     DIRECTION 3: Clean Lines
+     ============================ */
+  .d3 { --bg: #f8f5f1; --surface: #f8f5f1; --text: #332b26; --text-secondary: #a0958c; --placeholder: #bfb5ab; --accent: #b87a4a; --accent-light: rgba(184,122,74,0.08); --complete-text: #bfb5ab; --error: #b86a5a; --border: #e0d8d0; --checkbox-border: #d0c8c0; --radius: 0px; --font: 'Plus Jakarta Sans', system-ui, sans-serif; }
+
+  .d3 .app-shell { width: 100%; max-width: 480px; padding: 48px 24px; font-family: var(--font); background: var(--bg); min-height: 380px; }
+  .d3 .input-area { margin-bottom: 24px; border-bottom: 2px solid var(--border); padding-bottom: 24px; }
+  .d3 .todo-input { width: 100%; padding: 12px 0; border: none; border-bottom: 2px solid transparent; font-size: 18px; font-family: var(--font); color: var(--text); background: transparent; outline: none; transition: border-color 0.2s ease; }
+  .d3 .todo-input::placeholder { color: var(--placeholder); }
+  .d3 .todo-input:focus { border-bottom-color: var(--accent); }
+  .d3 .todo-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+  .d3 .todo-item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid var(--border); transition: background 0.15s ease; cursor: pointer; }
+  .d3 .todo-item:hover { background: var(--accent-light); margin: 0 -12px; padding: 16px 12px; }
+  .d3 .checkbox { width: 20px; height: 20px; border-radius: 2px; border: 2px solid var(--checkbox-border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+  .d3 .todo-item.completed .checkbox { background: var(--accent); border-color: var(--accent); }
+  .d3 .checkmark { color: white; font-size: 11px; opacity: 0; transition: opacity 0.2s ease; }
+  .d3 .todo-item.completed .checkmark { opacity: 1; }
+  .d3 .todo-content { flex: 1; }
+  .d3 .todo-text { font-size: 15px; color: var(--text); line-height: 1.5; font-weight: 500; }
+  .d3 .todo-item.completed .todo-text { color: var(--complete-text); text-decoration: line-through; font-weight: 400; }
+  .d3 .todo-time { font-size: 12px; color: var(--text-secondary); margin-top: 2px; font-weight: 400; }
+  .d3 .delete-btn { opacity: 0; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; font-size: 14px; transition: all 0.15s ease; }
+  .d3 .todo-item:hover .delete-btn { opacity: 1; }
+  .d3 .delete-btn:hover { color: var(--error); }
+  .d3 .divider-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-secondary); padding: 20px 0 8px; font-weight: 600; }
+  .d3 .empty-state { padding: 64px 0; color: var(--text-secondary); }
+  .d3 .empty-state p { font-size: 16px; line-height: 1.5; }
+  .d3 .error-state { padding: 12px 0; border-top: 2px solid var(--error); color: var(--error); font-size: 14px; margin-top: 8px; }
+  .d3 .error-state .retry { background: none; border: none; color: var(--accent); font-family: var(--font); font-size: 14px; font-weight: 600; cursor: pointer; padding: 0; }
+
+  /* ============================
+     DIRECTION 4: Warm Depth
+     ============================ */
+  .d4 { --bg: #f5f0eb; --surface: #fffcf9; --text: #38302a; --text-secondary: #9e9088; --placeholder: #c0b5ab; --accent: #d08a55; --accent-hover: #c07a45; --complete-text: #c0b5ab; --error: #c07060; --border: #e8e0d8; --shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.03); --shadow-hover: 0 2px 6px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.05); --radius: 14px; --font: 'Outfit', system-ui, sans-serif; }
+
+  .d4 .app-shell { width: 100%; max-width: 480px; padding: 48px 24px; font-family: var(--font); background: var(--bg); min-height: 380px; }
+  .d4 .input-area { margin-bottom: 28px; }
+  .d4 .todo-input { width: 100%; padding: 18px 22px; border: none; border-radius: var(--radius); font-size: 16px; font-family: var(--font); color: var(--text); background: var(--surface); outline: none; box-shadow: var(--shadow), 0 0 0 0px var(--accent); transition: all 0.25s ease; }
+  .d4 .todo-input::placeholder { color: var(--placeholder); }
+  .d4 .todo-input:focus { box-shadow: var(--shadow-hover), 0 0 0 2px var(--accent); }
+  .d4 .todo-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .d4 .todo-item { display: flex; align-items: center; gap: 14px; padding: 16px 20px; border-radius: var(--radius); background: var(--surface); box-shadow: var(--shadow); transition: all 0.25s ease; cursor: pointer; }
+  .d4 .todo-item:hover { box-shadow: var(--shadow-hover); transform: translateY(-1px); }
+  .d4 .todo-item.completed { opacity: 0.7; }
+  .d4 .todo-item.completed:hover { opacity: 0.85; }
+  .d4 .checkbox { width: 22px; height: 22px; border-radius: 8px; border: 2px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+  .d4 .todo-item.completed .checkbox { background: var(--accent); border-color: var(--accent); }
+  .d4 .checkmark { color: white; font-size: 12px; opacity: 0; transition: opacity 0.2s ease; }
+  .d4 .todo-item.completed .checkmark { opacity: 1; }
+  .d4 .todo-content { flex: 1; }
+  .d4 .todo-text { font-size: 15px; color: var(--text); line-height: 1.5; }
+  .d4 .todo-item.completed .todo-text { color: var(--complete-text); text-decoration: line-through; }
+  .d4 .todo-time { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+  .d4 .delete-btn { opacity: 0; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 6px; font-size: 14px; border-radius: 8px; transition: all 0.15s ease; }
+  .d4 .todo-item:hover .delete-btn { opacity: 1; }
+  .d4 .delete-btn:hover { background: rgba(192,112,96,0.08); color: var(--error); }
+  .d4 .empty-state { text-align: center; padding: 64px 24px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); color: var(--text-secondary); }
+  .d4 .empty-state .empty-icon { font-size: 28px; margin-bottom: 12px; opacity: 0.3; }
+  .d4 .empty-state p { font-size: 15px; line-height: 1.6; }
+  .d4 .error-state { padding: 16px 20px; background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow); border-left: 3px solid var(--error); color: #6b4a42; font-size: 14px; margin-top: 12px; display: flex; align-items: center; gap: 12px; }
+  .d4 .error-state .retry { background: none; border: 1px solid var(--accent); color: var(--accent); font-family: var(--font); font-size: 13px; cursor: pointer; padding: 5px 12px; border-radius: 8px; transition: all 0.15s ease; }
+  .d4 .error-state .retry:hover { background: var(--accent); color: white; }
+
+  /* ============================
+     DIRECTION 5: Airy Spacious
+     ============================ */
+  .d5 { --bg: #faf8f5; --surface: #faf8f5; --text: #3a332e; --text-secondary: #a89e95; --placeholder: #c8bfb5; --accent: #c89060; --complete-text: #c8bfb5; --error: #b87060; --border: #ece5dd; --radius: 10px; --font: 'DM Sans', system-ui, sans-serif; }
+
+  .d5 .app-shell { width: 100%; max-width: 520px; padding: 64px 32px; font-family: var(--font); background: var(--bg); min-height: 380px; }
+  .d5 .input-area { margin-bottom: 48px; }
+  .d5 .todo-input { width: 100%; padding: 18px 0; border: none; border-bottom: 1.5px solid var(--border); font-size: 20px; font-family: var(--font); color: var(--text); background: transparent; outline: none; transition: border-color 0.2s ease; letter-spacing: -0.01em; }
+  .d5 .todo-input::placeholder { color: var(--placeholder); }
+  .d5 .todo-input:focus { border-bottom-color: var(--accent); }
+  .d5 .todo-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
+  .d5 .todo-item { display: flex; align-items: flex-start; gap: 18px; padding: 24px 0; border-bottom: 1px solid var(--border); cursor: pointer; transition: opacity 0.2s ease; }
+  .d5 .checkbox { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--text-secondary); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; margin-top: 3px; }
+  .d5 .todo-item.completed .checkbox { background: var(--accent); border-color: var(--accent); }
+  .d5 .checkmark { color: white; font-size: 10px; opacity: 0; transition: opacity 0.2s ease; }
+  .d5 .todo-item.completed .checkmark { opacity: 1; }
+  .d5 .todo-content { flex: 1; }
+  .d5 .todo-text { font-size: 17px; color: var(--text); line-height: 1.6; letter-spacing: -0.01em; }
+  .d5 .todo-item.completed .todo-text { color: var(--complete-text); text-decoration: line-through; text-decoration-thickness: 1px; }
+  .d5 .todo-time { font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+  .d5 .delete-btn { opacity: 0; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 4px; font-size: 14px; transition: all 0.15s ease; margin-top: 3px; }
+  .d5 .todo-item:hover .delete-btn { opacity: 0.5; }
+  .d5 .delete-btn:hover { opacity: 1 !important; color: var(--error); }
+  .d5 .empty-state { padding: 80px 0; color: var(--placeholder); }
+  .d5 .empty-state p { font-size: 18px; font-style: italic; }
+  .d5 .error-state { padding: 16px 0; color: var(--error); font-size: 14px; margin-top: 16px; border-top: 1.5px solid var(--error); }
+  .d5 .error-state .retry { background: none; border: none; color: var(--accent); font-family: var(--font); font-size: 14px; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* ============================
+     DIRECTION 6: Compact Warm
+     ============================ */
+  .d6 { --bg: #f7f3ef; --surface: #ffffff; --text: #3b342e; --text-secondary: #a8a098; --placeholder: #c5bdb5; --accent: #d09565; --accent-bg: rgba(208,149,101,0.08); --complete-text: #c5bdb5; --error: #c47060; --border: #e8e2dc; --radius: 8px; --font: 'Plus Jakarta Sans', system-ui, sans-serif; }
+
+  .d6 .app-shell { width: 100%; max-width: 440px; padding: 40px 20px; font-family: var(--font); background: var(--bg); min-height: 380px; }
+  .d6 .input-area { margin-bottom: 20px; }
+  .d6 .input-row { display: flex; gap: 8px; }
+  .d6 .todo-input { flex: 1; padding: 12px 16px; border: 1.5px solid var(--border); border-radius: var(--radius); font-size: 14px; font-family: var(--font); color: var(--text); background: var(--surface); outline: none; transition: border-color 0.2s ease; }
+  .d6 .todo-input::placeholder { color: var(--placeholder); font-size: 14px; }
+  .d6 .todo-input:focus { border-color: var(--accent); }
+  .d6 .submit-btn { padding: 12px 18px; border-radius: var(--radius); background: var(--accent); border: none; color: white; font-size: 13px; font-weight: 600; font-family: var(--font); cursor: pointer; transition: all 0.15s ease; white-space: nowrap; }
+  .d6 .submit-btn:hover { background: #c08555; }
+  .d6 .todo-list { list-style: none; display: flex; flex-direction: column; gap: 4px; }
+  .d6 .todo-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: var(--radius); background: var(--surface); transition: all 0.15s ease; cursor: pointer; font-size: 14px; }
+  .d6 .todo-item:hover { background: var(--accent-bg); }
+  .d6 .checkbox { width: 18px; height: 18px; border-radius: 4px; border: 1.5px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all 0.15s ease; }
+  .d6 .todo-item.completed .checkbox { background: var(--accent); border-color: var(--accent); }
+  .d6 .checkmark { color: white; font-size: 10px; opacity: 0; transition: opacity 0.15s ease; }
+  .d6 .todo-item.completed .checkmark { opacity: 1; }
+  .d6 .todo-text { font-size: 14px; color: var(--text); flex: 1; }
+  .d6 .todo-item.completed .todo-text { color: var(--complete-text); text-decoration: line-through; }
+  .d6 .todo-time { font-size: 11px; color: var(--text-secondary); }
+  .d6 .delete-btn { opacity: 0; background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 2px 4px; font-size: 12px; transition: all 0.15s ease; }
+  .d6 .todo-item:hover .delete-btn { opacity: 1; }
+  .d6 .delete-btn:hover { color: var(--error); }
+  .d6 .completed-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .d6 .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-secondary); margin-bottom: 8px; font-weight: 600; }
+  .d6 .empty-state { text-align: center; padding: 48px 16px; color: var(--text-secondary); }
+  .d6 .empty-state p { font-size: 14px; }
+  .d6 .error-state { padding: 10px 14px; background: #fef6f4; border: 1px solid #f0dcd8; border-radius: var(--radius); color: var(--error); font-size: 13px; margin-top: 8px; display: flex; align-items: center; justify-content: space-between; }
+  .d6 .error-state .retry { background: none; border: none; color: var(--accent); font-family: var(--font); font-size: 13px; font-weight: 600; cursor: pointer; }
+
+  /* Shared skeleton animation */
+  @keyframes breathe {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.7; }
+  }
+
+  .skeleton { display: flex; align-items: center; gap: 14px; padding: 14px 16px; }
+  .skel-check { width: 22px; height: 22px; border-radius: 6px; background: #e0d8d0; animation: breathe 2.5s ease-in-out infinite; }
+  .skel-text { height: 14px; border-radius: 8px; background: #e0d8d0; animation: breathe 2.5s ease-in-out infinite; }
+  .skel-text.w70 { width: 70%; animation-delay: 0.2s; }
+  .skel-text.w50 { width: 50%; animation-delay: 0.4s; }
+  .skel-text.w85 { width: 85%; animation-delay: 0.1s; }
+  .skel-text.w60 { width: 60%; animation-delay: 0.3s; }
+</style>
+</head>
+<body>
+
+<div class="showcase-header">
+  <h1>todo-bmad — Design Directions</h1>
+  <p>6 visual approaches built on: warm palette, no title, centered column, generous spacing, sans-serif</p>
+  <div class="direction-nav">
+    <button class="active" onclick="showDirection(1)">1. Warm Minimal</button>
+    <button onclick="showDirection(2)">2. Soft Rounded</button>
+    <button onclick="showDirection(3)">3. Clean Lines</button>
+    <button onclick="showDirection(4)">4. Warm Depth</button>
+    <button onclick="showDirection(5)">5. Airy Spacious</button>
+    <button onclick="showDirection(6)">6. Compact Warm</button>
+  </div>
+</div>
+
+<div class="directions-container">
+
+  <!-- DIRECTION 1: Warm Minimal -->
+  <div class="direction-panel active" id="dir-1">
+    <div class="direction-meta">
+      <h2>1. Warm Minimal</h2>
+      <p>Maximum restraint. Subtle borders, no shadows, no cards. The list items live directly on the background — the content <em>is</em> the design. Quiet and composed, motion only on interaction.</p>
+      <div class="tags">
+        <span class="tag">DM Sans</span>
+        <span class="tag">Borderless items</span>
+        <span class="tag">Rounded checkbox</span>
+        <span class="tag">Ultra-clean</span>
+      </div>
+    </div>
+    <div class="states-grid">
+      <div class="state-card">
+        <div class="state-card-label">Active List</div>
+        <div class="mockup-frame">
+          <div class="d1">
+            <div class="app-shell">
+              <div class="input-area">
+                <div class="input-row">
+                  <input type="text" class="todo-input" placeholder="What's next...?" disabled>
+                </div>
+              </div>
+              <ul class="todo-list">
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><span class="todo-text">Call the vet about appointment</span><span class="todo-time">2m ago</span><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><span class="todo-text">Pick up dry cleaning</span><span class="todo-time">1h ago</span><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><span class="todo-text">Send invoice to client</span><span class="todo-time">3h ago</span><button class="delete-btn">✕</button></li>
+                <li class="todo-item completed"><div class="checkbox"><span class="checkmark">✓</span></div><span class="todo-text">Buy groceries</span><span class="todo-time">5h ago</span><button class="delete-btn">✕</button></li>
+                <li class="todo-item completed"><div class="checkbox"><span class="checkmark">✓</span></div><span class="todo-text">Reply to Sarah's email</span><span class="todo-time">1d ago</span><button class="delete-btn">✕</button></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Empty State</div>
+        <div class="mockup-frame">
+          <div class="d1">
+            <div class="app-shell">
+              <div class="input-area">
+                <div class="input-row">
+                  <input type="text" class="todo-input" placeholder="What's first...?" disabled>
+                </div>
+              </div>
+              <div class="empty-state">
+                <div class="empty-icon">○</div>
+                <p>Nothing here yet.<br>Type something above to get started.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Error State</div>
+        <div class="mockup-frame">
+          <div class="d1">
+            <div class="app-shell">
+              <div class="input-area">
+                <div class="input-row">
+                  <input type="text" class="todo-input" placeholder="What's next...?" value="Book dentist" disabled>
+                </div>
+                <div class="error-state">
+                  <span>Hmm, that didn't stick. Want to <button class="retry">try again</button>?</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Loading (Skeleton)</div>
+        <div class="mockup-frame">
+          <div class="d1">
+            <div class="app-shell">
+              <div class="input-area">
+                <div class="input-row">
+                  <input type="text" class="todo-input" placeholder="What's next...?" disabled>
+                </div>
+              </div>
+              <div class="skeleton"><div class="skel-check"></div><div class="skel-text w70"></div></div>
+              <div class="skeleton"><div class="skel-check"></div><div class="skel-text w85"></div></div>
+              <div class="skeleton"><div class="skel-check"></div><div class="skel-text w50"></div></div>
+              <div class="skeleton"><div class="skel-check"></div><div class="skel-text w60"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIRECTION 2: Soft Rounded -->
+  <div class="direction-panel" id="dir-2">
+    <div class="direction-meta">
+      <h2>2. Soft Rounded</h2>
+      <p>Friendly and approachable. Each todo lives in its own softly shadowed card with generous rounding. A circular submit button adds a playful touch. Feels warm and tactile — like handling smooth objects.</p>
+      <div class="tags">
+        <span class="tag">Nunito Sans</span>
+        <span class="tag">Card per item</span>
+        <span class="tag">Circular checkbox</span>
+        <span class="tag">Circular submit</span>
+      </div>
+    </div>
+    <div class="states-grid">
+      <div class="state-card">
+        <div class="state-card-label">Active List</div>
+        <div class="mockup-frame">
+          <div class="d2">
+            <div class="app-shell">
+              <div class="input-area">
+                <div class="input-row">
+                  <input type="text" class="todo-input" placeholder="What's next...?" disabled>
+                  <button class="submit-btn">+</button>
+                </div>
+              </div>
+              <ul class="todo-list">
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Call the vet about appointment</div><div class="todo-time">2 minutes ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Pick up dry cleaning</div><div class="todo-time">1 hour ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Send invoice to client</div><div class="todo-time">3 hours ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item completed"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Buy groceries</div><div class="todo-time">5 hours ago</div></div><button class="delete-btn">✕</button></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Empty State</div>
+        <div class="mockup-frame">
+          <div class="d2">
+            <div class="app-shell">
+              <div class="input-area">
+                <div class="input-row">
+                  <input type="text" class="todo-input" placeholder="What's first...?" disabled>
+                  <button class="submit-btn">+</button>
+                </div>
+              </div>
+              <div class="empty-state">
+                <div class="empty-icon">☀️</div>
+                <p>A blank slate — the best kind.<br>What's on your mind?</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Error State</div>
+        <div class="mockup-frame">
+          <div class="d2">
+            <div class="app-shell">
+              <div class="input-area">
+                <div class="input-row">
+                  <input type="text" class="todo-input" value="Book dentist" disabled>
+                  <button class="submit-btn">+</button>
+                </div>
+              </div>
+              <div class="error-state">
+                <span>Well, that didn't work. No worries.</span>
+                <button class="retry">Try again</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIRECTION 3: Clean Lines -->
+  <div class="direction-panel" id="dir-3">
+    <div class="direction-meta">
+      <h2>3. Clean Lines</h2>
+      <p>Typographic and structured. Horizontal rules create rhythm. The input uses an underline style — editorial and focused. Square checkboxes and a labeled divider between active and completed items. Feels precise and intentional.</p>
+      <div class="tags">
+        <span class="tag">Plus Jakarta Sans</span>
+        <span class="tag">Line separators</span>
+        <span class="tag">Square checkbox</span>
+        <span class="tag">Section labels</span>
+      </div>
+    </div>
+    <div class="states-grid">
+      <div class="state-card">
+        <div class="state-card-label">Active List</div>
+        <div class="mockup-frame">
+          <div class="d3">
+            <div class="app-shell">
+              <div class="input-area">
+                <input type="text" class="todo-input" placeholder="What's next...?" disabled>
+              </div>
+              <ul class="todo-list">
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Call the vet about appointment</div><div class="todo-time">2 minutes ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Pick up dry cleaning</div><div class="todo-time">1 hour ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Send invoice to client</div><div class="todo-time">3 hours ago</div></div><button class="delete-btn">✕</button></li>
+              </ul>
+              <div class="divider-label">Completed</div>
+              <ul class="todo-list">
+                <li class="todo-item completed"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Buy groceries</div><div class="todo-time">5 hours ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item completed"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Reply to Sarah's email</div><div class="todo-time">1 day ago</div></div><button class="delete-btn">✕</button></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Empty State</div>
+        <div class="mockup-frame">
+          <div class="d3">
+            <div class="app-shell">
+              <div class="input-area">
+                <input type="text" class="todo-input" placeholder="What's first...?" disabled>
+              </div>
+              <div class="empty-state">
+                <p>Nothing yet. Start typing above.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Error State</div>
+        <div class="mockup-frame">
+          <div class="d3">
+            <div class="app-shell">
+              <div class="input-area">
+                <input type="text" class="todo-input" value="Book dentist" disabled>
+                <div class="error-state">
+                  That didn't go through. <button class="retry">Retry</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIRECTION 4: Warm Depth -->
+  <div class="direction-panel" id="dir-4">
+    <div class="direction-meta">
+      <h2>4. Warm Depth</h2>
+      <p>Layered and dimensional. Soft shadows give each element a sense of physical presence. Items feel like paper cards floating above the surface. The hover lift effect adds subtle tactility. Feels polished and crafted.</p>
+      <div class="tags">
+        <span class="tag">Outfit</span>
+        <span class="tag">Shadow depth</span>
+        <span class="tag">Hover lift</span>
+        <span class="tag">Rounded squares</span>
+      </div>
+    </div>
+    <div class="states-grid">
+      <div class="state-card">
+        <div class="state-card-label">Active List</div>
+        <div class="mockup-frame">
+          <div class="d4">
+            <div class="app-shell">
+              <div class="input-area">
+                <input type="text" class="todo-input" placeholder="What's next...?" disabled>
+              </div>
+              <ul class="todo-list">
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Call the vet about appointment</div><div class="todo-time">2 minutes ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Pick up dry cleaning</div><div class="todo-time">1 hour ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Send invoice to client</div><div class="todo-time">3 hours ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item completed"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Buy groceries</div><div class="todo-time">5 hours ago</div></div><button class="delete-btn">✕</button></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Empty State</div>
+        <div class="mockup-frame">
+          <div class="d4">
+            <div class="app-shell">
+              <div class="input-area">
+                <input type="text" class="todo-input" placeholder="What's first...?" disabled>
+              </div>
+              <div class="empty-state">
+                <div class="empty-icon">✦</div>
+                <p>Your list is empty.<br>That's either very zen, or you haven't started yet.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Error State</div>
+        <div class="mockup-frame">
+          <div class="d4">
+            <div class="app-shell">
+              <div class="input-area">
+                <input type="text" class="todo-input" value="Book dentist" disabled>
+              </div>
+              <div class="error-state">
+                <span>Couldn't save that one. The internet blinked.</span>
+                <button class="retry">Retry</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIRECTION 5: Airy Spacious -->
+  <div class="direction-panel" id="dir-5">
+    <div class="direction-meta">
+      <h2>5. Airy Spacious</h2>
+      <p>Maximum breathing room. Taller line heights, wider gaps, and a larger input create a sense of openness and calm. The underline input feels like writing on a ruled page. Feels unhurried and meditative.</p>
+      <div class="tags">
+        <span class="tag">DM Sans</span>
+        <span class="tag">Extra spacing</span>
+        <span class="tag">Underline input</span>
+        <span class="tag">Thin borders</span>
+      </div>
+    </div>
+    <div class="states-grid">
+      <div class="state-card">
+        <div class="state-card-label">Active List</div>
+        <div class="mockup-frame">
+          <div class="d5">
+            <div class="app-shell">
+              <div class="input-area">
+                <input type="text" class="todo-input" placeholder="What's next...?" disabled>
+              </div>
+              <ul class="todo-list">
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Call the vet about appointment</div><div class="todo-time">2 minutes ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Pick up dry cleaning</div><div class="todo-time">1 hour ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Send invoice to client</div><div class="todo-time">3 hours ago</div></div><button class="delete-btn">✕</button></li>
+                <li class="todo-item completed"><div class="checkbox"><span class="checkmark">✓</span></div><div class="todo-content"><div class="todo-text">Buy groceries</div><div class="todo-time">5 hours ago</div></div><button class="delete-btn">✕</button></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Empty State</div>
+        <div class="mockup-frame">
+          <div class="d5">
+            <div class="app-shell">
+              <div class="input-area">
+                <input type="text" class="todo-input" placeholder="What's first...?" disabled>
+              </div>
+              <div class="empty-state">
+                <p>A fresh page awaits.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DIRECTION 6: Compact Warm -->
+  <div class="direction-panel" id="dir-6">
+    <div class="direction-meta">
+      <h2>6. Compact Warm</h2>
+      <p>Tighter and more efficient without sacrificing warmth. Items are closer together, the input has an explicit submit button with text. A labeled "Completed" section provides clear structure. Feels productive and organized.</p>
+      <div class="tags">
+        <span class="tag">Plus Jakarta Sans</span>
+        <span class="tag">Compact spacing</span>
+        <span class="tag">Text submit button</span>
+        <span class="tag">Section divider</span>
+      </div>
+    </div>
+    <div class="states-grid">
+      <div class="state-card">
+        <div class="state-card-label">Active List</div>
+        <div class="mockup-frame">
+          <div class="d6">
+            <div class="app-shell">
+              <div class="input-area">
+                <div class="input-row">
+                  <input type="text" class="todo-input" placeholder="What's next...?" disabled>
+                  <button class="submit-btn">Add</button>
+                </div>
+              </div>
+              <ul class="todo-list">
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><span class="todo-text">Call the vet about appointment</span><span class="todo-time">2m</span><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><span class="todo-text">Pick up dry cleaning</span><span class="todo-time">1h</span><button class="delete-btn">✕</button></li>
+                <li class="todo-item"><div class="checkbox"><span class="checkmark">✓</span></div><span class="todo-text">Send invoice to client</span><span class="todo-time">3h</span><button class="delete-btn">✕</button></li>
+              </ul>
+              <div class="completed-section">
+                <div class="section-label">Completed</div>
+                <ul class="todo-list">
+                  <li class="todo-item completed"><div class="checkbox"><span class="checkmark">✓</span></div><span class="todo-text">Buy groceries</span><span class="todo-time">5h</span><button class="delete-btn">✕</button></li>
+                  <li class="todo-item completed"><div class="checkbox"><span class="checkmark">✓</span></div><span class="todo-text">Reply to Sarah's email</span><span class="todo-time">1d</span><button class="delete-btn">✕</button></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Empty State</div>
+        <div class="mockup-frame">
+          <div class="d6">
+            <div class="app-shell">
+              <div class="input-area">
+                <div class="input-row">
+                  <input type="text" class="todo-input" placeholder="What's first...?" disabled>
+                  <button class="submit-btn">Add</button>
+                </div>
+              </div>
+              <div class="empty-state">
+                <p>Nothing on the list. Nice.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="state-card">
+        <div class="state-card-label">Error State</div>
+        <div class="mockup-frame">
+          <div class="d6">
+            <div class="app-shell">
+              <div class="input-area">
+                <div class="input-row">
+                  <input type="text" class="todo-input" value="Book dentist" disabled>
+                  <button class="submit-btn">Add</button>
+                </div>
+                <div class="error-state">
+                  <span>Didn't save — give it another go?</span>
+                  <button class="retry">Retry</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function showDirection(n) {
+  document.querySelectorAll('.direction-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.direction-nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('dir-' + n).classList.add('active');
+  document.querySelectorAll('.direction-nav button')[n - 1].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+</script>
+
+</body>
+</html>

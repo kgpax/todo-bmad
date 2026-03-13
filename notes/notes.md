@@ -34,3 +34,22 @@
 - After it had updated the PRD, it didn't prompt me for the next stage - I had to ask it "what happens next?"
 
 **Conclusion:** I'm glad I ran this (optional) step - it probably helped that a different model was used to capture areas which the same model might have missed
+
+## `/bmad-create-ux-design`
+
+**Model:** Opus 4.6
+
+- I triggered this optional step as I was curious about what I could define with it, given that I have no design mockups
+- It once again asked me whether I have any additional documentation I would like to include
+- I told it that I wanted aesthetically pleasing visuals incorporating animations and transitions on interaction, and that given the minimal nature of the UI, I want what little we do have to look and feel stunning
+- In this instance, it showed me as a preview in the agent chat what it would like to write into the ux document, vs actually just writing it; this was different to before, and was annoying as it had no word-wrap and I had to scroll horizontally to read most of the content
+- I really like how it is able to articulate a great sounding plan from small amounts of guidance
+- It probed about the emotional tone of the aesthetics, offering different options for how motion is presented
+- As somebody who is keen about UX and design (without necessarily being creative enough), I enjoyed being able to direct this part of the planning phase
+- When it proposed accent colours and possible alternatives, I asked if that would be something easy to change at a later stage; the first time I asked about potentially deferring a decision
+- IT CREATES HTML MOCKUPS TO REVIEW AND SELECT FROM!!!!
+- I told it what design direction I preferred but indicated that I wanted to include an aspect from another one. I was expecting it to re-jig my preferred design to show me how that would look, but it just went ahead and wrote up my choices without altering the design options. Maybe that's how it works, or maybe I should have been explicit about wanting to see how that looked
+- When mapping out the journeys, it failed to "complete" one of the mermaid diagrams, so I had to prompt it to try again (which took a few times to realise that an apostrophe was causing the diagram code to be invalid)
+- I had to push it to not rely on CI for its testing strategy, instead asking that all testing can be performed locally
+
+**Conclusion:** This step was much more involved than I was expecting, but it was enjoyable for me. I'm surprised that this is optional, given how much more guidance and clarity has been established here.
