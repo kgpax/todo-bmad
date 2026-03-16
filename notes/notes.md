@@ -84,3 +84,12 @@
   - The agent kept on trying to bundle the E2E work all together as part of a single story
 
 **Conclusion:** This felt like the stage to pay the most attention to, as it helps inform how the development PRs and testing capabilities will look due to my describing how to split and organise the work.
+
+## `/bmm-check-implementation-readiness`
+
+**Model:** Opus 4.6
+
+- Four issues found (none critical)
+  - One major (but non-blocking) finding related to story 1.9 being quite large, but having looked at it I didn't see much value in splitting it
+
+**Conclusion:** Not much to do for this step, although it was good to know that the implementation plan done so far has been deemed in good shape.
