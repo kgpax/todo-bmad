@@ -23,7 +23,7 @@ documentCounts:
   projectDocs: 0
   requirements: 1
 classification:
-  projectType: Web App (SSG with backend API)
+  projectType: Web App (ISR with backend API)
   domain: General (productivity/task management)
   complexity: Low
   projectContext: greenfield
@@ -38,7 +38,7 @@ workflowType: 'prd'
 
 ## Executive Summary
 
-A lean, full-stack Todo application that lets a single user manage personal tasks through a statically generated web interface backed by a persistent API. The scope is deliberately minimal -- create, view, complete, and delete tasks -- to keep focus on execution quality rather than feature breadth. Every interaction should be immediately understandable, with zero onboarding required.
+A lean, full-stack Todo application that lets a single user manage personal tasks through a server-rendered web interface (ISR) backed by a persistent API. The scope is deliberately minimal -- create, view, complete, and delete tasks -- to keep focus on execution quality rather than feature breadth. Every interaction should be immediately understandable, with zero onboarding required.
 
 ### What Makes This Special
 
@@ -46,7 +46,7 @@ The value lies in craftsmanship within tight constraints: a functionally lean su
 
 ## Project Classification
 
-- **Project Type:** Web App -- statically generated frontend (SSG) with a backend API for data persistence
+- **Project Type:** Web App -- server-rendered frontend with ISR (Incremental Static Regeneration) and a backend API for data persistence
 - **Domain:** General productivity / task management
 - **Complexity:** Low -- standard requirements, no regulatory or compliance concerns
 - **Project Context:** Greenfield -- new product built from scratch
@@ -109,7 +109,7 @@ Sam opens the app on their laptop at the end of the day. They see five todos. Tw
 
 ### Journey 4: Something Goes Wrong -- The Graceful Stumble
 
-Sam opens the app but their internet connection is flaky. The page itself loads fine (it's statically generated), but when they try to add a todo, the save fails. Instead of a cryptic error or silent failure, they see a clear, friendly message that the action couldn't be completed. Sam waits a moment, tries again, and this time it works. Their todo appears and the error state clears. At no point did Sam lose data or wonder what happened.
+Sam opens the app but their internet connection is flaky. The page itself loads fine (it was server-rendered and cached), but when they try to add a todo, the save fails. Instead of a cryptic error or silent failure, they see a clear, friendly message that the action couldn't be completed. Sam waits a moment, tries again, and this time it works. Their todo appears and the error state clears. At no point did Sam lose data or wonder what happened.
 
 **Reveals:** Error states must be human-readable and non-alarming. Failed operations should be clearly communicated with an obvious path to retry. The static shell should always render even if the API is unavailable. No silent failures.
 
@@ -132,7 +132,7 @@ Sam opens the app but their internet connection is flaky. The page itself loads 
 
 ### Project-Type Overview
 
-Statically generated (SSG) web application with a backend API for data persistence. The frontend is pre-rendered at build time, delivering fast initial page loads and reliable rendering. Dynamic interactions (CRUD operations on todos) are handled client-side via API calls. No real-time or push features required.
+Server-rendered web application using ISR (Incremental Static Regeneration) with a backend API for data persistence. The frontend is server-rendered with current data on each request, cached, and revalidated on-demand after mutations — delivering fast initial page loads with fresh content. Dynamic interactions (CRUD operations on todos) are handled client-side via API calls. No real-time or push features required.
 
 ### Browser Support
 
@@ -166,12 +166,12 @@ Statically generated (SSG) web application with a backend API for data persisten
 
 ### SEO Baseline
 
-Minimum expected for an SSG application -- not a priority, but included for good practice:
+Minimum expected for a server-rendered application -- not a priority, but included for good practice:
 - Semantic HTML with proper heading hierarchy
 - Meta title and description tags
 - Open Graph tags for basic social sharing
 - Proper use of `<main>`, `<nav>`, `<header>`, `<footer>` landmarks
-- Server-rendered content (inherent to SSG)
+- Server-rendered content (inherent to ISR)
 
 ### Accessibility
 
@@ -185,7 +185,7 @@ Minimum expected for an SSG application -- not a priority, but included for good
 
 ### Implementation Considerations
 
-- SSG framework handles build-time rendering; client-side JavaScript hydrates for dynamic API interactions
+- Next.js ISR handles server-side rendering with on-demand revalidation; client-side JavaScript hydrates for dynamic API interactions
 - API client should handle network failures gracefully with user-visible error states
 - Static assets should be optimized (minified, compressed, cache-controlled)
 - No WebSocket or Server-Sent Events required -- standard HTTP request/response is sufficient
@@ -212,7 +212,7 @@ Minimum expected for an SSG application -- not a priority, but included for good
 - Create, view, complete, and delete todo items
 - Text description, completion status, and creation timestamp per todo
 - Persistent backend API storage
-- SSG frontend with client-side hydration for dynamic operations
+- ISR frontend with server-rendered data and client-side hydration for dynamic operations
 - Mobile-first responsive design (320px to desktop)
 - WCAG 2.1 AA accessible markup and interactions
 - Empty, loading, and error states
@@ -305,7 +305,7 @@ Minimum expected for an SSG application -- not a priority, but included for good
 - NFR14: User-supplied text must be escaped or sanitized before rendering to prevent cross-site scripting (XSS), verified through automated rendering tests using malicious payload cases.
 - NFR15: API responses must not expose internal system details in error messages
 - NFR16: HTTPS must be used for all client-server communication in all deployed environments, including preview and production.
-- NFR17: API must reject malformed requests and any todo creation or update request whose description exceeds 1024 characters or total request body exceeds 10 KB.
+- NFR17: API must reject malformed requests and any todo creation or update request whose description exceeds 128 characters or total request body exceeds 10 KB.
 
 ### Testing
 

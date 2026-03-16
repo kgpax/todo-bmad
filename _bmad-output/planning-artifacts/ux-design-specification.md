@@ -61,9 +61,9 @@ The primary interaction — adding a todo — must be achievable in under 10 sec
 
 ### Platform Strategy
 
-- **Web application:** Statically generated (SSG) with client-side hydration for dynamic CRUD operations
+- **Web application:** Server-rendered with ISR (Incremental Static Regeneration) and client-side hydration for dynamic CRUD operations
 - **Mobile-first responsive:** Designed for touch first (320px+), with mouse and keyboard as fully supported secondary inputs
-- **No offline write capability in MVP:** The static shell always renders, but write operations require API connectivity. Failures are handled gracefully with clear, personality-driven error messaging and an obvious retry path
+- **No offline write capability in MVP:** The server-rendered page always loads with cached data, but write operations require API connectivity. Failures are handled gracefully with clear, personality-driven error messaging and an obvious retry path
 - **Keyboard navigation:** Full keyboard accessibility (tab, enter, escape) required for WCAG compliance. Dedicated keyboard shortcuts deferred to Phase 2
 - **Browser support:** Latest 2 versions of Chrome, Firefox, Safari, Edge, plus mobile Safari and Chrome
 
@@ -147,17 +147,17 @@ No specific product references adopted. The design direction for todo-bmad is in
 - **Inline actions:** Complete and delete are available directly on each item without expanding, swiping, or opening a menu. One action, one gesture.
 
 **Feedback Patterns:**
-- **Optimistic UI updates:** Reflect changes immediately in the UI before API confirmation. If the API fails, roll back with a friendly error. This makes every interaction feel instant.
+- **Pending state feedback:** Show a pending indicator on the affected element while waiting for API confirmation. On success, play the appropriate animation and update the UI. On failure, clear the pending state and show a friendly error. For todo creation, the input clears immediately for responsiveness and the text is cached — if the API fails, a restore action in the error callout lets the user recover their input.
 - **Animated state transitions:** Every add, complete, and delete triggers a purposeful animation that communicates what happened. No state change occurs without visual motion.
 
 **Loading Patterns:**
 - **Breathing skeleton loader (initial list load):** On slower networks where the initial fetch of existing todos has perceptible delay, display placeholder skeleton shapes that pulse with a slow, organic breathing rhythm. This communicates "your data is coming" with the same calm composure as the rest of the app — never frantic, never urgent.
 - **Anticipation animation (new item creation):** When adding a todo on a slow connection, an anticipatory animation in the list area signals that something is arriving — a subtle opening of space or a gentle placeholder pulse where the new item will land. The user sees their action acknowledged before the API confirms it.
-- **No full-page loading states:** The SSG shell renders instantly. Loading indicators are scoped to the content area only — the input and app chrome are always interactive and ready.
+- **No full-page loading states:** The ISR-rendered page includes real data on first paint. Loading indicators are scoped to the content area only — the input and app chrome are always interactive and ready.
 
 **Error Patterns:**
 - **Inline error with personality:** Errors appear contextually near the failed action, not in a global toast or banner. Copy is warm and human, with an obvious retry path.
-- **Graceful degradation:** The static shell always renders. If the API is down, the user sees a friendly empty state with a clear explanation rather than a broken page.
+- **Graceful degradation:** The page shell always renders. If the API is down during server render, the user sees a friendly empty/error state with a clear explanation rather than a broken page.
 
 ### Anti-Patterns to Avoid
 
@@ -238,7 +238,7 @@ The mental model is a paper list. Write something down. Check it off. Cross it o
 - **Capture in under 10 seconds** from app open (including on mobile)
 - **Zero hesitation** — the user never pauses to figure out how to add, complete, or delete
 - **Every action produces visible, immediate feedback** — no state change without animation
-- **The list always reflects reality** — optimistic updates with graceful rollback if the API fails
+- **The list always reflects reality** — pending indicators while API calls are in flight, confirmed updates on success, clear error feedback on failure
 - **The user feels lighter after each interaction** — capture = relief, complete = accomplishment, delete = clarity
 
 ### Contextual Input Placeholder
@@ -270,7 +270,7 @@ Placeholder selection is random within each bank to avoid predictable repetition
 |-------|--------|
 | Initiation | Input field is always visible and prominent. Auto-focused on desktop page load. Contextual placeholder invites action. |
 | Interaction | User types text, presses enter or taps submit button. |
-| Feedback | Input clears instantly. New todo slides into the list with a smooth entrance animation at the top of the active items. Placeholder updates to the "just added" bank. |
+| Feedback | Input clears instantly (text cached for recovery). Anticipation animation plays in list area. On API success, new todo slides into list with entrance animation. Placeholder updates to "just added" bank. On failure, error callout appears near input with restore action to recover text. |
 | Completion | Input is immediately ready for the next entry. No mode change, no confirmation. |
 
 **Complete (checking off a todo):**
@@ -279,7 +279,7 @@ Placeholder selection is random within each bank to avoid predictable repetition
 |-------|--------|
 | Initiation | Checkbox or todo item row is the tap/click target. |
 | Interaction | Single tap or click. |
-| Feedback | Text receives a gentle strikethrough. The item smoothly migrates down the list to join the completed section at the bottom — the reorder animation is calm and purposeful, not a snap. This movement is the reward. |
+| Feedback | Checkbox shows pending indicator. On API success, text receives a gentle strikethrough and the item smoothly migrates down the list to join the completed section — the reorder animation is calm and purposeful, not a snap. This movement is the reward. On failure, pending clears, item shakes, error callout appears. |
 | Completion | Active list is visibly shorter. Completed item is still visible below, visually receded. |
 
 **Uncomplete (restoring a todo):**
@@ -444,7 +444,7 @@ A layered, dimensional aesthetic where each todo item lives in its own softly sh
 
 ```mermaid
 flowchart TD
-    A[User opens app URL] --> B[SSG shell renders instantly]
+    A[User opens app URL] --> B[ISR page renders with data]
     B --> C{API fetch succeeds?}
     C -->|Yes, empty list| D[Show empty state with warm copy]
     C -->|Yes, has items| E[Show existing todos]
@@ -466,7 +466,7 @@ flowchart TD
 ```
 
 **Key UX moments:**
-- SSG shell renders before API responds — user never sees a blank page
+- ISR page renders with real data — user sees their todos on first paint
 - Empty state placeholder ("What's first...?") communicates purpose without instructions
 - Auto-focus on desktop means the user can start typing immediately
 - On success: input clears, todo appears with entrance animation, placeholder shifts to "Anything else...?"
@@ -480,7 +480,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[User opens bookmarked app on mobile] --> B[SSG shell renders instantly]
+    A[User opens bookmarked app on mobile] --> B[ISR page renders with existing todos]
     B --> C{API fetch}
     C -->|Fast response| D[Existing todos appear, placeholder shows What is next]
     C -->|Slow response| E[Skeleton loader with breathing pulse]
@@ -592,10 +592,10 @@ flowchart TD
 ### Journey Patterns
 
 **Consistent patterns across all journeys:**
-- **Optimistic intent, honest feedback:** The UI responds immediately to user action (optimistic), but communicates clearly when something fails (honest). No silent failures.
+- **Responsive intent, honest feedback:** The UI acknowledges every action immediately with a pending indicator, then confirms with animation on success or shows a clear error on failure. No silent failures.
 - **Scoped feedback:** Every error, animation, and state change is localized to the element it affects. No global banners, no full-page overlays.
 - **Natural retry:** The retry action is always the same gesture the user already attempted — press enter again, tap the checkbox again, tap delete again. The load failure is the exception (explicit button) because the user didn't initiate the fetch.
-- **Text preservation:** Failed add operations never lose the user's typed text. The input preserves content so retry requires zero re-entry.
+- **Text recovery:** For add operations, the input clears immediately for responsiveness. If the API fails, the error callout includes a restore action that puts the cached text back in the input — zero data loss without blocking the input.
 
 ### Flow Optimization Principles
 
@@ -862,7 +862,7 @@ No toast, no banner, no confirmation message on success. The animation *is* the 
 - Submit on Enter (primary), optional submit button (secondary affordance)
 - Input clears on successful submit, preserves text on failed submit
 - Contextual placeholder rotates based on list state (empty, has items, just added)
-- No character counter visible (1024 char limit enforced silently — only surfaces as an error if exceeded)
+- No character counter visible (128 char limit enforced silently — only surfaces as an error if exceeded)
 - No multi-field validation — single text field, single validation rule
 
 **Input validation:**
@@ -1061,4 +1061,4 @@ The centered narrow column (max-width ~600-640px) means the layout is inherently
 **Performance approach:**
 - Font subsetting for Outfit (Latin character set only) to minimize web font payload
 - CSS animations preferred over JavaScript animations where possible (GPU-accelerated transforms and opacity)
-- Skeleton loader rendered server-side as part of the SSG shell for instant appearance
+- Skeleton loader rendered server-side as part of the ISR fallback for instant appearance when API is unavailable

@@ -53,3 +53,21 @@
 - I had to push it to not rely on CI for its testing strategy, instead asking that all testing can be performed locally
 
 **Conclusion:** This step was much more involved than I was expecting, but it was enjoyable for me. I'm surprised that this is optional, given how much more guidance and clarity has been established here.
+
+## `/bmad-create-architecture`
+
+**Model:** Opus 4.6
+
+- When it came to technology stack, I indicated preferences for the FE but that I had a lower level of experience and expertise in BE and database technologies.
+  - I stated that my requirements were that the chosen technologies were easily portable (i.e., didn't require to be cloud-hosted) and easily testable
+- It wanted to perform web searches to understand the latest versions of frameworks and to compare different options against each other, but at this stage it seemed to have gotten itself stuck
+  - I told it to try and resume, but it took that as my rejecting its request to search the web
+  - As it happens, the recommendations it made based on its built-in knowledge were good enough, but it does seem that failure recovery isn't a very good experience
+- When it presented the proposed database schema, it suggested a 1,024 character limit for the todo text. I suggested that we should only need 128 characters and asked it to update _all_ documentation around that, to see if it would correct any contradictory statements in the PRD
+  - Interestingly, it doesn't update it itself but it does flag in the architecture doc that this needs updating in the PRD... I wonder when that gets picked up on?
+- The proposed frontend strategy was to staticly render an empty (skeleton loader) UI and the load the todo's via client-side hydration, since I requested SSG. After reading this back, I decided that I would instead like to fetch todos on the server instead and serve them in the static HTML. The agent identified that this would be a shift to Next.js with ISR instead of SSG, so I asked it to make that change
+- Along a similar line, I asked it to drop the requirement for "optimistic updates" since I figured that this was overly complex for the MVP of such a simple app
+- After requesting changes to the above requirements, I asked again if it can update the PRD and other documents to reflect these changes, and this time it seemed to start doing them
+  - It was quite nice to be able to review them as diffs in the markdown files
+
+**Conclusion:** Going through this step and having the technicalities of the decisions I'd made so far played back to me allowed me to adjust some of the expectations, and it was nice to see how well the agent handled those changes. It also goes to show how easy it would be for a change in requirements even at this stage to lead to conflicting information in the documentation produced so far.
