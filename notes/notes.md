@@ -71,3 +71,16 @@
   - It was quite nice to be able to review them as diffs in the markdown files
 
 **Conclusion:** Going through this step and having the technicalities of the decisions I'd made so far played back to me allowed me to adjust some of the expectations, and it was nice to see how well the agent handled those changes. It also goes to show how easy it would be for a change in requirements even at this stage to lead to conflicting information in the documentation produced so far.
+
+## `/bmad-create-epics-and-stories`
+
+**Model:** Opus 4.6
+
+- Whilst the epic breakdown was good, I felt that the story breakdown packed too much into the "setup" stories
+  - I asked that the monorepo setup, BE scaffolding and FE scaffoling work be split into their own stories and not also include the delivery of BE API endpoints or FE components
+- I tried to guide the agent to ensuring that story output (i.e., the PRs) were small and focussed on a single concern (app scaffolding, BE API creation or FE component creation)
+- This is where the wall of text hits hard
+- For the UI related stories, I had to ask the agent to ensure that E2E and animations were done as part of the relevant stories rather than being a specific story after the others
+  - The agent kept on trying to bundle the E2E work all together as part of a single story
+
+**Conclusion:** This felt like the stage to pay the most attention to, as it helps inform how the development PRs and testing capabilities will look due to my describing how to split and organise the work.
