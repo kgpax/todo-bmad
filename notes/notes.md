@@ -114,3 +114,16 @@
 - I asked the architect agent to update the architecture document to reflect Zod v4, and asked the scrum master agent to re-update the story
 
 **Conclusion:** Nothing particularly special here, although I did use the opportunity to talk directly to specific agents using `@architect` and `@sm`
+
+## `/bmad-dev-story`
+
+**Model:** Sonet 4.6
+
+- Nothing really to comment on here; feels like this agent just implemented what the scrum master had defined in the `bmad-create-story` step
+- Whilst most of the things it did without having to ask permission (presumably because I allow-listed most of it), any `npx` commands had to be manually approved each time. I guess this make sense from a security perspective, but it does mean that you can't leave this kind of "firsttime setup heavy" thing running in the background
+- When creating the frontend, it seeme to get confused and tried to create it twice, forcing it to delete the directory and then recreate it
+- When installing `shadcn` it got stuck because the installation used an interactive prompt which it was just left hanging on; it did eventually realise this and opted to install it more manually
+- After having asked during architecture for all of the boilerplate "default starter template" files to be removed from the frontend, it had left in all of the `.svg` files, so I had to ask it remove them explicitly
+- When I ran `npm test`, I got an error in the backend because there were no tests to run; I pointed it to the error to see what it could do
+
+**Conclusion:** It was interesting watching it go through the development process and to see how many times it either got a little stuck or had to iterate on things, but for the most part it was able to complete the whole story without intervention. A couple of times I had to prompt it to do something afterwards.
