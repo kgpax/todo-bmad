@@ -6,7 +6,7 @@ import { errorHandlerPlugin } from "./plugins/error-handler";
 export function buildApp(config: AppConfig) {
   const app = Fastify({
     logger: {
-      level: "info",
+      level: config.LOG_LEVEL,
     },
     requestIdHeader: "x-request-id",
     bodyLimit: 10240,

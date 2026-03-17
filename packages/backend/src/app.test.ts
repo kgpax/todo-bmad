@@ -5,7 +5,7 @@ describe("App", () => {
   let app: ReturnType<typeof buildApp>;
 
   beforeEach(() => {
-    app = buildApp(getConfig());
+    app = buildApp({ ...getConfig(), LOG_LEVEL: "silent" });
   });
 
   afterEach(async () => {
