@@ -76,4 +76,18 @@ export const todosRoutes = fp(async (app: FastifyInstance) => {
       todo: { ...existing, completed: parsed.completed },
     });
   });
+
+  app.delete<{ Params: { id: string } }>("/api/todos/:id", async (request, reply) => {
+    const existing = app.db.select().from(todos).where(eq(todos.id, request.params.id)).get();
+    if (!existing) {
+      return reply.status(404).send({
+        error: NOT_FOUND,
+        message: "Todo not found",
+      });
+    }
+
+    app.db.delete(todos).where(eq(todos.id, request.params.id)).run();
+
+    return reply.status(204).send();
+  });
 });

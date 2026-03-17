@@ -155,5 +155,12 @@
   - It was a long-running game of whack-a-mole; every time it addressed a node module, it would reveal another one it couldn't find
   - I opted to move away from Turbopack (which I always seem to have problems with) and using Webpack instead
     - It started to hallucinate the correct way to do that :(
+- There were perpetual problems running e2e tests in the sandbox, so I asked the agent to add a note to `project-context.md` to tell it to run them outside of the sandbox
+  - Despite this rule, subsequent dev agents would fail to run the e2e tests because they tried to run it in a sandbox
+  - I asked the agent to harden this constraint in `project-context.md`, and it tried to push it to being a manual user step
+  - I told the agent that the running of e2e tests outside of a sandbox should be a requirement component of the DoD
+- In story 1-6, it failed to create and switch to a branch... something that was done without fail in other stories up to that point. I only caught it just prior to committing
+  - It goes to show how the non-determinism of agents means that we can't get too complacent when watching them work
+  - I asked it to ensure that this critical step is not missed again... let's see how that goes
 
-**Conclusion:** This was the most involved I got, as a technical issue with module resolution really got the agent stuck
+**Conclusion:** This was the most involved I got. Most stories were implemented without problem, but there were some technical issues with module resolution and network permissions within the sandbox which really got the agent stuck
