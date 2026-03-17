@@ -117,7 +117,7 @@
 
 ## `/bmad-dev-story`
 
-**Model:** Sonet 4.6
+**Model:** Sonnet 4.6
 
 - Nothing really to comment on here; feels like this agent just implemented what the scrum master had defined in the `bmad-create-story` step
 - Whilst most of the things it did without having to ask permission (presumably because I allow-listed most of it), any `npx` commands had to be manually approved each time. I guess this make sense from a security perspective, but it does mean that you can't leave this kind of "firsttime setup heavy" thing running in the background
@@ -140,3 +140,9 @@
 - I also asked it to remove the `test:e2e` script since we don't have `playwright` yet
 
 **Conclusion:** Useful to have a different model run another pair of eyes over the code; I'm not sure I would have spotted the `frontend` vs `@todo-bmad/backend` inconsistency
+
+## Iteratively running `/mbad-create-story`, `/bmad-dev-story` and `/bmad-code-review` for remaning stories
+
+- Had to prompt a little to guide test structure, moving common setup/teardown logic to `beforeEach` and `afterEach`
+
+**Model:** Opus 4.6 for creating story and code review, Sonnet 4.6 for implementation
