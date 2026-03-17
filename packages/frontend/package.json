@@ -7,8 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest --no-watchman --passWithNoTests",
-    "test:e2e": "playwright test"
+    "test": "jest --no-watchman --passWithNoTests"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
@@ -23,7 +22,6 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/jest": "^29.5.14",
     "@types/node": "^20",

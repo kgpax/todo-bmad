@@ -143,6 +143,7 @@
 
 ## Iteratively running `/mbad-create-story`, `/bmad-dev-story` and `/bmad-code-review` for remaning stories
 
-- Had to prompt a little to guide test structure, moving common setup/teardown logic to `beforeEach` and `afterEach`
-
 **Model:** Opus 4.6 for creating story and code review, Sonnet 4.6 for implementation
+
+- Had to prompt a little to guide test structure, moving common setup/teardown logic to `beforeEach` and `afterEach`
+- It had a problem getting the CORS tests to pass, and iterated on this quite extensivley and fixed itself without the need for intervention
