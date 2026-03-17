@@ -261,3 +261,158 @@ describe("POST /api/todos", () => {
     expect(body.todos[0].text).toBe("Integration check");
   });
 });
+
+describe("PATCH /api/todos/:id", () => {
+  let app: ReturnType<typeof buildApp>;
+  let db: ReturnType<typeof getDb>;
+
+  beforeEach(() => {
+    const config = { ...getConfig(), LOG_LEVEL: "silent" };
+    db = getDb(":memory:");
+    runMigrations(db);
+    app = buildApp(config, db);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it("returns 200 with updated todo when active todo is set to completed: true", async () => {
+    db.insert(todos)
+      .values({
+        id: "test-id-1",
+        text: "Test todo",
+        completed: false,
+        createdAt: "2026-03-17T10:00:00.000Z",
+      })
+      .run();
+
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/test-id-1",
+      payload: { completed: true },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.body);
+    expect(body).toHaveProperty("todo");
+    expect(body.todo.completed).toBe(true);
+  });
+
+  it("returns 200 with updated todo when completed todo is set to completed: false", async () => {
+    db.insert(todos)
+      .values({
+        id: "test-id-2",
+        text: "Done todo",
+        completed: true,
+        createdAt: "2026-03-17T10:00:00.000Z",
+      })
+      .run();
+
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/test-id-2",
+      payload: { completed: false },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const body = JSON.parse(res.body);
+    expect(body.todo.completed).toBe(false);
+  });
+
+  it("response contains all fields (id, text, completed, createdAt) with correct values", async () => {
+    db.insert(todos)
+      .values({
+        id: "test-id-3",
+        text: "Field check",
+        completed: false,
+        createdAt: "2026-03-17T10:00:00.000Z",
+      })
+      .run();
+
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/test-id-3",
+      payload: { completed: true },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const { todo } = JSON.parse(res.body);
+    expect(todo.id).toBe("test-id-3");
+    expect(todo.text).toBe("Field check");
+    expect(todo.completed).toBe(true);
+    expect(todo.createdAt).toBe("2026-03-17T10:00:00.000Z");
+  });
+
+  it("returns 404 with NOT_FOUND error for non-existent todo ID", async () => {
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/non-existent-id",
+      payload: { completed: true },
+    });
+
+    expect(res.statusCode).toBe(404);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("NOT_FOUND");
+    expect(body).toHaveProperty("message");
+  });
+
+  it("returns 400 with VALIDATION_ERROR when completed field is missing", async () => {
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/any-id",
+      payload: {},
+    });
+
+    expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("VALIDATION_ERROR");
+  });
+
+  it("returns 400 with VALIDATION_ERROR when completed is a string (e.g. 'true')", async () => {
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/any-id",
+      payload: { completed: "true" },
+    });
+
+    expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("VALIDATION_ERROR");
+  });
+
+  it("returns 400 with VALIDATION_ERROR for empty body", async () => {
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/any-id",
+      headers: { "content-type": "application/json" },
+      payload: "{}",
+    });
+
+    expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("VALIDATION_ERROR");
+  });
+
+  it("updated todo reflects change in subsequent GET /api/todos", async () => {
+    db.insert(todos)
+      .values({
+        id: "test-id-4",
+        text: "Integration todo",
+        completed: false,
+        createdAt: "2026-03-17T10:00:00.000Z",
+      })
+      .run();
+
+    await app.inject({
+      method: "PATCH",
+      url: "/api/todos/test-id-4",
+      payload: { completed: true },
+    });
+
+    const getRes = await app.inject({ method: "GET", url: "/api/todos" });
+    const body = JSON.parse(getRes.body);
+    expect(body.todos).toHaveLength(1);
+    expect(body.todos[0].completed).toBe(true);
+  });
+});
