@@ -7,13 +7,15 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest --no-watchman --passWithNoTests"
+    "test": "jest --no-watchman --passWithNoTests",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@todo-bmad/shared": "*",
     "@radix-ui/react-slot": "^1.2.4",
+    "@todo-bmad/shared": "*",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "jiti": "^2.6.1",
     "lucide-react": "^0.577.0",
     "next": "16.1.7",
     "react": "19.2.3",
@@ -21,6 +23,7 @@
     "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@types/jest": "^29.5.14",
     "@types/node": "^20",
