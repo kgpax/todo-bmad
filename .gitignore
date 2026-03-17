@@ -8,6 +8,7 @@ node_modules/
 
 # Database
 data/
+!data/.gitkeep
 *.db
 
 # Next.js
