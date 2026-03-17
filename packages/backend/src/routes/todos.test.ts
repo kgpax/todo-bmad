@@ -31,15 +31,24 @@ describe("GET /api/todos", () => {
         id: "abc-123",
         text: "Test todo",
         completed: false,
-        createdAt: new Date().toISOString(),
+        createdAt: "2026-03-17T10:00:00.000Z",
+      })
+      .run();
+    db.insert(todos)
+      .values({
+        id: "abc-456",
+        text: "Second todo",
+        completed: true,
+        createdAt: "2026-03-17T11:00:00.000Z",
       })
       .run();
 
     const res = await app.inject({ method: "GET", url: "/api/todos" });
     expect(res.statusCode).toBe(200);
     const body = JSON.parse(res.body);
-    expect(body.todos).toHaveLength(1);
-    expect(body.todos[0].text).toBe("Test todo");
+    expect(body.todos).toHaveLength(2);
+    expect(body.todos[0].text).toBe("Second todo");
+    expect(body.todos[1].text).toBe("Test todo");
   });
 
   it("returns todos with camelCase fields (id, text, completed, createdAt)", async () => {
@@ -61,6 +70,7 @@ describe("GET /api/todos", () => {
     expect(todo).toHaveProperty("completed");
     expect(todo).toHaveProperty("createdAt");
     expect(todo).not.toHaveProperty("created_at");
+    expect(typeof todo.completed).toBe("boolean");
   });
 
   it("returns todos ordered by createdAt descending (newest first)", async () => {

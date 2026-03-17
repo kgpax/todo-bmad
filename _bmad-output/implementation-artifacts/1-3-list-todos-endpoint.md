@@ -1,6 +1,6 @@
 # Story 1.3: List Todos Endpoint
 
-Status: review
+Status: done
 
 ## Story
 
@@ -320,3 +320,4 @@ No issues encountered. Implementation was straightforward following the pattern 
 ### Change Log
 
 - 2026-03-17: Implemented Story 1.3 — List Todos Endpoint. Wired DB into buildApp(), created GET /api/todos route handler and tests. All ACs satisfied.
+- 2026-03-17: Code review (claude-4.6-opus-high-thinking). 0 HIGH, 0 MEDIUM, 2 LOW findings. Fixed both: (1) "returns all todos" test now inserts multiple records and verifies count/order, (2) camelCase fields test now asserts `typeof completed === "boolean"`. Status → done.
