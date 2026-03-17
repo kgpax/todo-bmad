@@ -6,8 +6,8 @@ const config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
+  setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   verbose: true,
-  // TODO: remove --passWithNoTests from the test script in package.json once frontend tests exist
 };
 
 module.exports = config;

@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest --no-watchman --passWithNoTests"
+    "test": "jest --no-watchman"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
@@ -23,6 +23,8 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.2",
     "@types/jest": "^29.5.14",
     "@types/node": "^20",
     "@types/react": "^19",

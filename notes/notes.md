@@ -162,5 +162,7 @@
 - In story 1-6, it failed to create and switch to a branch... something that was done without fail in other stories up to that point. I only caught it just prior to committing
   - It goes to show how the non-determinism of agents means that we can't get too complacent when watching them work
   - I asked it to ensure that this critical step is not missed again... let's see how that goes
+- After a couple of frontend stories, I realised that linting was not a part of the DoD, so I added it
+  - This picked up on a linting issue related to random messages causing unstable server render/client hydration HTML
 
 **Conclusion:** This was the most involved I got. Most stories were implemented without problem, but there were some technical issues with module resolution and network permissions within the sandbox which really got the agent stuck
