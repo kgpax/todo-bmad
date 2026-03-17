@@ -1,6 +1,6 @@
 # Story 1.8: Empty State & ISR Page
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -367,6 +367,7 @@ claude-4.6-sonnet-medium-thinking
 
 packages/frontend/src/lib/api.ts (NEW)
 packages/frontend/src/lib/actions.ts (NEW)
+packages/frontend/src/lib/utils.ts (MODIFIED — added pickRandom utility)
 packages/frontend/src/components/empty-state.tsx (NEW)
 packages/frontend/src/components/empty-state.test.tsx (NEW)
 packages/frontend/src/components/todo-page.tsx (NEW)
@@ -374,8 +375,13 @@ packages/frontend/src/app/page.tsx (MODIFIED)
 packages/frontend/jest.config.js (MODIFIED)
 packages/frontend/package.json (MODIFIED — added @testing-library/react, @testing-library/jest-dom)
 e2e/smoke.test.ts (MODIFIED)
+playwright.config.ts (MODIFIED — reuseExistingServer: true)
+project-context.md (MODIFIED — added Lighthouse audit DoD steps)
+package.json (MODIFIED — added lint script)
 _bmad-output/implementation-artifacts/sprint-status.yaml (MODIFIED)
 
 ### Change Log
 
 - 2026-03-17: Story 1.8 implemented — Empty State & ISR Page. Created API client, server actions, EmptyState component, TodoPage client component. Converted page.tsx to async ISR server component. Replaced Hello World with EmptyState render. Updated E2E tests. Added 4 unit tests for EmptyState. Random empty-state message selected server-side and passed as prop to avoid SSR/hydration mismatch. Fixed Playwright config to always reuse existing dev server. All validations pass.
+- 2026-03-17: Code review fixes applied — (1) Removed duplicate responsive container from TodoPage (double max-w/padding with page.tsx); (2) Added Array.isArray guard on API response in fetchTodos; (3) Added empty-array throw guard to pickRandom; (4) Updated File List with previously undocumented file changes (utils.ts, playwright.config.ts, project-context.md, root package.json).
+- 2026-03-17: Code review recommendation — Add unit tests for `lib/api.ts` (fetchTodos has 4 code paths: success, non-ok response, fetch exception, invalid response shape) and `lib/utils.ts` (pickRandom empty-array guard). Deferred to Story 1.9 which will expand the API client with mutation functions, making it a better point to test the full API client cohesively. `lib/actions.ts` is a thin wrapper and does not warrant its own tests.

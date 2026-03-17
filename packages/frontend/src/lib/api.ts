@@ -11,7 +11,7 @@ export async function fetchTodos(): Promise<Todo[]> {
       return [];
     }
     const data = await response.json();
-    return data.todos;
+    return Array.isArray(data?.todos) ? data.todos : [];
   } catch {
     return [];
   }
