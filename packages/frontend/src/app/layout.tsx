@@ -19,8 +19,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${outfit.variable} antialiased`}>{children}</body>
+    <html lang="en" className={outfit.variable}>
+      <body className="antialiased">{children}</body>
     </html>
   );
 }

@@ -1,6 +1,6 @@
 # Story 1.7: Frontend Foundation & Design System
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -343,7 +343,9 @@ No issues encountered. Implementation was straightforward.
 - Added `prefers-reduced-motion` media query setting all durations to 0ms.
 - Replaced `<h1>Hello World</h1>` with plain text "Hello World" inside responsive centered column using `max-w-[640px] mx-auto` with `px-4 md:px-6` padding.
 - Verified postcss.config.mjs, components.json, and src/lib/utils.ts are correct — no changes needed.
-- Chose `--color-accent: #c49a3c` (darker amber) to meet WCAG 2.1 AA 3:1 contrast ratio for focus indicators against the `#faf8f5` background.
+- Chose `--color-accent: #c49a3c` initially, later corrected to `#b08628` during code review for WCAG 2.1 AA 3:1 non-text contrast compliance (3.15:1 against `#faf8f5` background).
+- Darkened `--color-text-secondary` from `#8a8480` to `#736e6a` during code review for WCAG 2.1 AA 4.5:1 text contrast compliance (4.75:1 against `#faf8f5` background).
+- Moved `outfit.variable` from `<body>` to `<html>` per task spec; `<body>` retains `antialiased` class.
 - All 37 tests pass, build succeeds, 2 E2E tests pass.
 
 ### File List
@@ -355,3 +357,4 @@ packages/frontend/src/app/globals.css
 ## Change Log
 
 - 2026-03-17: Implemented frontend foundation and design system (Story 1.7) — replaced Geist fonts with Outfit, established warm-depth design token system in globals.css (colors, shadows, spacing, radii, motion), removed default create-next-app boilerplate, implemented responsive centered column layout.
+- 2026-03-17: Code review fixes — darkened accent color (#c49a3c → #b08628) for WCAG 3:1 non-text contrast, darkened secondary text (#8a8480 → #736e6a) for WCAG 4.5:1 text contrast, moved font variable from body to html element.
