@@ -1,5 +1,5 @@
 # bmad help request
-_Exported on 17/03/2026 at 8:38:55 GMT from Cursor (2.6.19)_
+_Exported on 17/03/2026 at 8:43:33 GMT from Cursor (2.6.19)_
 
 ---
 
@@ -353,4 +353,114 @@ You forgot to commit the changes to `package.json` files
 **Cursor**
 
 Done — committed and pushed. Both `package.json` files now have `--passWithNoTests` in their test scripts.
+
+---
+
+**User**
+
+Please write a suitable PR description for this story which I can paste into the GitHub PR description
+
+---
+
+**Cursor**
+
+Here's a PR description you can paste in:
+
+---
+
+## Story 1.1 — Project Scaffolding & Shared API Contract
+
+Sets up the monorepo foundation that every subsequent story builds upon. Establishes the npm workspaces structure, shared type/schema contract between frontend and backend, and scaffolds all three packages with zero TypeScript errors.
+
+### What's included
+
+**Root monorepo**
+- `package.json` with npm workspaces (`packages/*`) and root-level scripts (`dev`, `build`, `test`, `test:e2e`, `db:generate`, `db:migrate`)
+- `tsconfig.base.json` — strict TypeScript (ES2022, strict mode, source maps, declarations) extended by all packages
+- `.gitignore` and `.env.example` documenting all environment variables
+
+**`@todo-bmad/shared` package**
+- Zod 4 schemas: `createTodoSchema` (trimmed, 1–128 chars), `updateTodoSchema`, `todoSchema`
+- TypeScript types inferred from schemas: `Todo`, `CreateTodoRequest`, `UpdateTodoRequest`, `ApiError`
+- Constants: `MAX_TEXT_LENGTH = 128`, `VALIDATION_ERROR`, `NOT_FOUND`, `INTERNAL_ERROR`
+- Barrel export via `src/index.ts` (named exports only, no default exports)
+- 17 unit tests covering all validation rules — all passing
+
+**`packages/frontend`**
+- Next.js 16.1.7 (App Router, TypeScript, Tailwind v4, ESLint)
+- shadcn/ui initialised with new-york style (`components.json`)
+- `tsconfig.json` extends base config; `@/` alias maps to `./src/`
+- `@todo-bmad/shared` linked as workspace dependency
+- Minimal Hello World `page.tsx` (boilerplate stripped)
+- Jest configured with ts-jest + jsdom
+
+**`packages/backend`**
+- Fastify 5.8.x with `buildApp()` factory and `getConfig()` env loader
+- Config covers `PORT`, `DATABASE_PATH`, `CORS_ORIGIN`, `REVALIDATION_SECRET`
+- `data/.gitkeep` tracks the SQLite storage directory (contents gitignored)
+- `@todo-bmad/shared` linked as workspace dependency
+- Jest configured with ts-jest + node environment
+
+### Verification
+- `npm install` at root installs all 3 workspaces cleanly
+- `tsc --noEmit` passes with zero errors in all packages
+- Cross-package imports from `@todo-bmad/shared` resolve correctly in both frontend and backend
+- 17/17 shared package tests pass
+
+### Not included (deferred to later stories)
+Database schema and Drizzle config (1.2) · CORS/error handler plugins (1.2) · API routes (1.3–1.6) · Design tokens and UI components (1.7+) · Playwright config (1.9)
+
+---
+
+**User**
+
+Please can you give me the markdown format for that so that I can copy and paste it
+
+---
+
+**Cursor**
+
+````markdown
+## Story 1.1 — Project Scaffolding & Shared API Contract
+
+Sets up the monorepo foundation that every subsequent story builds upon. Establishes the npm workspaces structure, shared type/schema contract between frontend and backend, and scaffolds all three packages with zero TypeScript errors.
+
+### What's included
+
+**Root monorepo**
+- `package.json` with npm workspaces (`packages/*`) and root-level scripts (`dev`, `build`, `test`, `test:e2e`, `db:generate`, `db:migrate`)
+- `tsconfig.base.json` — strict TypeScript (ES2022, strict mode, source maps, declarations) extended by all packages
+- `.gitignore` and `.env.example` documenting all environment variables
+
+**`@todo-bmad/shared` package**
+- Zod 4 schemas: `createTodoSchema` (trimmed, 1–128 chars), `updateTodoSchema`, `todoSchema`
+- TypeScript types inferred from schemas: `Todo`, `CreateTodoRequest`, `UpdateTodoRequest`, `ApiError`
+- Constants: `MAX_TEXT_LENGTH = 128`, `VALIDATION_ERROR`, `NOT_FOUND`, `INTERNAL_ERROR`
+- Barrel export via `src/index.ts` (named exports only, no default exports)
+- 17 unit tests covering all validation rules — all passing
+
+**`packages/frontend`**
+- Next.js 16.1.7 (App Router, TypeScript, Tailwind v4, ESLint)
+- shadcn/ui initialised with new-york style (`components.json`)
+- `tsconfig.json` extends base config; `@/` alias maps to `./src/`
+- `@todo-bmad/shared` linked as workspace dependency
+- Minimal Hello World `page.tsx` (boilerplate stripped)
+- Jest configured with ts-jest + jsdom
+
+**`packages/backend`**
+- Fastify 5.8.x with `buildApp()` factory and `getConfig()` env loader
+- Config covers `PORT`, `DATABASE_PATH`, `CORS_ORIGIN`, `REVALIDATION_SECRET`
+- `data/.gitkeep` tracks the SQLite storage directory (contents gitignored)
+- `@todo-bmad/shared` linked as workspace dependency
+- Jest configured with ts-jest + node environment
+
+### Verification
+- `npm install` at root installs all 3 workspaces cleanly
+- `tsc --noEmit` passes with zero errors in all packages
+- Cross-package imports from `@todo-bmad/shared` resolve correctly in both frontend and backend
+- 17/17 shared package tests pass
+
+### Not included (deferred to later stories)
+Database schema and Drizzle config (1.2) · CORS/error handler plugins (1.2) · API routes (1.3–1.6) · Design tokens and UI components (1.7+) · Playwright config (1.9)
+````
 
