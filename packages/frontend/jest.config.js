@@ -6,6 +6,7 @@ const config = {
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/src/$1",
   },
+  // TODO: remove --passWithNoTests from the test script in package.json once frontend tests exist
 };
 
 module.exports = config;
