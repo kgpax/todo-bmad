@@ -1,6 +1,6 @@
 # Story 1.6: Delete Todo Endpoint
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -235,3 +235,4 @@ claude-4.6-sonnet-medium-thinking
 ### Change Log
 
 - 2026-03-17: Implemented DELETE `/api/todos/:id` handler — 204 on success, 404 for non-existent IDs; added 4 tests (37 total pass)
+- 2026-03-17: Code review passed — all ACs verified, all tasks confirmed complete, 0 issues found. Status → done
