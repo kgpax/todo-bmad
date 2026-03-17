@@ -18,5 +18,9 @@ out/
 # Build output
 dist/
 
+# Playwright
+test-results/
+playwright-report/
+
 # OS
 .DS_Store
