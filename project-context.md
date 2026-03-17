@@ -30,6 +30,7 @@ Before any story implementation is considered complete, ALL of the following mus
 npm run dev    # dev server starts cleanly with no module or compilation errors
 npm run test   # all Jest unit/integration tests pass across all packages
 npm run build  # production build completes without errors
+npm run lint   # ESLint passes with no errors (frontend)
 ```
 
 ### ⚠️ CRITICAL — E2E Tests: ALWAYS Run Outside the Sandbox
@@ -44,7 +45,7 @@ npm run test:e2e  # ← MUST be run with required_permissions: ["all"]
 >
 > **DO NOT skip `npm run test:e2e`.** A story is NOT complete until E2E tests pass.
 
-No story may be marked `review` until ALL commands above exit successfully, including `npm run test:e2e` run outside the sandbox.
+No story may be marked `review` until ALL commands above exit successfully, including `npm run lint` and `npm run test:e2e` run outside the sandbox.
 
 ### Lighthouse Audit via Chrome DevTools MCP
 
