@@ -1,5 +1,5 @@
 # bmad help request
-_Exported on 17/03/2026 at 8:55:40 GMT from Cursor (2.6.19)_
+_Exported on 17/03/2026 at 9:09:20 GMT from Cursor (2.6.19)_
 
 ---
 
@@ -233,4 +233,24 @@ Committed successfully. The only remaining unstaged file is `notes/notes.md` whi
 - `_bmad-output/implementation-artifacts/1-1-project-scaffolding-shared-api-contract.md` (status → done, File List + Change Log updated)
 - `_bmad-output/implementation-artifacts/sprint-status.yaml` (1-1 → done)
 - `packages/frontend/package.json` (name → `@todo-bmad/frontend`)
+
+---
+
+**User**
+
+If I run `npm run test:e2e` then it fails because playwright isn't there.  Should we remove this script until we have playwright available?
+
+---
+
+**Cursor**
+
+Yes, that's the right call. The story task specified adding the script, but Playwright isn't installed until Story 1.9. Leaving a broken script in the root is worse than omitting it for now. Same logic as the `--passWithNoTests` workaround — be honest about what's available.
+
+Removed `test:e2e`. It'll be re-added in Story 1.9 when Playwright is actually installed and configured.
+
+---
+
+**User**
+
+Commit this change
 
