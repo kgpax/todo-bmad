@@ -347,7 +347,7 @@ claude-4.6-sonnet-medium-thinking
 
 ### Debug Log References
 
-- Hydration mismatch: `Math.random()` in `EmptyState` produces different values on SSR vs client. Fixed with `suppressHydrationWarning` on the `<p>` element — this is intentional per the copy-bank design. Lighthouse Best Practices dropped to 96 without this fix; resolved to 100 after.
+- Hydration mismatch: `Math.random()` in `EmptyState` produces different values on SSR vs client. Resolved by moving message selection into the server component (`page.tsx`) using the exported `EMPTY_STATE_MESSAGES` array, then passing the chosen message as a prop through `TodoPage` → `EmptyState`. SSR and hydration now use the identical message; a new random message is picked on each page load or ISR revalidation (e.g., after `revalidateHome()` fires). Lighthouse Best Practices confirmed at 100.
 - Build error: `todo.title` used in `TodoPage` placeholder list; the `Todo` type uses `todo.text`. Fixed immediately.
 - Jest config used wrong option name `setupFilesAfterFramework` (not a valid Jest option). Corrected to `setupFilesAfterEnv`.
 
@@ -355,9 +355,9 @@ claude-4.6-sonnet-medium-thinking
 
 - Created `lib/api.ts`: typed `fetchTodos()` using `API_URL` (server-only env var), `cache: "no-store"`, graceful degradation returning `[]` on any error.
 - Created `lib/actions.ts`: `"use server"` `revalidateHome()` using `revalidatePath("/")` — scaffolded for Story 1.9 mutations.
-- Created `EmptyState` component: centered card with `role="status"`, `bg-surface`, inline `boxShadow: var(--shadow-resting)` (shadows not in `@theme inline`), `rounded-xl` matching `--radius-lg` (0.75rem), random copy from 5-message bank with `suppressHydrationWarning`.
-- Created `TodoPage` client component: `"use client"`, accepts `initialTodos: Todo[]`, renders `EmptyState` when empty or placeholder list for Story 1.9.
-- Updated `page.tsx`: async server component, `export const revalidate = false`, fetches todos and passes to `TodoPage`.
+- Created `EmptyState` component: centered card with `role="status"`, `bg-surface`, inline `boxShadow: var(--shadow-resting)` (shadows not in `@theme inline`), `rounded-xl` matching `--radius-lg` (0.75rem). Accepts a `message: string` prop; exports `EMPTY_STATE_MESSAGES` array for use by the server component.
+- Created `TodoPage` client component: `"use client"`, accepts `initialTodos: Todo[]` and `emptyMessage: string`, renders `<EmptyState message={emptyMessage} />` when empty or placeholder list for Story 1.9.
+- Updated `page.tsx`: async server component, `export const revalidate = false`, fetches todos, selects a random message from `EMPTY_STATE_MESSAGES` server-side, passes both to `TodoPage`.
 - Updated `e2e/smoke.test.ts`: replaced "Hello World" assertion with `role="status"` visibility check.
 - Installed `@testing-library/react` and `@testing-library/jest-dom` as devDependencies (anticipated in Dev Notes).
 - Updated `jest.config.js`: added `setupFilesAfterEnv: ["@testing-library/jest-dom"]`, removed `--passWithNoTests` TODO comment.
@@ -378,4 +378,4 @@ _bmad-output/implementation-artifacts/sprint-status.yaml (MODIFIED)
 
 ### Change Log
 
-- 2026-03-17: Story 1.8 implemented — Empty State & ISR Page. Created API client, server actions, EmptyState component, TodoPage client component. Converted page.tsx to async ISR server component. Replaced Hello World with EmptyState render. Updated E2E tests. Added 4 unit tests for EmptyState. All validations pass.
+- 2026-03-17: Story 1.8 implemented — Empty State & ISR Page. Created API client, server actions, EmptyState component, TodoPage client component. Converted page.tsx to async ISR server component. Replaced Hello World with EmptyState render. Updated E2E tests. Added 4 unit tests for EmptyState. Random empty-state message selected server-side and passed as prop to avoid SSR/hydration mismatch. Fixed Playwright config to always reuse existing dev server. All validations pass.
