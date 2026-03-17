@@ -128,3 +128,14 @@
 - I asked it to write a suitable PR description which I could copy and use for teh PR
 
 **Conclusion:** It was interesting watching it go through the development process and to see how many times it either got a little stuck or had to iterate on things, but for the most part it was able to complete the whole story without intervention. A couple of times I had to prompt it to do something afterwards.
+
+## `/bmad-code-review`
+
+**Model:** Opus 4.6
+
+- It picked up on a few medium issues
+  - Changes made outside of the original story (e.g., the bits I asked it to do)
+  - Inconsistency in package nameing `frontent` vs `@todo-bmad/backend`
+  - Incomplete file list in story due to files that I had manually added like `README.md`
+
+**Conclusion:**
