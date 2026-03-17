@@ -1,16 +1,11 @@
 import { buildApp } from "./app";
 import { getConfig } from "./config";
-import { getDb } from "./db/client";
-import { runMigrations } from "./db/migrate";
 
 describe("App", () => {
   let app: ReturnType<typeof buildApp>;
 
   beforeEach(() => {
-    const config = { ...getConfig(), DATABASE_PATH: ":memory:" };
-    const db = getDb(config.DATABASE_PATH);
-    runMigrations(db);
-    app = buildApp(config);
+    app = buildApp(getConfig());
   });
 
   afterEach(async () => {
@@ -67,5 +62,10 @@ describe("App", () => {
       headers: { "x-request-id": "test-id-123" },
     });
     expect(res.headers["x-request-id"]).toBe("test-id-123");
+  });
+
+  it("auto-generates a request ID when none is provided", async () => {
+    const res = await app.inject({ method: "GET", url: "/nonexistent" });
+    expect(res.headers["x-request-id"]).toBeDefined();
   });
 });
