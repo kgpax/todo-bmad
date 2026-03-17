@@ -1,6 +1,6 @@
 # Story 1.2: Backend Server Foundation
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -28,53 +28,53 @@ So that API endpoints can be added incrementally on a solid foundation.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Install dependencies (AC: #1, #2, #4)
-  - [ ] 1.1 Install `drizzle-orm`, `better-sqlite3`, `@fastify/cors` as production dependencies
-  - [ ] 1.2 Install `@types/better-sqlite3`, `drizzle-kit` as dev dependencies
-  - [ ] 1.3 Verify `@todo-bmad/shared` workspace link still resolves after dependency changes
+- [x] Task 1: Install dependencies (AC: #1, #2, #4)
+  - [x] 1.1 Install `drizzle-orm`, `better-sqlite3`, `@fastify/cors` as production dependencies
+  - [x] 1.2 Install `@types/better-sqlite3`, `drizzle-kit` as dev dependencies
+  - [x] 1.3 Verify `@todo-bmad/shared` workspace link still resolves after dependency changes
 
-- [ ] Task 2: Create Drizzle schema and database client (AC: #2, #3)
-  - [ ] 2.1 Create `src/db/schema.ts` — define `todos` table with columns: `id` (TEXT PK), `text` (TEXT NOT NULL), `completed` (INTEGER mode boolean, NOT NULL, default false), `created_at` (TEXT NOT NULL) using `sqliteTable` from `drizzle-orm/sqlite-core`
-  - [ ] 2.2 Create `src/db/client.ts` — export a `getDb()` function that accepts a database path, creates the better-sqlite3 connection, and returns a Drizzle ORM instance with schema
-  - [ ] 2.3 Create `drizzle.config.ts` at backend package root — dialect `sqlite`, schema path `./src/db/schema.ts`, out directory `./drizzle`, breakpoints enabled
-  - [ ] 2.4 Run `drizzle-kit generate` to produce the initial `0000_create_todos.sql` migration file in `drizzle/` directory
-  - [ ] 2.5 Verify the generated migration SQL creates the `todos` table with correct column types and constraints
+- [x] Task 2: Create Drizzle schema and database client (AC: #2, #3)
+  - [x] 2.1 Create `src/db/schema.ts` — define `todos` table with columns: `id` (TEXT PK), `text` (TEXT NOT NULL), `completed` (INTEGER mode boolean, NOT NULL, default false), `created_at` (TEXT NOT NULL) using `sqliteTable` from `drizzle-orm/sqlite-core`
+  - [x] 2.2 Create `src/db/client.ts` — export a `getDb()` function that accepts a database path, creates the better-sqlite3 connection, and returns a Drizzle ORM instance with schema
+  - [x] 2.3 Create `drizzle.config.ts` at backend package root — dialect `sqlite`, schema path `./src/db/schema.ts`, out directory `./drizzle`, breakpoints enabled
+  - [x] 2.4 Run `drizzle-kit generate` to produce the initial `0000_create_todos.sql` migration file in `drizzle/` directory
+  - [x] 2.5 Verify the generated migration SQL creates the `todos` table with correct column types and constraints
 
-- [ ] Task 3: Create migration runner (AC: #2, #3)
-  - [ ] 3.1 Create `src/db/migrate.ts` — export a `runMigrations()` function that uses `migrate` from `drizzle-orm/better-sqlite3/migrator` pointing to the `drizzle/` folder
-  - [ ] 3.2 Verify migrations are idempotent (running twice does not error or duplicate tables)
+- [x] Task 3: Create migration runner (AC: #2, #3)
+  - [x] 3.1 Create `src/db/migrate.ts` — export a `runMigrations()` function that uses `migrate` from `drizzle-orm/better-sqlite3/migrator` pointing to the `drizzle/` folder
+  - [x] 3.2 Verify migrations are idempotent (running twice does not error or duplicate tables)
 
-- [ ] Task 4: Create CORS plugin (AC: #4, #5)
-  - [ ] 4.1 Create `src/plugins/cors.ts` — export an async Fastify plugin that registers `@fastify/cors` with origin set to `config.CORS_ORIGIN`
-  - [ ] 4.2 Verify allowed origin passes, unknown origin is rejected
+- [x] Task 4: Create CORS plugin (AC: #4, #5)
+  - [x] 4.1 Create `src/plugins/cors.ts` — export an async Fastify plugin that registers `@fastify/cors` with origin set to `config.CORS_ORIGIN`
+  - [x] 4.2 Verify allowed origin passes, unknown origin is rejected
 
-- [ ] Task 5: Create error handler plugin (AC: #6)
-  - [ ] 5.1 Create `src/plugins/error-handler.ts` — export an async Fastify plugin that sets a global error handler
-  - [ ] 5.2 Error handler formats all errors to `{ error: string, message: string }` using `INTERNAL_ERROR` code from `@todo-bmad/shared`
-  - [ ] 5.3 For Zod validation errors, return 400 with `VALIDATION_ERROR` code and a safe message
-  - [ ] 5.4 Never expose stack traces, internal paths, or raw error messages in responses
+- [x] Task 5: Create error handler plugin (AC: #6)
+  - [x] 5.1 Create `src/plugins/error-handler.ts` — export an async Fastify plugin that sets a global error handler
+  - [x] 5.2 Error handler formats all errors to `{ error: string, message: string }` using `INTERNAL_ERROR` code from `@todo-bmad/shared`
+  - [x] 5.3 For Zod validation errors, return 400 with `VALIDATION_ERROR` code and a safe message
+  - [x] 5.4 Never expose stack traces, internal paths, or raw error messages in responses
 
-- [ ] Task 6: Wire up app.ts and index.ts (AC: #1, #2, #3, #7, #8)
-  - [ ] 6.1 Update `app.ts` `buildApp()` to accept config, set Fastify options (logger with requestIdHeader, bodyLimit 10KB), register CORS and error handler plugins
-  - [ ] 6.2 Update `index.ts` to run migrations before starting the server, pass config to `buildApp()`
-  - [ ] 6.3 Verify `npm run dev -w packages/backend` starts successfully, creates database file, applies migrations
+- [x] Task 6: Wire up app.ts and index.ts (AC: #1, #2, #3, #7, #8)
+  - [x] 6.1 Update `app.ts` `buildApp()` to accept config, set Fastify options (logger with requestIdHeader, bodyLimit 10KB), register CORS and error handler plugins
+  - [x] 6.2 Update `index.ts` to run migrations before starting the server, pass config to `buildApp()`
+  - [x] 6.3 Verify `npm run dev -w packages/backend` starts successfully, creates database file, applies migrations
 
-- [ ] Task 7: Add package.json scripts (AC: #2)
-  - [ ] 7.1 Add `db:generate` script: `drizzle-kit generate`
-  - [ ] 7.2 Add `db:migrate` script to run migrations via a standalone entry point (or `drizzle-kit migrate`)
-  - [ ] 7.3 Verify root `package.json` `db:generate` and `db:migrate` scripts proxy correctly to backend
+- [x] Task 7: Add package.json scripts (AC: #2)
+  - [x] 7.1 Add `db:generate` script: `drizzle-kit generate`
+  - [x] 7.2 Add `db:migrate` script to run migrations via a standalone entry point (or `drizzle-kit migrate`)
+  - [x] 7.3 Verify root `package.json` `db:generate` and `db:migrate` scripts proxy correctly to backend
 
-- [ ] Task 8: Write tests (AC: #1–#8)
-  - [ ] 8.1 Create `src/app.test.ts` — integration tests using Fastify `.inject()`:
+- [x] Task 8: Write tests (AC: #1–#8)
+  - [x] 8.1 Create `src/app.test.ts` — integration tests using Fastify `.inject()`:
     - Server boots and responds to requests
     - CORS allows configured origin
     - CORS rejects unknown origin
     - Unhandled errors return `{ error, message }` format without internals
     - Request IDs are present in responses
-  - [ ] 8.2 Create `src/db/migrate.test.ts` — migration tests:
+  - [x] 8.2 Create `src/db/migrate.test.ts` — migration tests:
     - Migrations create the `todos` table with correct columns
     - Running migrations twice is idempotent
-  - [ ] 8.3 Ensure all tests pass via `npm test -w packages/backend`
+  - [x] 8.3 Ensure all tests pass via `npm test -w packages/backend`
 
 ## Dev Notes
 
@@ -405,10 +405,42 @@ Per `project-context.md`: create feature branch `feat/1-2-backend-server-foundat
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-4.6-sonnet-medium-thinking
 
 ### Debug Log References
 
+- **fastify-plugin scoping**: `@fastify/cors` and `errorHandlerPlugin` both needed to be wrapped with `fastify-plugin` (fp) to escape encapsulation and apply at the root scope. Without this, plugins registered in child scopes do not affect routes on the root app.
+- **CORS string vs array origin**: `@fastify/cors` with `origin: string` sets it as a static fixed header for ALL requests. To enable proper origin filtering (reflecting origin only for allowed origins, rejecting unknown), the origin must be passed as an array: `[config.origin]`.
+- **x-request-id response header**: Fastify's `requestIdHeader` reads the incoming header as the request ID but does NOT automatically echo it in the response. An `onSend` hook was added to `buildApp()` to set `reply.header('x-request-id', request.id)`.
+- **node_modules corruption**: Initial `npm install` of drizzle/sqlite/cors packages caused EPERM errors on README files which corrupted some jest package files. Required a full clean reinstall (`rm -rf node_modules && npm install`).
+
 ### Completion Notes List
 
+- All 8 tasks and subtasks completed as specified in the story.
+- 7 integration/unit tests pass: server boot, CORS allow/reject, error format without internals, request ID, migration creation, migration idempotency.
+- `fastify-plugin` added as production dependency (was transitive, now explicit).
+- `@fastify/cors` configured with array-form origin for proper filtering behavior.
+- `onSend` hook added to echo `x-request-id` in response headers.
+- All acceptance criteria satisfied: AC#1 (server starts on port 3001), AC#2 (DB created on first run), AC#3 (migrations idempotent), AC#4 (configured origin allowed), AC#5 (unknown origin rejected), AC#6 (error format without internals), AC#7 (structured JSON logging with request ID), AC#8 (env vars loaded via config).
+
 ### File List
+
+packages/backend/package.json
+packages/backend/drizzle.config.ts
+packages/backend/drizzle/0000_talented_king_bedlam.sql
+packages/backend/drizzle/meta/0000_snapshot.json
+packages/backend/drizzle/meta/_journal.json
+packages/backend/src/app.ts
+packages/backend/src/index.ts
+packages/backend/src/app.test.ts
+packages/backend/src/db/schema.ts
+packages/backend/src/db/client.ts
+packages/backend/src/db/migrate.ts
+packages/backend/src/db/migrate.test.ts
+packages/backend/src/plugins/cors.ts
+packages/backend/src/plugins/error-handler.ts
+package.json
+
+## Change Log
+
+- 2026-03-17: Story implemented — Drizzle schema/client/migrations, CORS plugin, error handler plugin, updated app.ts/index.ts, integration and migration tests added. All 7 tests pass. Status set to review.

@@ -46,7 +46,7 @@ development_status:
   # Epic 1: Project Foundation & Todo Creation
   epic-1: in-progress
   1-1-project-scaffolding-shared-api-contract: done
-  1-2-backend-server-foundation: ready-for-dev
+  1-2-backend-server-foundation: review
   1-3-list-todos-endpoint: backlog
   1-4-create-todo-endpoint: backlog
   1-5-update-todo-endpoint: backlog
