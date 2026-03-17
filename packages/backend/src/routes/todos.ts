@@ -1,9 +1,9 @@
 import { randomUUID } from "crypto";
 import { FastifyInstance } from "fastify";
 import fp from "fastify-plugin";
-import { desc } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { z } from "zod";
-import { createTodoSchema, VALIDATION_ERROR } from "@todo-bmad/shared";
+import { createTodoSchema, updateTodoSchema, VALIDATION_ERROR, NOT_FOUND } from "@todo-bmad/shared";
 import { todos } from "../db/schema";
 
 function stripHtmlTags(text: string): string {
@@ -45,6 +45,35 @@ export const todosRoutes = fp(async (app: FastifyInstance) => {
 
     return reply.status(201).send({
       todo: { id, text, completed: false, createdAt },
+    });
+  });
+
+  app.patch<{ Params: { id: string } }>("/api/todos/:id", async (request, reply) => {
+    let parsed;
+    try {
+      parsed = updateTodoSchema.parse(request.body);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        return reply.status(400).send({
+          error: VALIDATION_ERROR,
+          message: err.issues[0].message,
+        });
+      }
+      throw err;
+    }
+
+    const existing = app.db.select().from(todos).where(eq(todos.id, request.params.id)).get();
+    if (!existing) {
+      return reply.status(404).send({
+        error: NOT_FOUND,
+        message: "Todo not found",
+      });
+    }
+
+    app.db.update(todos).set({ completed: parsed.completed }).where(eq(todos.id, request.params.id)).run();
+
+    return reply.status(200).send({
+      todo: { ...existing, completed: parsed.completed },
     });
   });
 });
