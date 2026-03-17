@@ -45,3 +45,20 @@ npm run test:e2e  # ← MUST be run with required_permissions: ["all"]
 > **DO NOT skip `npm run test:e2e`.** A story is NOT complete until E2E tests pass.
 
 No story may be marked `review` until ALL commands above exit successfully, including `npm run test:e2e` run outside the sandbox.
+
+### Lighthouse Audit via Chrome DevTools MCP
+
+For any story that modifies frontend files, run Lighthouse audits using the Chrome DevTools MCP server after starting the dev server (`npm run dev`):
+
+1. Open the page: `new_page` with `url: "http://localhost:3000"`
+2. Run desktop audit: `lighthouse_audit` with `mode: "navigation"`, `device: "desktop"`
+3. Run mobile audit: `lighthouse_audit` with `mode: "navigation"`, `device: "mobile"`
+
+**Required scores (both desktop and mobile):**
+- Accessibility: **100**
+- Best Practices: **100**
+- SEO: **100**
+
+Scores must remain at 100 unless a drop is technically unavoidable — in which case the story must document the reason and the minimum acceptable score.
+
+> **MANDATORY for AI Agents:** The dev server must be running before invoking the MCP tools. Start it with `npm run dev` (using `required_permissions: ["all"]`) and wait for the "Ready" message before opening the page. Stop the server after the audit completes. A story with frontend changes is NOT complete until Lighthouse scores meet the thresholds above.
