@@ -85,7 +85,7 @@
 
 **Conclusion:** This felt like the stage to pay the most attention to, as it helps inform how the development PRs and testing capabilities will look due to my describing how to split and organise the work.
 
-## `/bmm-check-implementation-readiness`
+## `/bmad-check-implementation-readiness`
 
 **Model:** Opus 4.6
 
@@ -94,10 +94,23 @@
 
 **Conclusion:** Not much to do for this step, although it was good to know that the implementation plan done so far has been deemed in good shape.
 
-## `/bmm-sprint-planning`
+## `/bmad-sprint-planning`
 
 **Model:** Opus 4.6
 
 - Not much to say on this one; it created the `sprint-status.yaml` file
 
 **Conclusion:** N/A
+
+## `/bmad-create-story`
+
+**Model:** Opus 4.6
+
+- After it created the first story, I asked whether we need to specify that each story be implemented in its own branch
+  - It suggested the creation of a `project-context.md` file where such constitutional rules can be applied
+- Interestingly, the story called for using Zod v4 whereas the architecture doc originally specified Zod v3
+  - I think this is because it used the internet to research Zod during the `bmad-create-story` step and it was not able to do that (for whatever reason) during `bmad-create-architecture`
+  - This goes to show how important it is to allow it to find current documentation beyond its own knowledge cut-off date
+- I asked the architect agent to update the architecture document to reflect Zod v4, and asked the scrum master agent to re-update the story
+
+**Conclusion:** Nothing particularly special here, although I did use the opportunity to talk directly to specific agents using `@architect` and `@sm`

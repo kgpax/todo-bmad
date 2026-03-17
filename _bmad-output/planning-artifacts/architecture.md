@@ -132,7 +132,7 @@ Next.js with Turbopack for frontend dev/build. tsx for backend development, tsc 
 Jest with ts-jest for unit and integration tests (frontend components, backend routes via Fastify `.inject()`). Playwright for E2E tests covering all 4 user journeys across mobile/tablet/desktop viewports.
 
 **Code Organization:**
-npm workspaces monorepo with 3 packages. Shared types package ensures API contract consistency between frontend and backend at compile time.
+npm workspaces monorepo with 3 packages. Shared Zod 4 types package ensures API contract consistency between frontend and backend at compile time.
 
 **Development Experience:**
 Turbopack hot reload for frontend. tsx watch mode for backend. SQLite file-based database requires zero setup. All tools run locally with no cloud dependencies.
@@ -146,7 +146,7 @@ Turbopack hot reload for frontend. tsx watch mode for backend. SQLite file-based
 **Critical Decisions (Block Implementation):**
 - Data model and schema design (todo entity with UUID, text, completed, createdAt)
 - API contract (REST endpoints, request/response shapes, error format)
-- Validation strategy (Zod schemas shared between frontend and backend)
+- Validation strategy (Zod 4 schemas shared between frontend and backend)
 - State management approach (custom useTodos hook with pending state pattern)
 - Rendering strategy: ISR with server-side data fetching (not pure static export)
 
@@ -179,7 +179,7 @@ Turbopack hot reload for frontend. tsx watch mode for backend. SQLite file-based
 
 **Character limit: 128** (architectural override of PRD NFR17 which specifies 1024). This limit reflects the intended use — short, single-line task descriptions — and keeps the UI clean without text wrapping concerns.
 
-**Validation:** Zod schemas in `shared` package. Used by Fastify (via `fastify-type-provider-zod`) for automatic request validation and by the frontend API client for pre-flight validation. Single source of truth for: text length (1-128 chars), text content (non-empty, trimmed), and completed boolean.
+**Validation:** Zod 4 schemas in `shared` package. Used by Fastify for request validation and by the frontend API client for pre-flight validation. Single source of truth for: text length (1-128 chars), text content (non-empty, trimmed), and completed boolean. If `fastify-type-provider-zod` supports Zod 4 at implementation time, use it for automatic validation; otherwise call `schema.parse()` directly in route handlers as a functionally equivalent fallback.
 
 **Migrations:** Drizzle Kit generates versioned SQL migration files. Applied automatically on backend startup. Migration files version-controlled in the repository.
 
@@ -304,6 +304,7 @@ frontend/src/
 | NFR17 | Todo description max 1024 characters | Max 128 characters | Stakeholder decision — short task descriptions only, keeps UI clean |
 | Project Type | SSG with client-side hydration | ISR with server-side data fetching + client-side hydration | Stakeholder decision — serve real data on first paint, eliminate loading flash |
 | UX Spec | Optimistic UI with rollback | Pending state pattern with server-confirmed updates | Stakeholder decision — simpler implementation, UI reflects pending/confirmed states rather than assuming success |
+| Validation Library | Zod (unversioned) | Zod 4 (^4.3) | Zod 4 is now the stable release (as of March 2026). Key API changes: `.describe()` → `.meta()`, `.superRefine()` → `.check()`, `.merge()` → `.extend()`, error access via `error.issues`. `z.infer<>` and `.trim()/.min()/.max()` unchanged. If `fastify-type-provider-zod` lacks Zod 4 support, use direct `schema.parse()` in handlers. |
 
 ## Implementation Patterns & Consistency Rules
 
@@ -396,7 +397,7 @@ No nested `data` wrapper. Response key matches the resource name. No `null` valu
 
 | Layer | Responsibility |
 |-------|---------------|
-| Zod schema (shared) | Validate shape and constraints |
+| Zod 4 schema (shared) | Validate shape and constraints |
 | Fastify handler | Business logic errors (404, conflict) |
 | Fastify error handler | Catch-all, format to `{ error, message }` |
 | Frontend API client | Convert HTTP errors to typed `ApiError` |
@@ -413,7 +414,7 @@ No nested `data` wrapper. Response key matches the resource name. No `null` valu
 | Toggling todo | Checkbox pending indicator (pulse/dim) |
 | Deleting todo | Item pending indicator (dim) |
 
-**Validation:** Always validate on client (fail fast, preserve input) AND on server (never trust client). Same Zod schema, both locations. Empty or whitespace-only submissions are silently ignored on the client (no error, no API call).
+**Validation:** Always validate on client (fail fast, preserve input) AND on server (never trust client). Same Zod 4 schema, both locations. Empty or whitespace-only submissions are silently ignored on the client (no error, no API call). Note: Zod 4 deprecates `.describe()` (use `.meta()`), `.superRefine()` (use `.check()`), and `.merge()` (use `.extend()`). Error access is via `error.issues`, not `error.errors`.
 
 ### Enforcement Rules
 
@@ -644,7 +645,7 @@ npm run db:migrate   # Apply migrations (also runs automatically on server start
 
 ### Coherence Validation
 
-**Decision Compatibility:** All technology choices are compatible and well-integrated. Next.js 16 + TypeScript + Tailwind CSS v4 + shadcn/ui are first-class integrations. Fastify + Drizzle ORM + better-sqlite3 work seamlessly with the shared Zod type provider. ISR + client-side pending state mutations follow standard Next.js App Router patterns. Jest and Playwright cover different test scopes without conflicts. npm workspaces manages all three packages natively.
+**Decision Compatibility:** All technology choices are compatible and well-integrated. Next.js 16 + TypeScript + Tailwind CSS v4 + shadcn/ui are first-class integrations. Fastify + Drizzle ORM + better-sqlite3 work seamlessly with Zod 4 validation (via type provider if supported, or direct `schema.parse()` calls). ISR + client-side pending state mutations follow standard Next.js App Router patterns. Jest and Playwright cover different test scopes without conflicts. npm workspaces manages all three packages natively.
 
 **Pattern Consistency:** All patterns align with the technology stack. kebab-case file naming follows Next.js/React conventions. camelCase JSON fields match JavaScript conventions, snake_case DB columns match SQL conventions, and Drizzle handles the mapping layer. Named exports support tree-shaking and refactor safety. Co-located tests follow React community standards.
 
@@ -705,7 +706,7 @@ No contradictions or conflicts found.
 ### Architecture Completeness Checklist
 
 - [x] Project context thoroughly analyzed (19 FRs, 20 NFRs, 5 cross-cutting concerns)
-- [x] Technology stack fully specified (Next.js 16, Fastify, Drizzle, SQLite, Zod)
+- [x] Technology stack fully specified (Next.js 16, Fastify, Drizzle, SQLite, Zod 4)
 - [x] Critical decisions documented with rationale (5 critical, 5 important, 7 deferred)
 - [x] Implementation patterns established (naming, structure, format, process)
 - [x] Enforcement rules defined (10 rules for AI agent consistency)
@@ -722,7 +723,7 @@ No contradictions or conflicts found.
 **Confidence Level:** High — low-complexity project with clear requirements, deliberate technology choices, and comprehensive patterns.
 
 **Key Strengths:**
-- Single shared validation layer (Zod) eliminates frontend/backend contract drift
+- Single shared validation layer (Zod 4) eliminates frontend/backend contract drift
 - ISR strategy gives fast first-paint with real data while keeping the architecture simple
 - Pending state pattern is straightforward to implement and test
 - Every component has a clear, single responsibility with explicit file locations
