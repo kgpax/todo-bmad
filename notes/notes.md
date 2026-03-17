@@ -147,3 +147,13 @@
 
 - Had to prompt a little to guide test structure, moving common setup/teardown logic to `beforeEach` and `afterEach`
 - It had a problem getting the CORS tests to pass, and iterated on this quite extensivley and fixed itself without the need for intervention
+- When manually running `npm run dev`, I got errors starting the frontend app that were not picked up in any tests; had to ask that a test be written which could assert the FE was running correctly
+  - It wrote a unit test which didn't work because of sandboxing, and then it wrote a custom script to test that the page was accessible
+  - None of this was working reliably, so I asked it to write a playwright test instead
+- It had a really big problem resolving some node modules being used by the global CSS (presumably used by tailwindcss)
+  - For these, I had to intervene and manually run the dev server and then tell it the error messages, as it wasn't doing a very good job of running the server and getting the error messages itself
+  - It was a long-running game of whack-a-mole; every time it addressed a node module, it would reveal another one it couldn't find
+  - I opted to move away from Turbopack (which I always seem to have problems with) and using Webpack instead
+    - It started to hallucinate the correct way to do that :(
+
+**Conclusion:** This was the most involved I got, as a technical issue with module resolution really got the agent stuck
