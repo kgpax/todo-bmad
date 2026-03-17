@@ -30,7 +30,14 @@ export const todosRoutes = fp(async (app: FastifyInstance) => {
       throw err;
     }
 
-    const text = stripHtmlTags(parsed.text);
+    const text = stripHtmlTags(parsed.text).trim();
+    if (text.length === 0) {
+      return reply.status(400).send({
+        error: VALIDATION_ERROR,
+        message: "Text must not be empty",
+      });
+    }
+
     const id = randomUUID();
     const createdAt = new Date().toISOString();
 

@@ -158,6 +158,17 @@ describe("POST /api/todos", () => {
     expect(todo.text).toBe("hello");
   });
 
+  it("returns 400 with VALIDATION_ERROR when text is only HTML tags", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "<b></b>" },
+    });
+    expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("VALIDATION_ERROR");
+  });
+
   it("returns 400 with VALIDATION_ERROR for empty text", async () => {
     const res = await app.inject({
       method: "POST",
@@ -179,6 +190,17 @@ describe("POST /api/todos", () => {
     expect(res.statusCode).toBe(400);
     const body = JSON.parse(res.body);
     expect(body.error).toBe("VALIDATION_ERROR");
+  });
+
+  it("accepts text at exactly 128 characters", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "a".repeat(128) },
+    });
+    expect(res.statusCode).toBe(201);
+    const { todo } = JSON.parse(res.body);
+    expect(todo.text).toHaveLength(128);
   });
 
   it("returns 400 with VALIDATION_ERROR for text exceeding 128 characters", async () => {
@@ -204,7 +226,17 @@ describe("POST /api/todos", () => {
     expect(new Date(todo.createdAt).toISOString()).toBe(todo.createdAt);
   });
 
-  it("returns 400 for malformed JSON body", async () => {
+  it("rejects request body exceeding 10KB", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      headers: { "content-type": "application/json" },
+      payload: JSON.stringify({ text: "a", padding: "x".repeat(11000) }),
+    });
+    expect(res.statusCode).toBe(413);
+  });
+
+  it("returns 400 with VALIDATION_ERROR for malformed JSON body", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/api/todos",
@@ -212,6 +244,8 @@ describe("POST /api/todos", () => {
       payload: "not valid json{",
     });
     expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("VALIDATION_ERROR");
   });
 
   it("created todo appears in subsequent GET /api/todos response", async () => {

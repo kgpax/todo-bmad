@@ -1,6 +1,6 @@
 # Story 1.4: Create Todo Endpoint
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -299,7 +299,9 @@ No debug issues encountered. Implementation was straightforward following Dev No
 
 - packages/backend/src/routes/todos.ts
 - packages/backend/src/routes/todos.test.ts
+- project-context.md
 
 ### Change Log
 
 - 2026-03-17: Implemented POST /api/todos endpoint with validation, HTML sanitization, UUID generation, Drizzle insert, and 10 test cases (Story 1.4)
+- 2026-03-17: Code review — fixed 3 issues: (H1) added post-sanitization empty-text guard after HTML stripping, (M1) strengthened malformed JSON test to assert VALIDATION_ERROR code, (M2) added project-context.md to File List. 23 backend tests now pass.
