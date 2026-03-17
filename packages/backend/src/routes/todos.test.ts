@@ -91,3 +91,139 @@ describe("GET /api/todos", () => {
     expect(body.todos[1].id).toBe("old-1");
   });
 });
+
+describe("POST /api/todos", () => {
+  const UUID_V4_REGEX =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+  let app: ReturnType<typeof buildApp>;
+  let db: ReturnType<typeof getDb>;
+
+  beforeEach(() => {
+    const config = { ...getConfig(), LOG_LEVEL: "silent" };
+    db = getDb(":memory:");
+    runMigrations(db);
+    app = buildApp(config, db);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it("returns 201 with { todo } containing id, text, completed, createdAt for valid text", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "Buy groceries" },
+    });
+    expect(res.statusCode).toBe(201);
+    const body = JSON.parse(res.body);
+    expect(body).toHaveProperty("todo");
+    const { todo } = body;
+    expect(todo).toHaveProperty("id");
+    expect(todo).toHaveProperty("text");
+    expect(todo).toHaveProperty("completed");
+    expect(todo).toHaveProperty("createdAt");
+  });
+
+  it("returned id matches UUID v4 regex pattern", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "Check UUID" },
+    });
+    const { todo } = JSON.parse(res.body);
+    expect(todo.id).toMatch(UUID_V4_REGEX);
+  });
+
+  it("trims leading and trailing whitespace from text", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "  trimmed  " },
+    });
+    expect(res.statusCode).toBe(201);
+    const { todo } = JSON.parse(res.body);
+    expect(todo.text).toBe("trimmed");
+  });
+
+  it("strips HTML tags from text before storing", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "<b>hello</b>" },
+    });
+    expect(res.statusCode).toBe(201);
+    const { todo } = JSON.parse(res.body);
+    expect(todo.text).toBe("hello");
+  });
+
+  it("returns 400 with VALIDATION_ERROR for empty text", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "" },
+    });
+    expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("VALIDATION_ERROR");
+    expect(body).toHaveProperty("message");
+  });
+
+  it("returns 400 with VALIDATION_ERROR for whitespace-only text", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "   " },
+    });
+    expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("VALIDATION_ERROR");
+  });
+
+  it("returns 400 with VALIDATION_ERROR for text exceeding 128 characters", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "a".repeat(129) },
+    });
+    expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("VALIDATION_ERROR");
+  });
+
+  it("returns completed: false and valid ISO 8601 createdAt in response", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "ISO date check" },
+    });
+    expect(res.statusCode).toBe(201);
+    const { todo } = JSON.parse(res.body);
+    expect(todo.completed).toBe(false);
+    expect(new Date(todo.createdAt).toISOString()).toBe(todo.createdAt);
+  });
+
+  it("returns 400 for malformed JSON body", async () => {
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      headers: { "content-type": "application/json" },
+      payload: "not valid json{",
+    });
+    expect(res.statusCode).toBe(400);
+  });
+
+  it("created todo appears in subsequent GET /api/todos response", async () => {
+    await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "Integration check" },
+    });
+
+    const getRes = await app.inject({ method: "GET", url: "/api/todos" });
+    const body = JSON.parse(getRes.body);
+    expect(body.todos).toHaveLength(1);
+    expect(body.todos[0].text).toBe("Integration check");
+  });
+});

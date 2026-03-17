@@ -29,3 +29,5 @@ npm run build      # production build completes without errors
 ```
 
 No story may be marked `review` until every command above exits successfully.
+
+> **AI Agent Note:** `npm run test:e2e` requires network interface access and a real Chromium binary. Always run this command **outside the sandbox** (use `required_permissions: ["all"]` in the Shell tool). Running inside the sandbox will fail with `uv_interface_addresses` / `EPERM` errors regardless of network permission level.
