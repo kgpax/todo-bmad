@@ -1,0 +1,5 @@
+export const MAX_TEXT_LENGTH = 128;
+
+export const VALIDATION_ERROR = "VALIDATION_ERROR";
+export const NOT_FOUND = "NOT_FOUND";
+export const INTERNAL_ERROR = "INTERNAL_ERROR";

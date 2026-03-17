@@ -1,6 +1,6 @@
 # Story 1.1: Project Scaffolding & Shared API Contract
 
-Status: ready-for-dev
+Status: done
 
 ## Story
 
@@ -26,48 +26,48 @@ So that all packages have a consistent foundation and API contract.
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Initialize root monorepo (AC: #1, #5)
-  - [ ] 1.1 Create root `package.json` with npm workspaces pointing to `packages/*`
-  - [ ] 1.2 Create `tsconfig.base.json` with TypeScript strict mode, path aliases, and shared compiler options
-  - [ ] 1.3 Create `.gitignore` (node_modules, .env, .env.local, data/, .next/, dist/, *.db)
-  - [ ] 1.4 Create root `.env.example` documenting all env vars across packages
-  - [ ] 1.5 Add root `package.json` scripts: `dev`, `build`, `test`, `test:e2e`, `db:generate`, `db:migrate`
-- [ ] Task 2: Create shared package with Zod schemas and types (AC: #2, #3, #4, #6, #7)
-  - [ ] 2.1 Create `packages/shared/package.json` with name `@todo-bmad/shared`, Zod dependency, barrel entry point
-  - [ ] 2.2 Create `packages/shared/tsconfig.json` extending base config
-  - [ ] 2.3 Create `packages/shared/src/constants.ts` — `MAX_TEXT_LENGTH = 128`, error codes `VALIDATION_ERROR`, `NOT_FOUND`, `INTERNAL_ERROR`
-  - [ ] 2.4 Create `packages/shared/src/schemas.ts` — `createTodoSchema` (text: trimmed string 1-128 chars, strips whitespace-only), `updateTodoSchema` (completed: boolean), `todoSchema` (id, text, completed, createdAt)
-  - [ ] 2.5 Create `packages/shared/src/types.ts` — `Todo`, `CreateTodoRequest`, `UpdateTodoRequest`, `ApiError` types inferred from Zod schemas
-  - [ ] 2.6 Create `packages/shared/src/index.ts` barrel export (all schemas, types, and constants as named exports)
-  - [ ] 2.7 Write unit tests for `createTodoSchema` validation: empty string fails, whitespace-only fails, >128 chars fails, valid 1-128 chars succeeds with trimming, HTML content passes through (sanitization is backend responsibility)
-  - [ ] 2.8 Write unit tests for `updateTodoSchema` validation: boolean required, non-boolean fails
-  - [ ] 2.9 Write unit tests for `todoSchema`: validates complete Todo shape
-- [ ] Task 3: Scaffold frontend package (AC: #1, #5)
-  - [ ] 3.1 Run `npx create-next-app@latest` in `packages/frontend` with TypeScript, Tailwind, ESLint, App Router, src directory, npm
-  - [ ] 3.2 Configure `tsconfig.json` to extend `../../tsconfig.base.json` and set `@/` path alias to `./src/`
-  - [ ] 3.3 Run `npx shadcn@latest init` to set up shadcn/ui with new-york style
-  - [ ] 3.4 Add `@todo-bmad/shared` as a workspace dependency
-  - [ ] 3.5 Strip default create-next-app boilerplate content from page.tsx (leave minimal "Hello World" placeholder)
-  - [ ] 3.6 Create `.env.example` documenting `NEXT_PUBLIC_API_URL`, `API_URL`, `REVALIDATION_SECRET`
-  - [ ] 3.7 Install and configure Jest with ts-jest for frontend unit testing
-  - [ ] 3.8 Verify `npm run build` compiles with zero TypeScript errors
-- [ ] Task 4: Scaffold backend package (AC: #1, #5)
-  - [ ] 4.1 Create `packages/backend/package.json` with all dependencies
-  - [ ] 4.2 Create `packages/backend/tsconfig.json` extending base config
-  - [ ] 4.3 Create minimal `packages/backend/src/index.ts` entry point (Fastify server that starts on configured port)
-  - [ ] 4.4 Create `packages/backend/src/app.ts` Fastify app factory (empty plugin/route registration placeholder)
-  - [ ] 4.5 Create `packages/backend/src/config.ts` environment config loader (PORT, DATABASE_PATH, CORS_ORIGIN)
-  - [ ] 4.6 Add `@todo-bmad/shared` as a workspace dependency
-  - [ ] 4.7 Create `.env.example` documenting `PORT`, `DATABASE_PATH`, `CORS_ORIGIN`, `REVALIDATION_SECRET`
-  - [ ] 4.8 Create `data/.gitkeep` for SQLite database directory
-  - [ ] 4.9 Install and configure Jest with ts-jest for backend unit testing
-  - [ ] 4.10 Verify TypeScript compilation with zero errors
-- [ ] Task 5: Verify cross-package integration (AC: #1, #5)
-  - [ ] 5.1 Verify `npm install` at root installs all 3 workspaces without errors
-  - [ ] 5.2 Verify frontend can import from `@todo-bmad/shared` (schemas, types, constants)
-  - [ ] 5.3 Verify backend can import from `@todo-bmad/shared` (schemas, types, constants)
-  - [ ] 5.4 Verify `npm run build` at root compiles all packages with zero errors
-  - [ ] 5.5 Run all shared package unit tests and confirm they pass
+- [x] Task 1: Initialize root monorepo (AC: #1, #5)
+  - [x] 1.1 Create root `package.json` with npm workspaces pointing to `packages/*`
+  - [x] 1.2 Create `tsconfig.base.json` with TypeScript strict mode, path aliases, and shared compiler options
+  - [x] 1.3 Create `.gitignore` (node_modules, .env, .env.local, data/, .next/, dist/, *.db)
+  - [x] 1.4 Create root `.env.example` documenting all env vars across packages
+  - [x] 1.5 Add root `package.json` scripts: `dev`, `build`, `test`, `test:e2e`, `db:generate`, `db:migrate`
+- [x] Task 2: Create shared package with Zod schemas and types (AC: #2, #3, #4, #6, #7)
+  - [x] 2.1 Create `packages/shared/package.json` with name `@todo-bmad/shared`, Zod dependency, barrel entry point
+  - [x] 2.2 Create `packages/shared/tsconfig.json` extending base config
+  - [x] 2.3 Create `packages/shared/src/constants.ts` — `MAX_TEXT_LENGTH = 128`, error codes `VALIDATION_ERROR`, `NOT_FOUND`, `INTERNAL_ERROR`
+  - [x] 2.4 Create `packages/shared/src/schemas.ts` — `createTodoSchema` (text: trimmed string 1-128 chars, strips whitespace-only), `updateTodoSchema` (completed: boolean), `todoSchema` (id, text, completed, createdAt)
+  - [x] 2.5 Create `packages/shared/src/types.ts` — `Todo`, `CreateTodoRequest`, `UpdateTodoRequest`, `ApiError` types inferred from Zod schemas
+  - [x] 2.6 Create `packages/shared/src/index.ts` barrel export (all schemas, types, and constants as named exports)
+  - [x] 2.7 Write unit tests for `createTodoSchema` validation: empty string fails, whitespace-only fails, >128 chars fails, valid 1-128 chars succeeds with trimming, HTML content passes through (sanitization is backend responsibility)
+  - [x] 2.8 Write unit tests for `updateTodoSchema` validation: boolean required, non-boolean fails
+  - [x] 2.9 Write unit tests for `todoSchema`: validates complete Todo shape
+- [x] Task 3: Scaffold frontend package (AC: #1, #5)
+  - [x] 3.1 Run `npx create-next-app@latest` in `packages/frontend` with TypeScript, Tailwind, ESLint, App Router, src directory, npm
+  - [x] 3.2 Configure `tsconfig.json` to extend `../../tsconfig.base.json` and set `@/` path alias to `./src/`
+  - [x] 3.3 Run `npx shadcn@latest init` to set up shadcn/ui with new-york style
+  - [x] 3.4 Add `@todo-bmad/shared` as a workspace dependency
+  - [x] 3.5 Strip default create-next-app boilerplate content from page.tsx (leave minimal "Hello World" placeholder)
+  - [x] 3.6 Create `.env.example` documenting `NEXT_PUBLIC_API_URL`, `API_URL`, `REVALIDATION_SECRET`
+  - [x] 3.7 Install and configure Jest with ts-jest for frontend unit testing
+  - [x] 3.8 Verify `npm run build` compiles with zero TypeScript errors
+- [x] Task 4: Scaffold backend package (AC: #1, #5)
+  - [x] 4.1 Create `packages/backend/package.json` with all dependencies
+  - [x] 4.2 Create `packages/backend/tsconfig.json` extending base config
+  - [x] 4.3 Create minimal `packages/backend/src/index.ts` entry point (Fastify server that starts on configured port)
+  - [x] 4.4 Create `packages/backend/src/app.ts` Fastify app factory (empty plugin/route registration placeholder)
+  - [x] 4.5 Create `packages/backend/src/config.ts` environment config loader (PORT, DATABASE_PATH, CORS_ORIGIN)
+  - [x] 4.6 Add `@todo-bmad/shared` as a workspace dependency
+  - [x] 4.7 Create `.env.example` documenting `PORT`, `DATABASE_PATH`, `CORS_ORIGIN`, `REVALIDATION_SECRET`
+  - [x] 4.8 Create `data/.gitkeep` for SQLite database directory
+  - [x] 4.9 Install and configure Jest with ts-jest for backend unit testing
+  - [x] 4.10 Verify TypeScript compilation with zero errors
+- [x] Task 5: Verify cross-package integration (AC: #1, #5)
+  - [x] 5.1 Verify `npm install` at root installs all 3 workspaces without errors
+  - [x] 5.2 Verify frontend can import from `@todo-bmad/shared` (schemas, types, constants)
+  - [x] 5.3 Verify backend can import from `@todo-bmad/shared` (schemas, types, constants)
+  - [x] 5.4 Verify `npm run build` at root compiles all packages with zero errors
+  - [x] 5.5 Run all shared package unit tests and confirm they pass
 
 ## Dev Notes
 
@@ -302,10 +302,67 @@ Do NOT implement these — they belong to later stories:
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-4.6-sonnet-medium-thinking
 
 ### Debug Log References
 
+- shadcn CLI v4 `--style` flag removed; manually created `components.json` with new-york style instead
+- Jest config uses `.js` format (not `.ts`) to avoid ts-node dependency
+- Added `--no-watchman` flag to Jest scripts due to watchman socket permissions in sandbox environment
+- Backend tsconfig overrides `module: CommonJS` + `moduleResolution: node` (base uses ESNext/bundler — backend needs Node.js-compatible CommonJS output)
+- `data/` in `.gitignore` uses `!data/.gitkeep` negation to track the directory placeholder while ignoring database files
+
 ### Completion Notes List
 
+- Monorepo initialized with npm workspaces (`packages/*`) and `concurrently` for parallel dev server
+- `tsconfig.base.json` sets strict TypeScript (ES2022, strict mode, bundler resolution, source maps, declarations)
+- Shared package: Zod 4.3.6 schemas (`createTodoSchema`, `updateTodoSchema`, `todoSchema`), types (`Todo`, `CreateTodoRequest`, `UpdateTodoRequest`, `ApiError`), and constants (`MAX_TEXT_LENGTH=128`, error codes)
+- 17 unit tests covering all schema validation rules — all pass
+- Frontend: Next.js 16.1.7 (App Router, TypeScript, Tailwind v4, ESLint), shadcn/ui new-york style, `@/` → `./src/` alias, minimal Hello World page.tsx
+- Backend: Fastify 5.8.x with `buildApp()` factory, `getConfig()` env loader (PORT/DATABASE_PATH/CORS_ORIGIN/REVALIDATION_SECRET), `data/.gitkeep` for SQLite dir
+- Both packages link to `@todo-bmad/shared` via npm workspace — TypeScript import resolution verified for both
+- Zero TypeScript errors across all 3 packages
+
 ### File List
+
+- `package.json` (root — workspaces, scripts, concurrently)
+- `tsconfig.base.json` (root — shared TypeScript config)
+- `.gitignore` (root — updated with all required patterns)
+- `.env.example` (root — all env vars documented)
+- `packages/shared/package.json`
+- `packages/shared/tsconfig.json`
+- `packages/shared/jest.config.js`
+- `packages/shared/src/constants.ts`
+- `packages/shared/src/schemas.ts`
+- `packages/shared/src/types.ts`
+- `packages/shared/src/index.ts`
+- `packages/shared/src/schemas.test.ts`
+- `packages/backend/package.json`
+- `packages/backend/tsconfig.json`
+- `packages/backend/jest.config.js`
+- `packages/backend/.env.example`
+- `packages/backend/data/.gitkeep`
+- `packages/backend/src/index.ts`
+- `packages/backend/src/app.ts`
+- `packages/backend/src/config.ts`
+- `packages/frontend/package.json`
+- `packages/frontend/tsconfig.json`
+- `packages/frontend/jest.config.js`
+- `packages/frontend/components.json`
+- `packages/frontend/.env.example`
+- `packages/frontend/.gitignore` (auto-generated by create-next-app)
+- `packages/frontend/README.md` (auto-generated by create-next-app)
+- `packages/frontend/eslint.config.mjs`
+- `packages/frontend/next.config.ts`
+- `packages/frontend/postcss.config.mjs`
+- `packages/frontend/src/app/page.tsx`
+- `packages/frontend/src/app/layout.tsx`
+- `packages/frontend/src/app/globals.css`
+- `packages/frontend/src/app/favicon.ico` (auto-generated by create-next-app)
+- `packages/frontend/src/lib/utils.ts`
+
+### Change Log
+
+- 2026-03-17: Initial implementation — monorepo scaffolded, shared package with Zod schemas/types/tests, frontend (Next.js 16 + shadcn), backend (Fastify 5). All ACs satisfied, 17 tests passing, zero TypeScript errors.
+- 2026-03-17: Post-implementation cleanup — removed 5 default create-next-app SVGs from `packages/frontend/public/`, added `--passWithNoTests` to backend and frontend jest test scripts (no tests in those packages yet), added TODO comments to jest configs as reminder to remove the flag later.
+- 2026-03-17: Code review fixes — renamed frontend package from `"frontend"` to `"@todo-bmad/frontend"` for naming consistency with `@todo-bmad/shared` and `@todo-bmad/backend`. Updated File List to include auto-generated files (`packages/frontend/.gitignore`, `packages/frontend/README.md`, `packages/frontend/src/app/favicon.ico`).
