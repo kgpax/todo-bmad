@@ -1,11 +1,15 @@
 import { buildApp } from "./app";
 import { getConfig } from "./config";
+import { getDb } from "./db/client";
+import { runMigrations } from "./db/migrate";
 
 describe("App", () => {
   let app: ReturnType<typeof buildApp>;
 
   beforeEach(() => {
-    app = buildApp({ ...getConfig(), LOG_LEVEL: "silent" });
+    const db = getDb(":memory:");
+    runMigrations(db);
+    app = buildApp({ ...getConfig(), LOG_LEVEL: "silent" }, db);
   });
 
   afterEach(async () => {
