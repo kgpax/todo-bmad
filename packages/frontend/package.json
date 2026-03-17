@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest --no-watchman --passWithNoTests"
+    "test": "jest --no-watchman"
   },
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.4",
