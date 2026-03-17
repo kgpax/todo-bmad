@@ -22,12 +22,21 @@ Each story MUST be implemented on its own feature branch. The `main` branch is p
 Before any story implementation is considered complete, ALL of the following must pass without error:
 
 ```bash
-npm run dev        # dev server starts cleanly with no module or compilation errors
-npm run test       # all Jest unit/integration tests pass across all packages
-npm run test:e2e   # all Playwright E2E tests pass (starts dev server automatically if not running)
-npm run build      # production build completes without errors
+npm run dev    # dev server starts cleanly with no module or compilation errors
+npm run test   # all Jest unit/integration tests pass across all packages
+npm run build  # production build completes without errors
 ```
 
-No story may be marked `review` until every command above exits successfully.
+### ⚠️ CRITICAL — E2E Tests: ALWAYS Run Outside the Sandbox
 
-> **AI Agent Note:** `npm run test:e2e` requires network interface access and a real Chromium binary. Always run this command **outside the sandbox** (use `required_permissions: ["all"]` in the Shell tool). Running inside the sandbox will fail with `uv_interface_addresses` / `EPERM` errors regardless of network permission level.
+```bash
+npm run test:e2e  # ← MUST be run with required_permissions: ["all"]
+```
+
+> **MANDATORY for AI Agents:** `npm run test:e2e` requires OS-level network interface access (`uv_interface_addresses`) and a real Chromium binary. It will **always fail** inside the Cursor sandbox — no matter what `required_permissions` are set.
+>
+> **ALWAYS run `npm run test:e2e` using `required_permissions: ["all"]`** in the Shell tool to execute it outside the sandbox. This is not optional — E2E tests MUST pass before a story can be marked `review`.
+>
+> **DO NOT skip `npm run test:e2e`.** A story is NOT complete until E2E tests pass.
+
+No story may be marked `review` until ALL commands above exit successfully, including `npm run test:e2e` run outside the sandbox.

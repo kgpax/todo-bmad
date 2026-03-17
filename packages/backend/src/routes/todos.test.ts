@@ -416,3 +416,89 @@ describe("PATCH /api/todos/:id", () => {
     expect(body.todos[0].completed).toBe(true);
   });
 });
+
+describe("DELETE /api/todos/:id", () => {
+  let app: ReturnType<typeof buildApp>;
+  let db: ReturnType<typeof getDb>;
+
+  beforeEach(() => {
+    const config = { ...getConfig(), LOG_LEVEL: "silent" };
+    db = getDb(":memory:");
+    runMigrations(db);
+    app = buildApp(config, db);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it("returns 204 with empty body when deleting an existing todo", async () => {
+    db.insert(todos)
+      .values({
+        id: "test-id-1",
+        text: "Test todo",
+        completed: false,
+        createdAt: "2026-03-17T10:00:00.000Z",
+      })
+      .run();
+
+    const res = await app.inject({
+      method: "DELETE",
+      url: "/api/todos/test-id-1",
+    });
+
+    expect(res.statusCode).toBe(204);
+    expect(res.body).toBe("");
+  });
+
+  it("returns 404 with NOT_FOUND error for non-existent todo ID", async () => {
+    const res = await app.inject({
+      method: "DELETE",
+      url: "/api/todos/non-existent-id",
+    });
+
+    expect(res.statusCode).toBe(404);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("NOT_FOUND");
+    expect(body).toHaveProperty("message");
+  });
+
+  it("deleted todo no longer appears in GET /api/todos", async () => {
+    db.insert(todos)
+      .values({
+        id: "test-id-1",
+        text: "To be deleted",
+        completed: false,
+        createdAt: "2026-03-17T10:00:00.000Z",
+      })
+      .run();
+
+    await app.inject({ method: "DELETE", url: "/api/todos/test-id-1" });
+
+    const getRes = await app.inject({ method: "GET", url: "/api/todos" });
+    const body = JSON.parse(getRes.body);
+    expect(body.todos).toHaveLength(0);
+  });
+
+  it("returns 404 when deleting an already-deleted todo (idempotency boundary)", async () => {
+    db.insert(todos)
+      .values({
+        id: "test-id-1",
+        text: "Test todo",
+        completed: false,
+        createdAt: "2026-03-17T10:00:00.000Z",
+      })
+      .run();
+
+    await app.inject({ method: "DELETE", url: "/api/todos/test-id-1" });
+
+    const res = await app.inject({
+      method: "DELETE",
+      url: "/api/todos/test-id-1",
+    });
+
+    expect(res.statusCode).toBe(404);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("NOT_FOUND");
+  });
+});
