@@ -55,24 +55,20 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
     }
   }, [disabled]);
 
-  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
-    if (e.key === "Enter") {
-      const trimmed = text.trim();
-      if (trimmed) {
-        onSubmit(trimmed);
-        setText("");
-      }
-    } else if (e.key === "Escape") {
-      setText("");
-      inputRef.current?.blur();
-    }
-  }
-
-  function handleSubmitClick() {
+  function submitText() {
     const trimmed = text.trim();
     if (trimmed) {
       onSubmit(trimmed);
       setText("");
+    }
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      submitText();
+    } else if (e.key === "Escape") {
+      setText("");
+      inputRef.current?.blur();
     }
   }
 
@@ -96,7 +92,7 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
       />
       {text.trim().length > 0 && (
         <button
-          onClick={handleSubmitClick}
+          onClick={submitText}
           disabled={disabled}
           aria-label="Add todo"
           className="px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50 bg-accent text-white"

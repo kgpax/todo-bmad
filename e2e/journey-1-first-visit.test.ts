@@ -37,10 +37,19 @@ test.describe("Journey 1: First Visit", () => {
   });
 
   test("disables input during create then restores focus with ring", async () => {
+    // The local API responds faster than Playwright's assertion polling
+    // interval, so the input's transient disabled state is never observed.
+    // Delaying the POST gives the assertion time to catch it.
+    await todo.page.route("**/api/todos", async (route) => {
+      if (route.request().method() === "POST") {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+      }
+      await route.continue();
+    });
+
     await todo.addTodo("Buy coffee");
 
     await expect(todo.input).toBeDisabled();
-
     await expect(todo.input).toBeEnabled();
     await expect(todo.input).toBeFocused();
     await expect.poll(() => todo.hasFocusRing()).toBe(true);

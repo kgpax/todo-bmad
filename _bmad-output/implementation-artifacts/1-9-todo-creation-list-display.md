@@ -68,9 +68,9 @@ So that I can capture tasks effortlessly and see them persisted.
 
 - [x] Task 5: Create TodoItem component (`components/todo-item.tsx`) (AC: #6)
   - [x] 5.1 Create `packages/frontend/src/components/todo-item.tsx`
-  - [x] 5.2 Render a card with resting shadow, todo text, and relative timestamp
+  - [x] 5.2 Render a card with resting shadow, todo text, and absolute timestamp
   - [x] 5.3 Desktop hover: subtle lift (translateY -1px + deeper shadow)
-  - [x] 5.4 Accept `todo: Todo` prop; use `formatRelativeTime` for timestamp display
+  - [x] 5.4 Accept `todo: Todo` prop; use `formatTimestamp` for timestamp display
 
 - [x] Task 6: Create TodoInput component (`components/todo-input.tsx`) (AC: #1, #2, #3, #4, #10, #11)
   - [x] 6.1 Create `packages/frontend/src/components/todo-input.tsx`
@@ -78,7 +78,7 @@ So that I can capture tasks effortlessly and see them persisted.
   - [x] 6.3 Accept props: `onSubmit: (text: string) => void`, `placeholderContext`, `disabled?: boolean`
   - [x] 6.4 Handle Enter key: trim text, if non-empty call onSubmit and clear input; if empty silently ignore
   - [x] 6.5 Add optional submit button for touch/accessibility
-  - [x] 6.6 Auto-focus on desktop (use `min-width: 1024px` media query via `window.matchMedia`)
+  - [x] 6.6 Auto-focus on desktop (use `(hover: hover) and (pointer: fine)` media query via `isDesktopDevice()` utility)
   - [x] 6.7 Select random placeholder from the correct bank based on `placeholderContext`
 
 - [x] Task 7: Create TodoList component (`components/todo-list.tsx`) (AC: #7)
@@ -100,8 +100,8 @@ So that I can capture tasks effortlessly and see them persisted.
   - [x] 9.2 No structural changes expected — page.tsx passes initialTodos and emptyMessage to TodoPage
 
 - [x] Task 10: Write unit tests (AC: #12)
-  - [x] 10.1 Create `packages/frontend/src/components/todo-input.test.tsx` — renders card, placeholder text, Enter submits, empty input ignored, focus ring on focus
-  - [x] 10.2 Create `packages/frontend/src/components/todo-item.test.tsx` — renders card, displays text, displays relative timestamp
+  - [x] 10.1 Create `packages/frontend/src/components/todo-input.test.tsx` — placeholder text, Enter submits, empty input ignored, data-focused attribute, auto-focus, focus management around submit
+  - [x] 10.2 Create `packages/frontend/src/components/todo-item.test.tsx` — displays text, displays absolute timestamp
   - [x] 10.3 Create `packages/frontend/src/components/todo-list.test.tsx` — renders list structure, role attributes, newest-first order, aria-live
   - [x] 10.4 Create `packages/frontend/src/hooks/use-todos.test.ts` — initializes from props, addTodo success flow, empty text ignored, pending state during create
   - [x] 10.5 Update `packages/frontend/src/components/todo-page.test.tsx` — empty state rendering, list rendering with todos, input integration
@@ -590,6 +590,7 @@ The story Dev Notes state "Do NOT modify backend files." A `db:reset` script was
 - 2026-03-18: Consolidated all focus lifecycle assertions (ring visible → disabled during create → ring reappears) into Journey 1. Journey 2 now tests quick-capture ordering only.
 - 2026-03-18: Split monolithic E2E journey tests into atomic single-responsibility tests. Extracted shared deleteAllTodos/seedTodos helpers into `e2e/helpers.ts`. Journey 1: 4 tests, Journey 2: 3 tests.
 - 2026-03-18: Introduced Page Object Model (`e2e/pages/todo-page.ts`). Replaced raw locators in tests with POM properties/methods. Focus ring assertion now checks computed box-shadow for the 3px spread ring pattern instead of matching raw style attribute strings.
+- 2026-03-18: Final code review pass — extracted shared submitText helper in TodoInput (DRY), fixed transient-state E2E assertion by starting disabled-check polling before pressing Enter, corrected File List (added 3 missing files, removed 2 stale entries, deduplicated journey files), updated 5 stale task descriptions.
 
 ### File List
 
@@ -604,20 +605,19 @@ The story Dev Notes state "Do NOT modify backend files." A `db:reset` script was
 - `packages/frontend/src/components/todo-list.tsx`
 - `packages/frontend/src/components/todo-list.test.tsx`
 - `packages/frontend/src/components/todo-page.test.tsx`
+- `packages/frontend/src/lib/utils.test.ts` (isDesktopDevice, pickRandom, formatTimestamp tests)
 - `e2e/helpers.ts` (shared E2E utilities: deleteAllTodos, seedTodos)
 - `e2e/pages/todo-page.ts` (Page Object Model for the todo app home page)
 - `e2e/journey-1-first-visit.test.ts`
 - `e2e/journey-2-quick-capture.test.ts`
 - `scripts/lighthouse.js` (headless Lighthouse audit script for Definition of Done)
+- `scripts/db-reset.js` (standalone SQLite reset script for local dev/E2E)
 
 **Modified:**
 - `packages/frontend/src/lib/api.ts` (added createTodo, CLIENT_API_URL)
-- `packages/frontend/src/lib/utils.ts` (added formatTimestamp)
+- `packages/frontend/src/lib/utils.ts` (added formatTimestamp, isDesktopDevice)
 - `packages/frontend/src/components/todo-page.tsx` (integrated useTodos, TodoInput, TodoList)
-- `packages/frontend/jest.setup.ts` (added window.matchMedia mock)
-- `e2e/journey-1-first-visit.test.ts` (updated timestamp assertion; added auto-focus, focus ring lifecycle, and post-submit focus assertions)
-- `e2e/journey-2-quick-capture.test.ts` (quick-capture ordering only; focus ring assertions moved to Journey 1)
+- `packages/frontend/src/components/empty-state.tsx` (replaced inline shadow style with Tailwind arbitrary value)
+- `packages/frontend/jest.setup.ts` (added window.matchMedia polyfill for jsdom)
 - `package.json` (added lighthouse devDependency, test:lighthouse and db:reset scripts)
-- `packages/backend/package.json` (added db:reset script — local dev convenience for E2E test isolation; see Deviations)
-- `project-context.md` (added suppressHydrationWarning ban and Lighthouse audit DoD rules)
-- `README.md` (added run/test instructions)
+- `project-context.md` (added suppressHydrationWarning ban, Lighthouse audit DoD rules, POM convention)
