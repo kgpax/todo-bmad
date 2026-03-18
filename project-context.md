@@ -10,6 +10,10 @@
 - For **user-generated or locale-specific content**: ensure the server and client render the same value, or defer the dynamic portion to a client-only effect after hydration with an explicit loading/placeholder state.
 - If a genuine mismatch is unavoidable, document it explicitly and use a client-only component that renders `null` on the server and populates after mount — never suppress the warning.
 
+### E2E tests must use Page Object Models
+
+Playwright tests must use Page Object Models (POMs) from `e2e/pages/` rather than inline locators. Each POM class encapsulates locators, actions, and query helpers for a page or major UI region. Keep all assertions in the test files — POMs should not import `expect` or contain assertion logic. When a test needs to verify a visual property (e.g. focus ring, hover state), the POM exposes a query method returning a value and the test asserts on it.
+
 ## Git Branching Convention
 
 ### ⚠️ CRITICAL — Create Feature Branch BEFORE Writing Any Code

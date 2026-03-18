@@ -1,62 +1,48 @@
 import { test, expect } from "@playwright/test";
-
-async function deleteAllTodos(request: Parameters<Parameters<typeof test.beforeEach>[0]>[0]["request"]) {
-  const todosResponse = await request.get("http://localhost:3001/api/todos");
-  if (todosResponse.ok()) {
-    const data = await todosResponse.json();
-    const todos = data.todos ?? [];
-    for (const todo of todos) {
-      await request.delete(`http://localhost:3001/api/todos/${todo.id}`);
-    }
-  }
-}
+import { deleteAllTodos } from "./helpers";
+import { TodoPage } from "./pages/todo-page";
 
 test.describe("Journey 1: First Visit", () => {
-  test.beforeEach(async ({ request }) => {
+  let todo: TodoPage;
+
+  test.beforeEach(async ({ request, page }) => {
     await deleteAllTodos(request);
+    todo = new TodoPage(page);
+    await todo.goto();
   });
 
   test.afterEach(async ({ request }) => {
     await deleteAllTodos(request);
   });
 
-  test("user opens app, sees empty state, creates first todo, todo appears in list", async ({
-    page,
-  }) => {
-    await page.goto("/");
+  test("shows empty state when there are no todos", async () => {
+    await expect(todo.emptyState).toBeVisible();
+  });
 
-    // Empty state is visible
-    const emptyState = page.locator('[role="status"]');
-    await expect(emptyState).toBeVisible();
+  test("auto-focuses the input with focus ring on desktop", async () => {
+    await expect(todo.input).toBeVisible();
+    await expect(todo.input).toBeFocused();
+    await expect.poll(() => todo.hasFocusRing()).toBe(true);
+  });
 
-    // Input is visible and auto-focused on desktop with accent focus ring
-    const input = page.getByRole("textbox", { name: /new todo/i });
-    const inputCard = input.locator("xpath=..");
-    await expect(input).toBeVisible();
-    await expect(input).toBeFocused();
-    await expect(inputCard).toHaveAttribute("style", /color-accent/);
+  test("creates a todo that appears in the list with a timestamp", async () => {
+    await todo.addTodo("Buy coffee");
 
-    // Type a todo
-    await input.fill("Buy coffee");
-    await input.press("Enter");
+    await expect(todo.emptyState).not.toBeVisible();
+    await expect(todo.todoList).toBeVisible();
+    await expect(todo.todoByText("Buy coffee")).toBeVisible();
+    await expect(
+      todo.todoList.getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/)
+    ).toBeVisible();
+  });
 
-    // Input is disabled during create (which clears the focus ring)
-    await expect(input).toBeDisabled();
+  test("disables input during create then restores focus with ring", async () => {
+    await todo.addTodo("Buy coffee");
 
-    // Empty state disappears
-    await expect(emptyState).not.toBeVisible();
+    await expect(todo.input).toBeDisabled();
 
-    // New todo appears in the list
-    const list = page.getByRole("list", { name: /todo list/i });
-    await expect(list).toBeVisible();
-    await expect(list.getByText("Buy coffee")).toBeVisible();
-
-    // Timestamp shows absolute DD/MM/YYYY HH:mm format
-    await expect(list.getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/)).toBeVisible();
-
-    // Focus ring reappears after create completes (input re-enabled and refocused)
-    await expect(input).toBeEnabled();
-    await expect(input).toBeFocused();
-    await expect(inputCard).toHaveAttribute("style", /color-accent/);
+    await expect(todo.input).toBeEnabled();
+    await expect(todo.input).toBeFocused();
+    await expect.poll(() => todo.hasFocusRing()).toBe(true);
   });
 });

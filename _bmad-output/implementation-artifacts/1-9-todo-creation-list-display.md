@@ -114,7 +114,7 @@ So that I can capture tasks effortlessly and see them persisted.
   - [x] 12.1 `npm run lint` — 0 errors
   - [x] 12.2 `npm run build` — production build clean
   - [x] 12.3 `npm run test` — all Jest tests pass (105 total: 17 shared, 37 backend, 51 frontend)
-  - [x] 12.4 `npm run test:e2e` — 4 E2E tests pass (Journey 1, Journey 2, smoke ×2)
+  - [x] 12.4 `npm run test:e2e` — 9 E2E tests pass (Journey 1 ×4, Journey 2 ×3, smoke ×2)
   - [x] 12.5 Lighthouse audit — Desktop & Mobile: Accessibility: 100, Best Practices: 100, SEO: 100
 
 ## Dev Notes
@@ -567,7 +567,7 @@ claude-4.6-sonnet-medium-thinking (2026-03-18)
 - Updated `TodoPage` to use `useTodos` hook, render `TodoInput` as hero element always, show `TodoList` or `EmptyState` conditionally
 - Added `window.matchMedia` mock to `jest.setup.ts` for jsdom compatibility
 - All 51 frontend unit tests pass; 105 total across all packages
-- All 4 Playwright E2E tests pass (Journey 1 First Visit, Journey 2 Quick Capture, 2 smoke tests); focus lifecycle assertions consolidated into Journey 1
+- All 9 Playwright E2E tests pass (4 Journey 1, 3 Journey 2, 2 smoke); each test has a single responsibility
 - Lighthouse scores: Desktop & Mobile — Accessibility: 100, Best Practices: 100, SEO: 100
 
 ### Deviations from Spec
@@ -588,6 +588,8 @@ The story Dev Notes state "Do NOT modify backend files." A `db:reset` script was
 - 2026-03-18: Code review — fixed useTodos setTimeout leak (L2: added ref + useEffect cleanup). All issues resolved. Story status → done.
 - 2026-03-18: Merged focus-behaviour E2E tests into Journey 1 and Journey 2. Added focus ring disappear/reappear assertions to Journey 2. Deleted standalone `e2e/focus-behaviour.test.ts`.
 - 2026-03-18: Consolidated all focus lifecycle assertions (ring visible → disabled during create → ring reappears) into Journey 1. Journey 2 now tests quick-capture ordering only.
+- 2026-03-18: Split monolithic E2E journey tests into atomic single-responsibility tests. Extracted shared deleteAllTodos/seedTodos helpers into `e2e/helpers.ts`. Journey 1: 4 tests, Journey 2: 3 tests.
+- 2026-03-18: Introduced Page Object Model (`e2e/pages/todo-page.ts`). Replaced raw locators in tests with POM properties/methods. Focus ring assertion now checks computed box-shadow for the 3px spread ring pattern instead of matching raw style attribute strings.
 
 ### File List
 
@@ -602,6 +604,8 @@ The story Dev Notes state "Do NOT modify backend files." A `db:reset` script was
 - `packages/frontend/src/components/todo-list.tsx`
 - `packages/frontend/src/components/todo-list.test.tsx`
 - `packages/frontend/src/components/todo-page.test.tsx`
+- `e2e/helpers.ts` (shared E2E utilities: deleteAllTodos, seedTodos)
+- `e2e/pages/todo-page.ts` (Page Object Model for the todo app home page)
 - `e2e/journey-1-first-visit.test.ts`
 - `e2e/journey-2-quick-capture.test.ts`
 - `scripts/lighthouse.js` (headless Lighthouse audit script for Definition of Done)

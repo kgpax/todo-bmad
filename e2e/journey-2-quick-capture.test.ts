@@ -1,55 +1,38 @@
 import { test, expect } from "@playwright/test";
-
-async function deleteAllTodos(request: Parameters<Parameters<typeof test.beforeEach>[0]>[0]["request"]) {
-  const todosResponse = await request.get("http://localhost:3001/api/todos");
-  if (todosResponse.ok()) {
-    const data = await todosResponse.json();
-    const todos = data.todos ?? [];
-    for (const todo of todos) {
-      await request.delete(`http://localhost:3001/api/todos/${todo.id}`);
-    }
-  }
-}
+import { deleteAllTodos, seedTodos } from "./helpers";
+import { TodoPage } from "./pages/todo-page";
 
 test.describe("Journey 2: Quick Capture", () => {
-  test.beforeEach(async ({ request }) => {
-    await deleteAllTodos(request);
+  let todo: TodoPage;
 
-    // Seed 2 todos via backend API
-    await request.post("http://localhost:3001/api/todos", {
-      data: { text: "Existing todo one" },
-    });
-    await request.post("http://localhost:3001/api/todos", {
-      data: { text: "Existing todo two" },
-    });
+  test.beforeEach(async ({ request, page }) => {
+    await deleteAllTodos(request);
+    await seedTodos(request, ["Existing todo one", "Existing todo two"]);
+    todo = new TodoPage(page);
+    await todo.goto();
   });
 
   test.afterEach(async ({ request }) => {
     await deleteAllTodos(request);
   });
 
-  test("returning user with existing todos adds a new todo that appears at top", async ({
-    page,
-  }) => {
-    await page.goto("/");
+  test("displays existing todos on page load", async () => {
+    await expect(todo.todoList).toBeVisible();
+    await expect(todo.todoByText("Existing todo one")).toBeVisible();
+    await expect(todo.todoByText("Existing todo two")).toBeVisible();
+  });
 
-    // Existing todos are visible
-    const list = page.getByRole("list", { name: /todo list/i });
-    await expect(list).toBeVisible();
-    await expect(list.getByText("Existing todo one")).toBeVisible();
-    await expect(list.getByText("Existing todo two")).toBeVisible();
+  test("new todo appears at the top of the list", async () => {
+    await todo.addTodo("Brand new todo");
 
-    // Add a new todo
-    const input = page.getByRole("textbox", { name: /new todo/i });
-    await input.fill("Brand new todo");
-    await input.press("Enter");
+    await expect(todo.todoItems().first()).toContainText("Brand new todo");
+  });
 
-    // New todo appears at the TOP of the list
-    const listItems = list.getByRole("listitem");
-    await expect(listItems.first()).toContainText("Brand new todo");
+  test("existing todos remain visible after adding a new one", async () => {
+    await todo.addTodo("Brand new todo");
 
-    // Existing todos are still visible below
-    await expect(list.getByText("Existing todo one")).toBeVisible();
-    await expect(list.getByText("Existing todo two")).toBeVisible();
+    await expect(todo.todoByText("Brand new todo")).toBeVisible();
+    await expect(todo.todoByText("Existing todo one")).toBeVisible();
+    await expect(todo.todoByText("Existing todo two")).toBeVisible();
   });
 });
