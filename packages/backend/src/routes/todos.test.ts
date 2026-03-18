@@ -3,6 +3,7 @@ import { getConfig } from "../config";
 import { getDb } from "../db/client";
 import { runMigrations } from "../db/migrate";
 import { todos } from "../db/schema";
+import * as shared from "@todo-bmad/shared";
 
 describe("GET /api/todos", () => {
   let app: ReturnType<typeof buildApp>;
@@ -414,6 +415,68 @@ describe("PATCH /api/todos/:id", () => {
     const body = JSON.parse(getRes.body);
     expect(body.todos).toHaveLength(1);
     expect(body.todos[0].completed).toBe(true);
+  });
+});
+
+describe("POST /api/todos - non-ZodError re-throw", () => {
+  let app: ReturnType<typeof buildApp>;
+  let db: ReturnType<typeof getDb>;
+
+  beforeEach(() => {
+    const config = { ...getConfig(), LOG_LEVEL: "silent" };
+    db = getDb(":memory:");
+    runMigrations(db);
+    app = buildApp(config, db);
+  });
+
+  afterEach(async () => {
+    await app.close();
+    jest.restoreAllMocks();
+  });
+
+  it("returns 500 when createTodoSchema.parse throws a non-ZodError", async () => {
+    jest.spyOn(shared.createTodoSchema, "parse").mockImplementationOnce(() => {
+      throw new Error("unexpected internal error");
+    });
+
+    const res = await app.inject({
+      method: "POST",
+      url: "/api/todos",
+      payload: { text: "Test" },
+    });
+
+    expect(res.statusCode).toBe(500);
+  });
+});
+
+describe("PATCH /api/todos/:id - non-ZodError re-throw", () => {
+  let app: ReturnType<typeof buildApp>;
+  let db: ReturnType<typeof getDb>;
+
+  beforeEach(() => {
+    const config = { ...getConfig(), LOG_LEVEL: "silent" };
+    db = getDb(":memory:");
+    runMigrations(db);
+    app = buildApp(config, db);
+  });
+
+  afterEach(async () => {
+    await app.close();
+    jest.restoreAllMocks();
+  });
+
+  it("returns 500 when updateTodoSchema.parse throws a non-ZodError", async () => {
+    jest.spyOn(shared.updateTodoSchema, "parse").mockImplementationOnce(() => {
+      throw new Error("unexpected internal error");
+    });
+
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/any-id",
+      payload: { completed: true },
+    });
+
+    expect(res.statusCode).toBe(500);
   });
 });
 

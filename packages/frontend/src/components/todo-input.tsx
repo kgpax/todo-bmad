@@ -37,6 +37,7 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
   // input is focused before the user ever sees the hydrated state — no delay.
   useLayoutEffect(() => {
     if (isDesktopDevice()) {
+      /* istanbul ignore next -- inputRef.current is always attached for a mounted component */
       inputRef.current?.focus();
     }
   }, []);
@@ -50,6 +51,7 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
       setFocused(false);
       wasDisabledRef.current = true;
     } else if (wasDisabledRef.current) {
+      /* istanbul ignore next -- inputRef.current is always attached for a mounted component */
       inputRef.current?.focus();
       wasDisabledRef.current = false;
     }
@@ -68,6 +70,7 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
       submitText();
     } else if (e.key === "Escape") {
       setText("");
+      /* istanbul ignore next -- inputRef.current is always attached for a mounted component */
       inputRef.current?.blur();
     }
   }

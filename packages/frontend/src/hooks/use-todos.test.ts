@@ -161,6 +161,40 @@ describe("useTodos", () => {
     expect(result.current.createError).toBe("Failed to create todo");
   });
 
+  it("falls back to default error message when error is null (non-object throw)", async () => {
+    mockCreateTodo.mockRejectedValue(null);
+    const { result } = renderHook(() => useTodos([]));
+
+    await act(async () => {
+      await result.current.addTodo("Some todo");
+    });
+
+    expect(result.current.createError).toBe("Failed to create todo");
+  });
+
+  it("clears a running justAdded timer when a second todo is added", async () => {
+    mockCreateTodo.mockResolvedValue(newTodo);
+    const { result } = renderHook(() => useTodos([]));
+
+    await act(async () => {
+      await result.current.addTodo("First todo");
+    });
+
+    expect(result.current.justAdded).toBe(true);
+
+    await act(async () => {
+      await result.current.addTodo("Second todo");
+    });
+
+    expect(result.current.justAdded).toBe(true);
+
+    act(() => {
+      jest.advanceTimersByTime(4000);
+    });
+
+    expect(result.current.justAdded).toBe(false);
+  });
+
   it("ignores addTodo when a create is already in flight", async () => {
     let resolveCreate!: (value: Todo) => void;
     mockCreateTodo.mockReturnValue(
