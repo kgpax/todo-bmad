@@ -76,14 +76,9 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
     }
   }
 
-  const shadowStyle = focused
-    ? { boxShadow: `0 0 0 3px var(--color-accent), var(--shadow-hover)` }
-    : { boxShadow: "var(--shadow-resting)" };
-
   return (
     <div
-      className="bg-surface rounded-xl p-4 md:p-5 flex items-center gap-3 transition-shadow"
-      style={shadowStyle}
+      className="bg-surface rounded-xl p-4 md:p-5 flex items-center gap-3 transition-shadow [box-shadow:var(--shadow-resting)] data-[focused=true]:[box-shadow:0_0_0_3px_var(--color-accent),var(--shadow-hover)]"
       data-focused={focused}
     >
       <input
@@ -104,8 +99,7 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
           onClick={handleSubmitClick}
           disabled={disabled}
           aria-label="Add todo"
-          className="px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50"
-          style={{ backgroundColor: "var(--color-accent)", color: "#fff" }}
+          className="px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50 bg-accent text-white"
         >
           Add
         </button>
