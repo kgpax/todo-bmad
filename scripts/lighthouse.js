@@ -53,6 +53,14 @@ function killDevServer() {
   }
 }
 
+function isServerRunning(url) {
+  return new Promise((resolve) => {
+    require("http")
+      .get(url, (res) => { res.resume(); resolve(true); })
+      .on("error", () => resolve(false));
+  });
+}
+
 function waitForServer(url, timeoutMs = 30000) {
   const start = Date.now();
   return new Promise((resolve, reject) => {
@@ -107,18 +115,23 @@ function readScores(outputPath) {
 async function main() {
   let devServer;
   let exitCode = 0;
+  const serverAlreadyRunning = await isServerRunning(URL);
 
   try {
-    log("\n🔧 Starting dev server...");
-    devServer = spawn("npm", ["run", "dev"], {
-      cwd: path.resolve(__dirname, ".."),
-      stdio: "ignore",
-      detached: false,
-    });
-
-    log("⏳ Waiting for http://localhost:3000...");
-    await waitForServer(URL);
-    log("✅ Dev server ready\n");
+    if (serverAlreadyRunning) {
+      log("\n⚡ Dev server already running — skipping start/stop.");
+    } else {
+      log("\n🔧 Starting dev server...");
+      devServer = spawn("npm", ["run", "dev"], {
+        cwd: path.resolve(__dirname, ".."),
+        stdio: "ignore",
+        detached: false,
+      });
+      log("⏳ Waiting for http://localhost:3000...");
+      await waitForServer(URL);
+      log("✅ Dev server ready");
+    }
+    log("");
 
     const results = [];
 
@@ -149,10 +162,14 @@ async function main() {
     log(`\n❌ Error: ${err.message}`);
     exitCode = 1;
   } finally {
-    log("\n🛑 Stopping dev server...");
-    if (devServer) devServer.kill("SIGTERM");
-    killDevServer();
-    log("✅ Dev server stopped.");
+    if (serverAlreadyRunning) {
+      log("\n⚡ Dev server was pre-existing — leaving it running.");
+    } else {
+      log("\n🛑 Stopping dev server...");
+      if (devServer) devServer.kill("SIGTERM");
+      killDevServer();
+      log("✅ Dev server stopped.");
+    }
   }
 
   process.exit(exitCode);
