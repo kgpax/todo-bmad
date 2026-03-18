@@ -54,17 +54,51 @@ npm run test:e2e  # ← Shell tool with required_permissions: ["all"]
 
 ### Step 5 — Lighthouse Audit *(frontend stories only)*
 
-> ⚠️ **MANDATORY for any story that touches frontend files.** Start the dev server outside the sandbox first (`required_permissions: ["all"]`), wait for the "Ready" message, then run both audits via the Chrome DevTools MCP server.
+> ⚠️ **MANDATORY for any story that touches frontend files.** Run headlessly using the Lighthouse CLI via `npx lighthouse` — this launches its own headless Chrome, runs the audit, and exits cleanly with no visible browser window and no lingering processes.
+
+Start the dev server, run both audits, then stop the dev server:
 
 ```bash
-npm run dev   # ← Shell tool with required_permissions: ["all"] — wait for "Ready"
-```
+# 1. Start dev server in background (required_permissions: ["all"])
+npm run dev > /tmp/dev-server.log 2>&1 &
+# Wait until "Ready" appears in the log (poll with: grep -q "Ready" /tmp/dev-server.log)
 
-Using the Chrome DevTools MCP:
-1. `new_page` — `url: "http://localhost:3000"`
-2. `lighthouse_audit` — `mode: "navigation"`, `device: "desktop"`
-3. `lighthouse_audit` — `mode: "navigation"`, `device: "mobile"`
-4. Stop the dev server after audits complete
+# 2. Desktop audit (required_permissions: ["all"])
+npx lighthouse http://localhost:3000 \
+  --chrome-flags="--headless --no-sandbox --disable-gpu" \
+  --only-categories=accessibility,best-practices,seo \
+  --output=json \
+  --output-path=/tmp/lh-desktop.json \
+  --form-factor=desktop \
+  --screen-emulation.mobile=false \
+  --screen-emulation.width=1350 \
+  --screen-emulation.height=940 \
+  --screen-emulation.deviceScaleFactor=1 \
+  --quiet
+
+# 3. Mobile audit (required_permissions: ["all"])
+npx lighthouse http://localhost:3000 \
+  --chrome-flags="--headless --no-sandbox --disable-gpu" \
+  --only-categories=accessibility,best-practices,seo \
+  --output=json \
+  --output-path=/tmp/lh-mobile.json \
+  --form-factor=mobile \
+  --quiet
+
+# 4. Read scores
+node -e "
+['desktop','mobile'].forEach(d => {
+  const r = require('/tmp/lh-' + d + '.json');
+  const c = r.categories;
+  console.log(d + ': A=' + Math.round(c.accessibility.score*100) +
+    ' BP=' + Math.round(c['best-practices'].score*100) +
+    ' SEO=' + Math.round(c.seo.score*100));
+});
+"
+
+# 5. Stop dev server (required_permissions: ["all"])
+pkill -f "concurrently" && pkill -f "next dev" && pkill -f "tsx watch"
+```
 
 **Required scores (both desktop and mobile):**
 - Accessibility: **100**
