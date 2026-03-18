@@ -29,13 +29,19 @@ test.describe("Journey 1: First Visit", () => {
     const emptyState = page.locator('[role="status"]');
     await expect(emptyState).toBeVisible();
 
-    // Input is visible
+    // Input is visible and auto-focused on desktop with accent focus ring
     const input = page.getByRole("textbox", { name: /new todo/i });
+    const inputCard = input.locator("xpath=..");
     await expect(input).toBeVisible();
+    await expect(input).toBeFocused();
+    await expect(inputCard).toHaveAttribute("style", /color-accent/);
 
     // Type a todo
     await input.fill("Buy coffee");
     await input.press("Enter");
+
+    // Input is disabled during create (which clears the focus ring)
+    await expect(input).toBeDisabled();
 
     // Empty state disappears
     await expect(emptyState).not.toBeVisible();
@@ -47,5 +53,10 @@ test.describe("Journey 1: First Visit", () => {
 
     // Timestamp shows absolute DD/MM/YYYY HH:mm format
     await expect(list.getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/)).toBeVisible();
+
+    // Focus ring reappears after create completes (input re-enabled and refocused)
+    await expect(input).toBeEnabled();
+    await expect(input).toBeFocused();
+    await expect(inputCard).toHaveAttribute("style", /color-accent/);
   });
 });

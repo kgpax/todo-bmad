@@ -114,7 +114,7 @@ So that I can capture tasks effortlessly and see them persisted.
   - [x] 12.1 `npm run lint` — 0 errors
   - [x] 12.2 `npm run build` — production build clean
   - [x] 12.3 `npm run test` — all Jest tests pass (105 total: 17 shared, 37 backend, 51 frontend)
-  - [x] 12.4 `npm run test:e2e` — 7 E2E tests pass (Journey 1, Journey 2, smoke ×2, focus-behaviour ×3)
+  - [x] 12.4 `npm run test:e2e` — 4 E2E tests pass (Journey 1, Journey 2, smoke ×2)
   - [x] 12.5 Lighthouse audit — Desktop & Mobile: Accessibility: 100, Best Practices: 100, SEO: 100
 
 ## Dev Notes
@@ -567,7 +567,7 @@ claude-4.6-sonnet-medium-thinking (2026-03-18)
 - Updated `TodoPage` to use `useTodos` hook, render `TodoInput` as hero element always, show `TodoList` or `EmptyState` conditionally
 - Added `window.matchMedia` mock to `jest.setup.ts` for jsdom compatibility
 - All 51 frontend unit tests pass; 105 total across all packages
-- All 7 Playwright E2E tests pass (Journey 1 First Visit, Journey 2 Quick Capture, 2 smoke tests, 3 focus-behaviour tests)
+- All 4 Playwright E2E tests pass (Journey 1 First Visit, Journey 2 Quick Capture, 2 smoke tests); focus lifecycle assertions consolidated into Journey 1
 - Lighthouse scores: Desktop & Mobile — Accessibility: 100, Best Practices: 100, SEO: 100
 
 ### Deviations from Spec
@@ -586,6 +586,8 @@ The story Dev Notes state "Do NOT modify backend files." A `db:reset` script was
 - 2026-03-18: Code review — corrected test counts (105 total / 51 frontend / 7 E2E) and updated Completion Notes to reflect current state. Removed stale references to formatRelativeTime.
 - 2026-03-18: Code review — added 6 undocumented files to File List (focus-behaviour E2E, lighthouse script, both package.json, project-context.md, README.md). Justified backend db:reset scope exception in Deviations.
 - 2026-03-18: Code review — fixed useTodos setTimeout leak (L2: added ref + useEffect cleanup). All issues resolved. Story status → done.
+- 2026-03-18: Merged focus-behaviour E2E tests into Journey 1 and Journey 2. Added focus ring disappear/reappear assertions to Journey 2. Deleted standalone `e2e/focus-behaviour.test.ts`.
+- 2026-03-18: Consolidated all focus lifecycle assertions (ring visible → disabled during create → ring reappears) into Journey 1. Journey 2 now tests quick-capture ordering only.
 
 ### File List
 
@@ -602,7 +604,6 @@ The story Dev Notes state "Do NOT modify backend files." A `db:reset` script was
 - `packages/frontend/src/components/todo-page.test.tsx`
 - `e2e/journey-1-first-visit.test.ts`
 - `e2e/journey-2-quick-capture.test.ts`
-- `e2e/focus-behaviour.test.ts` (E2E tests for input auto-focus and post-submit focus restoration)
 - `scripts/lighthouse.js` (headless Lighthouse audit script for Definition of Done)
 
 **Modified:**
@@ -610,7 +611,8 @@ The story Dev Notes state "Do NOT modify backend files." A `db:reset` script was
 - `packages/frontend/src/lib/utils.ts` (added formatTimestamp)
 - `packages/frontend/src/components/todo-page.tsx` (integrated useTodos, TodoInput, TodoList)
 - `packages/frontend/jest.setup.ts` (added window.matchMedia mock)
-- `e2e/journey-1-first-visit.test.ts` (updated timestamp assertion to match absolute format)
+- `e2e/journey-1-first-visit.test.ts` (updated timestamp assertion; added auto-focus, focus ring lifecycle, and post-submit focus assertions)
+- `e2e/journey-2-quick-capture.test.ts` (quick-capture ordering only; focus ring assertions moved to Journey 1)
 - `package.json` (added lighthouse devDependency, test:lighthouse and db:reset scripts)
 - `packages/backend/package.json` (added db:reset script — local dev convenience for E2E test isolation; see Deviations)
 - `project-context.md` (added suppressHydrationWarning ban and Lighthouse audit DoD rules)
