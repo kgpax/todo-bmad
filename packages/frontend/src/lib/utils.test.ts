@@ -1,19 +1,25 @@
 import { isDesktopDevice, pickRandom, formatTimestamp } from "./utils";
 
-function setMatchMedia(matches: boolean) {
-  window.matchMedia = jest.fn().mockReturnValue({
-    matches,
-    media: "",
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  });
-}
-
 describe("isDesktopDevice", () => {
+  const originalMatchMedia = window.matchMedia;
+
+  function setMatchMedia(matches: boolean) {
+    window.matchMedia = jest.fn().mockReturnValue({
+      matches,
+      media: "",
+      onchange: null,
+      addListener: jest.fn(),
+      removeListener: jest.fn(),
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(),
+    });
+  }
+
+  afterEach(() => {
+    window.matchMedia = originalMatchMedia;
+  });
+
   it("returns true when primary input is mouse/trackpad", () => {
     setMatchMedia(true);
     expect(isDesktopDevice()).toBe(true);
