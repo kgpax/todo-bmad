@@ -54,51 +54,16 @@ npm run test:e2e  # ← Shell tool with required_permissions: ["all"]
 
 ### Step 5 — Lighthouse Audit *(frontend stories only)*
 
-> ⚠️ **MANDATORY for any story that touches frontend files.** Run headlessly using the Lighthouse CLI via `npx lighthouse` — this launches its own headless Chrome, runs the audit, and exits cleanly with no visible browser window and no lingering processes.
+> ⚠️ **MANDATORY for any story that touches frontend files.**
+> ⚠️ **ALWAYS run outside the sandbox** using `required_permissions: ["all"]` — Lighthouse requires OS-level access to launch a headless Chromium binary.
 
-Start the dev server, run both audits, then stop the dev server:
+The script starts the dev server, runs desktop and mobile audits headlessly (no visible browser window), prints scores, and stops the server automatically:
 
 ```bash
-# 1. Start dev server in background (required_permissions: ["all"])
-npm run dev > /tmp/dev-server.log 2>&1 &
-# Wait until "Ready" appears in the log (poll with: grep -q "Ready" /tmp/dev-server.log)
-
-# 2. Desktop audit (required_permissions: ["all"])
-npx lighthouse http://localhost:3000 \
-  --chrome-flags="--headless --no-sandbox --disable-gpu" \
-  --only-categories=accessibility,best-practices,seo \
-  --output=json \
-  --output-path=/tmp/lh-desktop.json \
-  --form-factor=desktop \
-  --screen-emulation.mobile=false \
-  --screen-emulation.width=1350 \
-  --screen-emulation.height=940 \
-  --screen-emulation.deviceScaleFactor=1 \
-  --quiet
-
-# 3. Mobile audit (required_permissions: ["all"])
-npx lighthouse http://localhost:3000 \
-  --chrome-flags="--headless --no-sandbox --disable-gpu" \
-  --only-categories=accessibility,best-practices,seo \
-  --output=json \
-  --output-path=/tmp/lh-mobile.json \
-  --form-factor=mobile \
-  --quiet
-
-# 4. Read scores
-node -e "
-['desktop','mobile'].forEach(d => {
-  const r = require('/tmp/lh-' + d + '.json');
-  const c = r.categories;
-  console.log(d + ': A=' + Math.round(c.accessibility.score*100) +
-    ' BP=' + Math.round(c['best-practices'].score*100) +
-    ' SEO=' + Math.round(c.seo.score*100));
-});
-"
-
-# 5. Stop dev server (required_permissions: ["all"])
-pkill -f "concurrently" && pkill -f "next dev" && pkill -f "tsx watch"
+npm run test:lighthouse   # ← Shell tool with required_permissions: ["all"]
 ```
+
+The script exits with a non-zero code if any score is below 100, so a clean exit (`Exit code: 0`) confirms all scores passed.
 
 **Required scores (both desktop and mobile):**
 - Accessibility: **100**
@@ -106,3 +71,5 @@ pkill -f "concurrently" && pkill -f "next dev" && pkill -f "tsx watch"
 - SEO: **100**
 
 Scores must remain at 100 unless a drop is technically unavoidable — in which case document the reason and minimum acceptable score in the story's Dev Agent Record.
+
+> **Note:** The Chrome DevTools MCP server is NOT used for Lighthouse audits. The `test:lighthouse` script uses the `lighthouse` npm package directly with a headless Chrome flag.

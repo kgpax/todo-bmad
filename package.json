@@ -13,10 +13,12 @@
     "db:generate": "npm run db:generate -w packages/backend",
     "db:migrate": "npm run db:migrate -w packages/backend",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:lighthouse": "node scripts/lighthouse.js"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
-    "concurrently": "^9.1.2"
+    "concurrently": "^9.1.2",
+    "lighthouse": "^13.0.3"
   }
 }
