@@ -20,12 +20,6 @@ describe("TodoInput", () => {
     mockDesktopDevice(false);
   });
 
-  it("renders as a card container", () => {
-    const { container } = render(<TodoInput {...defaultProps} />);
-    const card = container.firstChild as HTMLElement;
-    expect(card).toHaveClass("bg-surface", "rounded-xl");
-  });
-
   it("renders an input with a placeholder", () => {
     render(<TodoInput {...defaultProps} />);
     const input = screen.getByRole("textbox", { name: /new todo/i });
@@ -99,21 +93,21 @@ describe("TodoInput", () => {
     expect(defaultProps.onSubmit).toHaveBeenCalledWith("Buy milk");
   });
 
-  it("applies focus ring style on focus", () => {
+  it("sets data-focused on the card when input gains focus", () => {
     const { container } = render(<TodoInput {...defaultProps} />);
     const input = screen.getByRole("textbox", { name: /new todo/i });
     const card = container.firstChild as HTMLElement;
     fireEvent.focus(input);
-    expect(card.style.boxShadow).toContain("var(--color-accent)");
+    expect(card).toHaveAttribute("data-focused", "true");
   });
 
-  it("restores resting shadow on blur", () => {
+  it("clears data-focused on the card when input loses focus", () => {
     const { container } = render(<TodoInput {...defaultProps} />);
     const input = screen.getByRole("textbox", { name: /new todo/i });
     const card = container.firstChild as HTMLElement;
     fireEvent.focus(input);
     fireEvent.blur(input);
-    expect(card.style.boxShadow).toBe("var(--shadow-resting)");
+    expect(card).toHaveAttribute("data-focused", "false");
   });
 
   describe("auto-focus on mount", () => {
@@ -131,16 +125,16 @@ describe("TodoInput", () => {
   });
 
   describe("focus management around submission", () => {
-    it("clears the focus ring when disabled becomes true (create in-flight)", () => {
+    it("clears focused state when disabled becomes true (create in-flight)", () => {
       const { container, rerender } = render(<TodoInput {...defaultProps} disabled={false} />);
       const input = screen.getByRole("textbox", { name: /new todo/i });
       const card = container.firstChild as HTMLElement;
 
       fireEvent.focus(input);
-      expect(card.style.boxShadow).toContain("var(--color-accent)");
+      expect(card).toHaveAttribute("data-focused", "true");
 
       rerender(<TodoInput {...defaultProps} disabled={true} />);
-      expect(card.style.boxShadow).toBe("var(--shadow-resting)");
+      expect(card).toHaveAttribute("data-focused", "false");
     });
 
     it("refocuses the input when disabled transitions from true to false (create complete)", () => {

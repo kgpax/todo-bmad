@@ -84,6 +84,7 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
     <div
       className="bg-surface rounded-xl p-4 md:p-5 flex items-center gap-3 transition-shadow"
       style={shadowStyle}
+      data-focused={focused}
     >
       <input
         ref={inputRef}
