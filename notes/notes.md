@@ -164,5 +164,11 @@
   - I asked it to ensure that this critical step is not missed again... let's see how that goes
 - After a couple of frontend stories, I realised that linting was not a part of the DoD, so I added it
   - This picked up on a linting issue related to random messages causing unstable server render/client hydration HTML
+- As we started to implement the frontend journeys which I could manually test, I found a few UX and QoL issues which it hadn't picked up on
+  - E.g., a significant delay after page load before the todo input got focus
+  - E.g., after submitting a todo, the input didn't recieve focus again
+  - I asked it to fix these and to write unit and playwright tests for them
 
-**Conclusion:** This was the most involved I got. Most stories were implemented without problem, but there were some technical issues with module resolution and network permissions within the sandbox which really got the agent stuck
+**Conclusion:** This was the most involved I got. Most stories were implemented without problem, but there were some technical issues with module resolution and network permissions within the sandbox which really got the agent stuck.
+
+For cases where we spot things which are not necessarily linked to the current story, but which we would like done (e.g., updates to testing, new DoD criteria) - I wonder what the best way to insert them is. So far I've been adding them within a story, even though they go beyond the scope of the story. Next time I might ask the scrum master if we should create a new story for these remedial actions and inset it before the next story.

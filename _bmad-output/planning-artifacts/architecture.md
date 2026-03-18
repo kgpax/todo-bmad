@@ -346,15 +346,20 @@ backend/src/routes/
 ├── todos.test.ts
 ```
 
-**E2E tests:** Root-level `e2e/` directory, one file per user journey.
+**E2E tests:** Root-level `e2e/` directory, one file per user journey. Shared helpers and Page Object Models live alongside tests.
 
 ```
 e2e/
+├── helpers.ts                         (shared utilities: deleteAllTodos, seedTodos)
+├── pages/
+│   └── todo-page.ts                   (Page Object Model for the home/todo page)
 ├── journey-1-first-visit.spec.ts
 ├── journey-2-quick-capture.spec.ts
 ├── journey-3-review-tidy.spec.ts
 ├── journey-4-error-recovery.spec.ts
 ```
+
+**Page Object Model (POM) convention:** Tests must use Page Object Models rather than inline locators. Each distinct page or major UI region gets a POM class in `e2e/pages/`. POMs encapsulate locators, actions, and query helpers. Assertions stay in the test files — POMs should not import `expect` or contain assertions. When a test needs to check a visual property (e.g. focus ring presence), the POM exposes a query method returning a value and the test asserts on the result.
 
 **Exports:** Named exports only. No default exports except where Next.js requires them (`page.tsx`, `layout.tsx`).
 

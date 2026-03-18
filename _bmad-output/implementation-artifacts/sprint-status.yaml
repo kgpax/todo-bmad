@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-17
-last_updated: 2026-03-17 # story 1-8 code review done
+last_updated: 2026-03-18 # story 1-9 code review complete
 project: todo-bmad
 project_key: NOKEY
 tracking_system: file-system
@@ -53,7 +53,8 @@ development_status:
   1-6-delete-todo-endpoint: done
   1-7-frontend-foundation-design-system: done
   1-8-empty-state-isr-page: done
-  1-9-todo-creation-list-display: backlog
+  1-9-todo-creation-list-display: done
+  1-10-100-percent-unit-test-coverage: ready-for-dev
   epic-1-retrospective: optional
 
   # Epic 2: Complete Todo Lifecycle

@@ -2,6 +2,9 @@
 
 import type { Todo } from "@todo-bmad/shared";
 import { EmptyState } from "@/components/empty-state";
+import { TodoInput } from "@/components/todo-input";
+import { TodoList } from "@/components/todo-list";
+import { useTodos } from "@/hooks/use-todos";
 
 interface TodoPageProps {
   initialTodos: Todo[];
@@ -9,15 +12,20 @@ interface TodoPageProps {
 }
 
 export function TodoPage({ initialTodos, emptyMessage }: TodoPageProps) {
-  if (initialTodos.length === 0) {
-    return <EmptyState message={emptyMessage} />;
-  }
+  const { todos, addTodo, isCreating, placeholderContext } = useTodos(initialTodos);
 
   return (
-    <ul>
-      {initialTodos.map((todo) => (
-        <li key={todo.id}>{todo.text}</li>
-      ))}
-    </ul>
+    <div className="pt-8 md:pt-12 lg:pt-16 flex flex-col gap-4">
+      <TodoInput
+        onSubmit={addTodo}
+        placeholderContext={placeholderContext}
+        disabled={isCreating}
+      />
+      {todos.length > 0 ? (
+        <TodoList todos={todos} />
+      ) : (
+        <EmptyState message={emptyMessage} />
+      )}
+    </div>
   );
 }

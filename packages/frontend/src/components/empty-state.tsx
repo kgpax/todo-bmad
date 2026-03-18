@@ -14,8 +14,7 @@ export function EmptyState({ message }: EmptyStateProps) {
   return (
     <div
       role="status"
-      className="bg-surface rounded-xl p-6 text-center"
-      style={{ boxShadow: "var(--shadow-resting)" }}
+      className="bg-surface rounded-xl p-6 text-center [box-shadow:var(--shadow-resting)]"
     >
       <p className="text-text-secondary">{message}</p>
     </div>

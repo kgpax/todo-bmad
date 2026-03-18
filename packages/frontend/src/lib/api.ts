@@ -1,6 +1,7 @@
-import type { Todo } from "@todo-bmad/shared";
+import type { Todo, ApiError } from "@todo-bmad/shared";
 
 const API_URL = process.env.API_URL || "http://localhost:3001";
+const CLIENT_API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 export async function fetchTodos(): Promise<Todo[]> {
   try {
@@ -15,4 +16,23 @@ export async function fetchTodos(): Promise<Todo[]> {
   } catch {
     return [];
   }
+}
+
+export async function createTodo(text: string): Promise<Todo> {
+  const response = await fetch(`${CLIENT_API_URL}/api/todos`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ text }),
+  });
+
+  if (!response.ok) {
+    const errorData: ApiError = await response.json().catch(() => ({
+      error: "INTERNAL_ERROR",
+      message: "Failed to create todo",
+    }));
+    throw errorData;
+  }
+
+  const data = await response.json();
+  return data.todo;
 }
