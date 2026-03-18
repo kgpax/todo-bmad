@@ -149,4 +149,42 @@ describe("useTodos", () => {
 
     expect(result.current.todos).toEqual([existingTodo]);
   });
+
+  it("falls back to default error message when error has no message", async () => {
+    mockCreateTodo.mockRejectedValue({});
+    const { result } = renderHook(() => useTodos([]));
+
+    await act(async () => {
+      await result.current.addTodo("Some todo");
+    });
+
+    expect(result.current.createError).toBe("Failed to create todo");
+  });
+
+  it("ignores addTodo when a create is already in flight", async () => {
+    let resolveCreate!: (value: Todo) => void;
+    mockCreateTodo.mockReturnValue(
+      new Promise<Todo>((resolve) => {
+        resolveCreate = resolve;
+      })
+    );
+
+    const { result } = renderHook(() => useTodos([]));
+
+    act(() => {
+      result.current.addTodo("First");
+    });
+
+    expect(result.current.isCreating).toBe(true);
+
+    await act(async () => {
+      await result.current.addTodo("Second while creating");
+    });
+
+    expect(mockCreateTodo).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      resolveCreate(newTodo);
+    });
+  });
 });
