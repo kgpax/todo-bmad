@@ -45,7 +45,7 @@ test.describe("Journey 1: First Visit", () => {
     await expect(list).toBeVisible();
     await expect(list.getByText("Buy coffee")).toBeVisible();
 
-    // Timestamp shows 'just now'
-    await expect(list.getByText("just now")).toBeVisible();
+    // Timestamp shows absolute DD/MM/YYYY HH:mm format
+    await expect(list.getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/)).toBeVisible();
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import type { Todo, ApiError } from "@todo-bmad/shared";
 import { createTodo } from "@/lib/api";
 import { revalidateHome } from "@/lib/actions";
@@ -11,6 +11,13 @@ export function useTodos(initialTodos: Todo[]) {
   const [cachedCreateText, setCachedCreateText] = useState("");
   const [justAdded, setJustAdded] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
+  const justAddedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (justAddedTimerRef.current) clearTimeout(justAddedTimerRef.current);
+    };
+  }, []);
 
   const placeholderContext: "empty" | "hasItems" | "justAdded" = justAdded
     ? "justAdded"
@@ -31,7 +38,8 @@ export function useTodos(initialTodos: Todo[]) {
       setTodos((prev) => [newTodo, ...prev]);
       setCachedCreateText("");
       setJustAdded(true);
-      setTimeout(() => setJustAdded(false), 4000);
+      if (justAddedTimerRef.current) clearTimeout(justAddedTimerRef.current);
+      justAddedTimerRef.current = setTimeout(() => setJustAdded(false), 4000);
       await revalidateHome();
     } catch (err) {
       const apiError = err as ApiError;
