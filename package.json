@@ -12,7 +12,7 @@
     "test:shared": "jest --config packages/shared/jest.config.js --no-watchman",
     "db:generate": "npm run db:generate -w packages/backend",
     "db:migrate": "npm run db:migrate -w packages/backend",
-    "db:reset": "npm run db:reset -w packages/backend",
+    "db:reset": "node scripts/db-reset.js",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:lighthouse": "node scripts/lighthouse.js"
