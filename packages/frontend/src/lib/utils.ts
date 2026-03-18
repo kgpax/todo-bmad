@@ -12,6 +12,15 @@ export function pickRandom<T>(items: readonly T[]): T {
   return items[Math.floor(Math.random() * items.length)];
 }
 
+/**
+ * Returns true when the primary input device is a mouse or trackpad,
+ * indicating a desktop-class device where auto-focusing an input won't
+ * trigger an on-screen keyboard.
+ */
+export function isDesktopDevice(): boolean {
+  return window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+}
+
 export function formatTimestamp(dateString: string): string {
   const date = new Date(dateString);
   const dd = String(date.getDate()).padStart(2, "0");

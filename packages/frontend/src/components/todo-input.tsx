@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useLayoutEffect, useRef } from "react";
-import { pickRandom } from "@/lib/utils";
+import { pickRandom, isDesktopDevice } from "@/lib/utils";
 import {
   EMPTY_LIST_PLACEHOLDERS,
   HAS_ITEMS_PLACEHOLDERS,
@@ -36,7 +36,7 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
   // useLayoutEffect fires synchronously before the browser paints, so the
   // input is focused before the user ever sees the hydrated state — no delay.
   useLayoutEffect(() => {
-    if (window.matchMedia("(min-width: 1024px)").matches) {
+    if (isDesktopDevice()) {
       inputRef.current?.focus();
     }
   }, []);

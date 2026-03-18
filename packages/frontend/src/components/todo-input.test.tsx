@@ -1,19 +1,12 @@
 import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { TodoInput } from "./todo-input";
+import * as utils from "@/lib/utils";
 
-// Utility: override the global matchMedia mock for one test
-function setMatchMedia(matches: boolean) {
-  window.matchMedia = jest.fn().mockReturnValue({
-    matches,
-    media: "",
-    onchange: null,
-    addListener: jest.fn(),
-    removeListener: jest.fn(),
-    addEventListener: jest.fn(),
-    removeEventListener: jest.fn(),
-    dispatchEvent: jest.fn(),
-  });
+jest.spyOn(utils, "isDesktopDevice");
+
+function mockDesktopDevice(isDesktop: boolean) {
+  (utils.isDesktopDevice as jest.Mock).mockReturnValue(isDesktop);
 }
 
 describe("TodoInput", () => {
@@ -24,8 +17,7 @@ describe("TodoInput", () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // Default: mobile viewport (no auto-focus)
-    setMatchMedia(false);
+    mockDesktopDevice(false);
   });
 
   it("renders as a card container", () => {
@@ -125,14 +117,14 @@ describe("TodoInput", () => {
   });
 
   describe("auto-focus on mount", () => {
-    it("focuses the input on mount when on desktop (matchMedia matches)", () => {
-      setMatchMedia(true);
+    it("focuses the input on mount when on a desktop device", () => {
+      mockDesktopDevice(true);
       render(<TodoInput {...defaultProps} />);
       expect(screen.getByRole("textbox", { name: /new todo/i })).toHaveFocus();
     });
 
-    it("does not focus the input on mount when on mobile (matchMedia does not match)", () => {
-      setMatchMedia(false);
+    it("does not focus the input on mount when on a touch device", () => {
+      mockDesktopDevice(false);
       render(<TodoInput {...defaultProps} />);
       expect(screen.getByRole("textbox", { name: /new todo/i })).not.toHaveFocus();
     });
@@ -163,8 +155,7 @@ describe("TodoInput", () => {
     });
 
     it("does not auto-focus on initial mount when disabled starts as false (no prior disabled state)", () => {
-      // wasDisabledRef starts false, so the else-if branch does not fire on mount
-      setMatchMedia(false);
+      mockDesktopDevice(false);
       render(<TodoInput {...defaultProps} disabled={false} />);
       expect(screen.getByRole("textbox", { name: /new todo/i })).not.toHaveFocus();
     });
