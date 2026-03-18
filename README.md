@@ -12,4 +12,23 @@ In addition to the source code and the bmad files, in following folders you will
 
 ## Running the app
 
-TBC
+To run locally:
+
+```bash
+npm run dev
+```
+
+## Testing the app
+
+Unit tests:
+
+```bash
+npm run test
+```
+
+E2E tests:
+
+```bash
+npm run test:e2e    # run in terminal
+npm run test:e2e:ui # open playwright ui
+```
