@@ -1,5 +1,5 @@
 import type { Todo } from "@todo-bmad/shared";
-import { formatRelativeTime } from "@/lib/utils";
+import { formatTimestamp } from "@/lib/utils";
 
 interface TodoItemProps {
   todo: Todo;
@@ -21,7 +21,7 @@ export function TodoItem({ todo }: TodoItemProps) {
     >
       <p className="text-text-primary">{todo.text}</p>
       <p className="text-text-secondary text-sm mt-1 text-right">
-        {formatRelativeTime(todo.createdAt)}
+        {formatTimestamp(todo.createdAt)}
       </p>
     </div>
   );

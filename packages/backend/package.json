@@ -8,7 +8,8 @@
     "start": "node dist/index.js",
     "test": "jest --no-watchman",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:reset": "node -e \"const fs=require('fs');['data/todos.db','data/todos.db-shm','data/todos.db-wal'].forEach(f=>{try{fs.unlinkSync(f);console.log('Deleted '+f);}catch(e){if(e.code!=='ENOENT')throw e;}});console.log('DB reset. Schema will be re-applied on next server start.')\""
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",

@@ -570,9 +570,17 @@ claude-4.6-sonnet-medium-thinking (2026-03-18)
 - All 4 Playwright E2E tests pass (Journey 1 First Visit, Journey 2 Quick Capture, 2 smoke tests)
 - Lighthouse scores: Desktop & Mobile — Accessibility: 100, Best Practices: 100, SEO: 100
 
+### Deviations from Spec
+
+**AC6 — timestamp format (post-review change):**
+AC6 specifies a relative timestamp ("just now"). This was initially implemented as `formatRelativeTime()` producing values like "just now", "5m ago", etc. However, because the page uses ISR, the server-rendered timestamp is frozen at cache-write time and never updates — displaying "just now" for a todo that is hours old.
+
+Rather than using `suppressHydrationWarning` (which is forbidden per `project-context.md` as it masks root causes), the timestamp was changed to an absolute `DD/MM/YYYY HH:mm` format via a new `formatTimestamp()` utility. This value is stable: the server and client render the same string for a given `createdAt`, so there is no hydration mismatch and no stale display. A future story may revisit live-updating relative timestamps using a client-only interval component once the ISR strategy is refined.
+
 ### Change Log
 
 - 2026-03-18: Implemented Story 1.9 — Todo Creation & List Display. Added 11 new files, modified 4 existing files. Core user interaction loop established: TodoInput → useTodos hook → API → TodoItem/TodoList display.
+- 2026-03-18: Post-review — replaced relative timestamp with absolute `DD/MM/YYYY HH:mm` format to fix stale ISR timestamps without using `suppressHydrationWarning`. Renamed `formatRelativeTime` → `formatTimestamp` in utils.
 
 ### File List
 

@@ -22,16 +22,9 @@ describe("TodoItem", () => {
     expect(screen.getByText("Buy groceries")).toBeInTheDocument();
   });
 
-  it("displays a relative timestamp", () => {
+  it("displays a formatted timestamp in DD/MM/YYYY HH:mm format", () => {
     render(<TodoItem todo={mockTodo} />);
-    expect(screen.getByText("just now")).toBeInTheDocument();
-  });
-
-  it("displays 'Xm ago' for a todo created minutes ago", () => {
-    const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
-    const todo: Todo = { ...mockTodo, createdAt: fiveMinutesAgo };
-    render(<TodoItem todo={todo} />);
-    expect(screen.getByText("5m ago")).toBeInTheDocument();
+    expect(screen.getByText(/^\d{2}\/\d{2}\/\d{4} \d{2}:\d{2}$/)).toBeInTheDocument();
   });
 
   it("applies resting shadow via inline style", () => {

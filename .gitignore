@@ -18,9 +18,6 @@ out/
 # Build output
 dist/
 
-# Test coverage
-coverage/
-
 # Playwright
 test-results/
 playwright-report/

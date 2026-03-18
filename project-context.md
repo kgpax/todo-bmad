@@ -1,5 +1,15 @@
 # Project Context — todo-bmad
 
+## Code Quality Rules
+
+### Never use `suppressHydrationWarning`
+
+`suppressHydrationWarning` is forbidden. Its presence is always a code smell — it silences a symptom rather than fixing the root cause (server/client rendering mismatch). If you find yourself reaching for it:
+
+- For **timestamps or other time-dependent values**: use a static format (e.g. `DD/MM/YYYY HH:mm`) that is identical on server and client, rather than a relative format that drifts after the ISR cache is written.
+- For **user-generated or locale-specific content**: ensure the server and client render the same value, or defer the dynamic portion to a client-only effect after hydration with an explicit loading/placeholder state.
+- If a genuine mismatch is unavoidable, document it explicitly and use a client-only component that renders `null` on the server and populates after mount — never suppress the warning.
+
 ## Git Branching Convention
 
 ### ⚠️ CRITICAL — Create Feature Branch BEFORE Writing Any Code
@@ -38,29 +48,11 @@ npm run lint   # ESLint passes with 0 errors (frontend)
 npm run build  # production build completes without TypeScript or compilation errors
 ```
 
-### Step 3 — Unit Tests & Coverage
+### Step 3 — Unit Tests
 
 ```bash
 npm run test   # all Jest unit/integration tests pass across all packages
 ```
-
-Coverage is collected automatically on every test run (configured in each package's `jest.config.js`). The build **fails** if any package drops below the required threshold:
-
-| Metric | Required |
-|--------|----------|
-| Statements | ≥ 80% |
-| Branches | ≥ 80% |
-| Functions | ≥ 80% |
-| Lines | ≥ 80% |
-
-**Coverage rules:**
-- Every story that adds or modifies source files must maintain ≥ 80% coverage — do not defer coverage gaps to a later story.
-- Write unit tests alongside each task, not as a batch at the end.
-- The following files are excluded from coverage measurement as they are untestable in Jest (Next.js internals / entry points):
-  - `src/lib/actions.ts` (Next.js Server Action wrapper)
-  - `src/app/layout.tsx`, `src/app/page.tsx` (Next.js page/layout entry points)
-  - `src/index.ts` (server/package entry points)
-  - `src/db/client.ts` (database connection module)
 
 ### Step 4 — E2E Tests
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { pickRandom } from "@/lib/utils";
 import {
   EMPTY_LIST_PLACEHOLDERS,
@@ -27,16 +27,33 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
   const [placeholder, setPlaceholder] = useState("");
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const wasDisabledRef = useRef(false);
 
   useEffect(() => {
     setPlaceholder(pickRandom(getPlaceholderBank(placeholderContext)));
   }, [placeholderContext]);
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.matchMedia("(min-width: 1024px)").matches) {
+  // useLayoutEffect fires synchronously before the browser paints, so the
+  // input is focused before the user ever sees the hydrated state — no delay.
+  useLayoutEffect(() => {
+    if (window.matchMedia("(min-width: 1024px)").matches) {
       inputRef.current?.focus();
     }
   }, []);
+
+  // When disabled becomes true (create in-flight), onBlur may not fire
+  // reliably for a programmatically disabled element, leaving a stale focus
+  // ring. Clear it explicitly. When disabled clears (create done), restore
+  // focus so the user can immediately type their next todo.
+  useEffect(() => {
+    if (disabled) {
+      setFocused(false);
+      wasDisabledRef.current = true;
+    } else if (wasDisabledRef.current) {
+      inputRef.current?.focus();
+      wasDisabledRef.current = false;
+    }
+  }, [disabled]);
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
     if (e.key === "Enter") {
