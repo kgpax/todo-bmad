@@ -1,6 +1,6 @@
 # Story 1.10: 100% Unit Test Coverage
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -91,63 +91,63 @@ Run `npm run test` with coverage enabled as the very first action to confirm the
 
 ## Tasks / Subtasks
 
-- [ ] Task 1 — Enable coverage collection and establish baseline (AC: 2)
-  - [ ] Add `collectCoverage: true`, `collectCoverageFrom`, `coverageDirectory: "coverage"`, `coverageReporters: ["text", "lcov"]` to `packages/shared/jest.config.js` (no threshold yet)
-  - [ ] Add the same to `packages/backend/jest.config.js`, excluding `src/index.ts` and `src/db/client.ts`
-  - [ ] Add the same to `packages/frontend/jest.config.js`, excluding `src/app/layout.tsx`, `src/app/page.tsx`, and `src/lib/actions.ts`
-  - [ ] Add `coverage/` to `.gitignore`
-  - [ ] Run `npm run test` from the repo root and record the baseline percentage for each package
-  - [ ] Confirm the known gaps above are present (or update this story if the baseline differs)
+- [x] Task 1 — Enable coverage collection and establish baseline (AC: 2)
+  - [x] Add `collectCoverage: true`, `collectCoverageFrom`, `coverageDirectory: "coverage"`, `coverageReporters: ["text", "lcov"]` to `packages/shared/jest.config.js` (no threshold yet)
+  - [x] Add the same to `packages/backend/jest.config.js`, excluding `src/index.ts` and `src/db/client.ts`
+  - [x] Add the same to `packages/frontend/jest.config.js`, excluding `src/app/layout.tsx`, `src/app/page.tsx`, and `src/lib/actions.ts`
+  - [x] Add `coverage/` to `.gitignore`
+  - [x] Run `npm run test` from the repo root and record the baseline percentage for each package
+  - [x] Confirm the known gaps above are present (or update this story if the baseline differs)
 
-- [ ] Task 2 — Create `packages/frontend/src/lib/utils.test.ts` (AC: 1, 3)
-  - [ ] Test `cn`: merges class names, deduplicates conflicting Tailwind classes, handles conditional/falsy classes
-  - [ ] Test `pickRandom`: returns an item from the array, throws on empty array
-  - [ ] Test `formatTimestamp`: formats as `DD/MM/YYYY HH:mm`, zero-pads single-digit values, output matches pattern regex
-  - [ ] Confirm `utils.ts` reaches 100% in all metrics
+- [x] Task 2 — Create `packages/frontend/src/lib/utils.test.ts` (AC: 1, 3)
+  - [x] Test `cn`: merges class names, deduplicates conflicting Tailwind classes, handles conditional/falsy classes
+  - [x] Test `pickRandom`: returns an item from the array, throws on empty array
+  - [x] Test `formatTimestamp`: formats as `DD/MM/YYYY HH:mm`, zero-pads single-digit values, output matches pattern regex
+  - [x] Confirm `utils.ts` reaches 100% in all metrics
 
-- [ ] Task 3 — Create `packages/frontend/src/lib/api.test.ts` (AC: 1, 4, 6)
-  - [ ] Test `fetchTodos` success: returns the todos array
-  - [ ] Test `fetchTodos` non-ok response: returns `[]`
-  - [ ] Test `fetchTodos` network error (fetch throws): returns `[]`
-  - [ ] Test `fetchTodos` when `data.todos` is not an array: returns `[]`
-  - [ ] Test `fetchTodos` when `data` itself is `null` (the `data?.todos` null branch): returns `[]`
-  - [ ] Test `createTodo` success: returns the new todo
-  - [ ] Test `createTodo` non-ok response with valid JSON error: throws the parsed `ApiError`
-  - [ ] Test `createTodo` non-ok response with invalid JSON: throws fallback `ApiError`
-  - [ ] Confirm `api.ts` reaches 100% in all metrics
+- [x] Task 3 — Create `packages/frontend/src/lib/api.test.ts` (AC: 1, 4, 6)
+  - [x] Test `fetchTodos` success: returns the todos array
+  - [x] Test `fetchTodos` non-ok response: returns `[]`
+  - [x] Test `fetchTodos` network error (fetch throws): returns `[]`
+  - [x] Test `fetchTodos` when `data.todos` is not an array: returns `[]`
+  - [x] Test `fetchTodos` when `data` itself is `null` (the `data?.todos` null branch): returns `[]`
+  - [x] Test `createTodo` success: returns the new todo
+  - [x] Test `createTodo` non-ok response with valid JSON error: throws the parsed `ApiError`
+  - [x] Test `createTodo` non-ok response with invalid JSON: throws fallback `ApiError`
+  - [x] Confirm `api.ts` reaches 100% in all metrics
 
-- [ ] Task 4 — Backend: cover `throw err` re-throw paths (AC: 1, 5)
-  - [ ] In `src/routes/todos.test.ts`, add test for POST that mocks `createTodoSchema.parse` to throw `new Error('unexpected')` and asserts status 500
-  - [ ] Add the same for PATCH mocking `updateTodoSchema.parse`, assert status 500
-  - [ ] Confirm `todos.ts` reaches 100% statements and lines
+- [x] Task 4 — Backend: cover `throw err` re-throw paths (AC: 1, 5)
+  - [x] In `src/routes/todos.test.ts`, add test for POST that mocks `createTodoSchema.parse` to throw `new Error('unexpected')` and asserts status 500
+  - [x] Add the same for PATCH mocking `updateTodoSchema.parse`, assert status 500
+  - [x] Confirm `todos.ts` reaches 100% statements and lines
 
-- [ ] Task 5 — Frontend: cover `use-todos.ts` null catch branch (AC: 1, 7)
-  - [ ] In `src/hooks/use-todos.test.ts`, add test: `addTodo` sets `createError` to `"Failed to create todo"` when `createTodo` rejects with `null`
-  - [ ] Confirm `use-todos.ts` branches reach 100%
+- [x] Task 5 — Frontend: cover `use-todos.ts` null catch branch (AC: 1, 7)
+  - [x] In `src/hooks/use-todos.test.ts`, add test: `addTodo` sets `createError` to `"Failed to create todo"` when `createTodo` rejects with `null`
+  - [x] Confirm `use-todos.ts` branches reach 100%
 
-- [ ] Task 6 — Frontend: annotate unreachable ref null branches in `todo-input.tsx` (AC: 1, 8)
-  - [ ] Add `/* istanbul ignore next -- inputRef.current is always attached for a mounted component */` above line 40 (`inputRef.current?.focus()` in `useLayoutEffect`)
-  - [ ] Add the same above line 53 (`inputRef.current?.focus()` in the disabled `useEffect`)
-  - [ ] Add the same above line 67 (`inputRef.current?.blur()` in `handleKeyDown`)
-  - [ ] Confirm `todo-input.tsx` branches reach 100%
+- [x] Task 6 — Frontend: annotate unreachable ref null branches in `todo-input.tsx` (AC: 1, 8)
+  - [x] Add `/* istanbul ignore next -- inputRef.current is always attached for a mounted component */` above line 40 (`inputRef.current?.focus()` in `useLayoutEffect`)
+  - [x] Add the same above line 53 (`inputRef.current?.focus()` in the disabled `useEffect`)
+  - [x] Add the same above line 67 (`inputRef.current?.blur()` in `handleKeyDown`)
+  - [x] Confirm `todo-input.tsx` branches reach 100%
 
-- [ ] Task 7 — Set all thresholds to 100% and confirm full suite (AC: 1, 9)
-  - [ ] Update `packages/shared/jest.config.js`: add `coverageThreshold` with all four metrics at `100`
-  - [ ] Update `packages/backend/jest.config.js`: add `coverageThreshold` with all four metrics at `100`
-  - [ ] Update `packages/frontend/jest.config.js`: add `coverageThreshold` with all four metrics at `100`
-  - [ ] Run `npm run test` from repo root and confirm all three packages exit with code 0 showing 100%
+- [x] Task 7 — Set all thresholds to 100% and confirm full suite (AC: 1, 9)
+  - [x] Update `packages/shared/jest.config.js`: add `coverageThreshold` with all four metrics at `100`
+  - [x] Update `packages/backend/jest.config.js`: add `coverageThreshold` with all four metrics at `100`
+  - [x] Update `packages/frontend/jest.config.js`: add `coverageThreshold` with all four metrics at `100`
+  - [x] Run `npm run test` from repo root and confirm all three packages exit with code 0 showing 100%
 
-- [ ] Task 8 — Update `project-context.md` DoD to make 100% coverage a permanent gate (AC: 10)
-  - [ ] Update Step 3 heading to "Unit Tests & Coverage"
-  - [ ] Add explicit rule: **no story may be marked `review` unless all packages report 100% across all four metrics**
-  - [ ] Add the coverage threshold table (100% for statements, branches, functions, lines)
-  - [ ] Add the file exclusion list (`src/lib/actions.ts`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/index.ts`, `src/db/client.ts`)
-  - [ ] Add the "Istanbul ignore pattern" approved usage section (see Dev Notes below)
-  - [ ] Add rule: coverage gaps must be closed in the **same story** that introduces the gap — never deferred
+- [x] Task 8 — Update `project-context.md` DoD to make 100% coverage a permanent gate (AC: 10)
+  - [x] Update Step 3 heading to "Unit Tests & Coverage"
+  - [x] Add explicit rule: **no story may be marked `review` unless all packages report 100% across all four metrics**
+  - [x] Add the coverage threshold table (100% for statements, branches, functions, lines)
+  - [x] Add the file exclusion list (`src/lib/actions.ts`, `src/app/layout.tsx`, `src/app/page.tsx`, `src/index.ts`, `src/db/client.ts`)
+  - [x] Add the "Istanbul ignore pattern" approved usage section (see Dev Notes below)
+  - [x] Add rule: coverage gaps must be closed in the **same story** that introduces the gap — never deferred
 
-- [ ] Task 9 — Commit
-  - [ ] `git add` all changes
-  - [ ] Commit: `test: enable 100% coverage threshold and close all gaps`
+- [x] Task 9 — Commit
+  - [x] `git add` all changes
+  - [x] Commit: `test: enable 100% coverage threshold and close all gaps`
 
 ## Dev Notes
 
@@ -270,12 +270,45 @@ No production logic changes. No new runtime dependencies.
 
 ### Agent Model Used
 
-_to be filled in by dev agent_
+claude-4.6-sonnet-medium-thinking
 
 ### Debug Log References
 
+None — implementation proceeded cleanly without errors.
+
 ### Completion Notes List
+
+- Baseline coverage confirmed: shared 100%, backend 97.29% (lines 30, 62 in todos.ts), frontend 84.73% (api.ts uncovered, utils.ts missing cn, use-todos.ts missing null branch, todo-input.tsx ref optional-chain branches)
+- utils.test.ts already existed from story 1-9 with isDesktopDevice/pickRandom/formatTimestamp tests; added cn tests and additional formatTimestamp zero-padding tests
+- api.test.ts created as new file with 8 tests covering all fetchTodos and createTodo paths including null data body branch
+- Backend re-throw tests used jest.spyOn on shared schema parse methods; confirmed spying on module singleton works correctly
+- use-todos.test.ts received 2 new tests: null error catch branch AND clearTimeout branch (when second addTodo fires while justAdded timer is running)
+- todo-input.tsx received 3 istanbul ignore next annotations for structurally unreachable ref null branches
+- All three packages pass with 100% statements, branches, functions, and lines with enforced coverageThreshold
+- project-context.md Step 3 updated to "Unit Tests & Coverage" with threshold table, exclusion list, istanbul ignore pattern, and "no story may be marked review" gate
 
 ### Change Log
 
+- Added coverage configuration and 100% thresholds to all three jest.config.js files (2026-03-18)
+- Added coverage/ to .gitignore (2026-03-18)
+- Added cn tests and formatTimestamp zero-padding tests to utils.test.ts (2026-03-18)
+- Created api.test.ts with full fetchTodos and createTodo coverage (2026-03-18)
+- Added non-ZodError re-throw tests to backend todos.test.ts (2026-03-18)
+- Added null catch and clearTimeout branch tests to use-todos.test.ts (2026-03-18)
+- Added istanbul ignore annotations to todo-input.tsx unreachable ref branches (2026-03-18)
+- Updated project-context.md DoD Step 3 to enforce 100% coverage as permanent gate (2026-03-18)
+
 ### File List
+
+- packages/shared/jest.config.js
+- packages/backend/jest.config.js
+- packages/backend/src/routes/todos.test.ts
+- packages/frontend/jest.config.js
+- packages/frontend/src/lib/utils.test.ts
+- packages/frontend/src/lib/api.test.ts
+- packages/frontend/src/hooks/use-todos.test.ts
+- packages/frontend/src/components/todo-input.tsx
+- project-context.md
+- .gitignore
+- _bmad-output/implementation-artifacts/1-10-100-percent-unit-test-coverage.md
+- _bmad-output/implementation-artifacts/sprint-status.yaml

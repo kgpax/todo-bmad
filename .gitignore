@@ -22,5 +22,8 @@ dist/
 test-results/
 playwright-report/
 
+# Coverage
+coverage/
+
 # OS
 .DS_Store

@@ -8,6 +8,23 @@ const config = {
   },
   setupFilesAfterEnv: ["<rootDir>/jest.setup.ts"],
   verbose: true,
+  collectCoverage: true,
+  collectCoverageFrom: [
+    "src/**/*.{ts,tsx}",
+    "!src/lib/actions.ts",
+    "!src/app/layout.tsx",
+    "!src/app/page.tsx",
+  ],
+  coverageDirectory: "coverage",
+  coverageReporters: ["text", "lcov"],
+  coverageThreshold: {
+    global: {
+      statements: 100,
+      branches: 100,
+      functions: 100,
+      lines: 100,
+    },
+  },
 };
 
 module.exports = config;

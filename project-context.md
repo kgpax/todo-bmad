@@ -52,11 +52,43 @@ npm run lint   # ESLint passes with 0 errors (frontend)
 npm run build  # production build completes without TypeScript or compilation errors
 ```
 
-### Step 3 — Unit Tests
+### Step 3 — Unit Tests & Coverage
 
 ```bash
 npm run test   # all Jest unit/integration tests pass across all packages
 ```
+
+**⚠️ 100% coverage is a mandatory gate — no story may be marked `review` unless all packages report 100% across all four metrics.**
+
+Every `npm run test` run collects coverage and **fails with a non-zero exit code** if any package drops below 100%. This is enforced by `coverageThreshold` in each `jest.config.js` — coverage numbers are not advisory.
+
+**Required thresholds (all packages):**
+
+| Metric     | Threshold |
+|------------|-----------|
+| Statements | 100%      |
+| Branches   | 100%      |
+| Functions  | 100%      |
+| Lines      | 100%      |
+
+**Excluded files (not measured):**
+
+- `packages/frontend/src/lib/actions.ts` — Next.js Server Action (not unit-testable)
+- `packages/frontend/src/app/layout.tsx` — Next.js layout entry point
+- `packages/frontend/src/app/page.tsx` — Next.js page entry point
+- `packages/backend/src/index.ts` — server entry point
+- `packages/backend/src/db/client.ts` — DB connection entry point
+- `packages/shared/src/index.ts` — package entry point
+
+**Approved `/* istanbul ignore next */` usage:**
+
+`/* istanbul ignore next */` is permitted **only** for code paths that are structurally unreachable during a correctly mounted component's lifecycle, and **must** include an explanatory comment. Current approved usages:
+
+- `todo-input.tsx`: `inputRef.current?.focus()` and `inputRef.current?.blur()` — `inputRef.current` is always attached for a mounted component; the null branch is unreachable without adversarial test gymnastics.
+
+Do **not** use `/* istanbul ignore next */` to silence branches that are merely inconvenient to test. If a branch is reachable but hard to exercise, write the test.
+
+**Coverage gap rule:** Coverage gaps must be closed in the **same story** that introduces the code — never deferred to a later story.
 
 ### Step 4 — E2E Tests
 
