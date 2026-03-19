@@ -1,6 +1,6 @@
 # Story 2.6: Root production start & Lighthouse performance gates
 
-Status: backlog
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -28,20 +28,20 @@ So that local verification matches how users experience the app and CI can enfor
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Root `start` script (AC: #1, #2)
-  - [ ] 1.1 Add root `package.json` script mirroring `dev`: run `start` in `packages/backend` and `packages/frontend` via `concurrently` (same style as existing `dev` line).
-  - [ ] 1.2 Verify after `npm run build` that todos load and mutations work against default ports.
-  - [ ] 1.3 Document the build-then-start sequence in README (and adjust project-context DoD if it references only dev for Lighthouse).
+- [x] Task 1: Root `start` script (AC: #1, #2)
+  - [x] 1.1 Add root `package.json` script mirroring `dev`: run `start` in `packages/backend` and `packages/frontend` via `concurrently` (same style as existing `dev` line).
+  - [x] 1.2 Verify after `npm run build` that todos load and mutations work against default ports.
+  - [x] 1.3 Document the build-then-start sequence in README (and adjust project-context DoD if it references only dev for Lighthouse).
 
-- [ ] Task 2: Lighthouse uses production stack + performance category (AC: #3, #4, #5, #6)
-  - [ ] 2.1 When the script owns the server lifecycle: run root `npm run build` (blocking, inherit stdio so failures surface), then change startup from `npm run dev` to `npm run start`; extend cleanup to terminate production processes (e.g. `next start`, backend `node dist/...`) in addition to or instead of dev-only `pkill` patterns — avoid overly broad kills.
-  - [ ] 2.2 Add `performance` to audited categories and to score parsing / console output.
-  - [ ] 2.3 Run `npm run test:lighthouse` locally (with full permissions / headless Chrome as today) — build is expected to run inside that flow — aim for a **performance** threshold of **100**; if that is not realistically achievable, adjust the constant(s) during this story and record baseline scores plus rationale in the Dev Agent Record.
-  - [ ] 2.4 Keep accessibility / best-practices / SEO at required 100 unless review explicitly lowers them.
+- [x] Task 2: Lighthouse uses production stack + performance category (AC: #3, #4, #5, #6)
+  - [x] 2.1 When the script owns the server lifecycle: run root `npm run build` (blocking, inherit stdio so failures surface), then change startup from `npm run dev` to `npm run start`; extend cleanup to terminate production processes (e.g. `next start`, backend `node dist/...`) in addition to or instead of dev-only `pkill` patterns — avoid overly broad kills.
+  - [x] 2.2 Add `performance` to audited categories and to score parsing / console output.
+  - [x] 2.3 Run `npm run test:lighthouse` locally (with full permissions / headless Chrome as today) — build is expected to run inside that flow — aim for a **performance** threshold of **100**; if that is not realistically achievable, adjust the constant(s) during this story and record baseline scores plus rationale in the Dev Agent Record.
+  - [x] 2.4 Keep accessibility / best-practices / SEO at required 100 unless review explicitly lowers them.
 
-- [ ] Task 3: Definition of Done alignment (AC: #7)
-  - [ ] 3.1 Update any story DoD bullets that still say Lighthouse runs only against dev or omit performance.
-  - [ ] 3.2 Run full existing checks: `npm run lint`, `npm run build`, `npm run test`, `npm run test:e2e`, `npm run test:lighthouse`.
+- [x] Task 3: Definition of Done alignment (AC: #7)
+  - [x] 3.1 Update any story DoD bullets that still say Lighthouse runs only against dev or omit performance.
+  - [x] 3.2 Run full existing checks: `npm run lint`, `npm run build`, `npm run test`, `npm run test:e2e`, `npm run test:lighthouse`.
 
 ## Dev Notes
 
@@ -73,10 +73,31 @@ So that local verification matches how users experience the app and CI can enfor
 
 ### Agent Model Used
 
-{{agent_model_name_version}}
+claude-4.6-sonnet-medium-thinking
 
 ### Debug Log References
 
+- Investigated desktop Lighthouse performance score: LCP consistently ~1.7s (score 93–94) across multiple runs on warmed and cold servers. Confirmed the cause is the dynamic route (`ƒ /`) blocking on the API fetch before sending HTML — server-side rendering waits for `fetchTodos()` before any HTML is streamed. This is not environment noise; it's an architectural characteristic.
+- Mobile scores 100 consistently despite identical architecture because the Lighthouse mobile scoring curve's LCP "Good" threshold is 4s (vs ~1.2s for desktop). At 1.7s, mobile scores perfect while desktop scores ~75 for the LCP metric.
+- Tested warmup request (one pre-audit page load to heat up the Next.js route handler and DB connection) — desktop score remained 93 on a warmed server, confirming the bottleneck is real rendering latency, not cold-start noise.
+- Discovered intermittent Playwright E2E failure root cause: Cursor sets `PLAYWRIGHT_BROWSERS_PATH` to a project-scoped temp dir under macOS's `/var/folders/.../T/cursor-sandbox-cache/`. This dir is cleared on system restart. Fix: run `npx playwright install chromium` (with `required_permissions: ["all"]`) once after each reboot.
+
 ### Completion Notes List
 
+- Added `"start"` to root `package.json` scripts — mirrors `dev` pattern using `concurrently` to run `npm run start -w packages/backend` and `npm run start -w packages/frontend`. Both workspace packages already had `start` scripts (`node dist/index.js` and `next start` respectively).
+- Rewrote `scripts/lighthouse.js`: builds the production artifacts first (`npm run build`, blocking with stdio inherited), starts the production stack (`npm run start`) instead of dev server, waits for port 3000, runs a warmup page load to equalise cold-start cost across Desktop/Mobile audits, then runs audits and kills production processes cleanly (`pkill -f 'next start'`, `pkill -f 'node dist/index.js'`).
+- Added `performance` as the first entry in `CATEGORIES` alongside `accessibility`, `best-practices`, `seo`. Score parsing, console output, and pass/fail logic all updated.
+- Performance floor set to `REQUIRED_PERFORMANCE_SCORE = 90` (observed desktop 93–94, mobile 100). Root cause documented in code comment: dynamic route requires React Suspense streaming to reach desktop 100, which is appropriately scoped to Story 3-1.
+- Updated `project-context.md` DoD Lighthouse section: now reflects production stack, includes performance in required scores, and documents the Playwright browser reinstall behaviour.
+- Updated `README.md`: added production mode section explaining `npm run build` + `npm run start` with note that `start` does not rebuild, and updated Lighthouse description to note it runs a fresh build targeting the production stack.
+
 ### File List
+
+- `package.json` — added `"start"` script; pinned `@playwright/test` to exact version `1.58.2` (removed `^`)
+- `scripts/lighthouse.js` — full rewrite: production build → production start → warmup → audit → clean stop; added `performance` category; set `REQUIRED_PERFORMANCE_SCORE = 90` with rationale comment; added `warmUpServer` helper
+- `README.md` — added Production mode section; updated Lighthouse test description
+- `project-context.md` — updated Step 5 (Lighthouse) to reflect production stack + performance scores + Playwright browser reinstall note; updated Step 4 (E2E) with Playwright reinstall guidance
+
+### Change Log
+
+- 2026-03-19: Implemented Story 2.6 — root `start` script, Lighthouse production stack with performance gate (floor 90 desktop/100 mobile), README and project-context.md updated
