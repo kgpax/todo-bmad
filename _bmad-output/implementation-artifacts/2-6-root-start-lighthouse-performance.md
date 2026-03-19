@@ -1,6 +1,6 @@
 # Story 2.6: Root production start & Lighthouse performance gates
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -82,6 +82,10 @@ claude-4.6-sonnet-medium-thinking
 - Tested warmup request (one pre-audit page load to heat up the Next.js route handler and DB connection) — desktop score remained 93 on a warmed server, confirming the bottleneck is real rendering latency, not cold-start noise.
 - Discovered intermittent Playwright E2E failure root cause: Cursor sets `PLAYWRIGHT_BROWSERS_PATH` to a project-scoped temp dir under macOS's `/var/folders/.../T/cursor-sandbox-cache/`. This dir is cleared on system restart. Fix: run `npx playwright install chromium` (with `required_permissions: ["all"]`) once after each reboot.
 
+### Accepted Risks
+
+- **pkill cleanup patterns:** `killProductionServer()` uses `pkill -f 'next start'` and `pkill -f 'node dist/index.js'` which could theoretically match other running processes on the developer's machine. The patterns are reasonably specific for local development and this matches the approach used by the original dev-server cleanup. Accepted as low risk.
+
 ### Completion Notes List
 
 - Added `"start"` to root `package.json` scripts — mirrors `dev` pattern using `concurrently` to run `npm run start -w packages/backend` and `npm run start -w packages/frontend`. Both workspace packages already had `start` scripts (`node dist/index.js` and `next start` respectively).
@@ -93,11 +97,14 @@ claude-4.6-sonnet-medium-thinking
 
 ### File List
 
-- `package.json` — added `"start"` script; pinned `@playwright/test` to exact version `1.58.2` (removed `^`)
+- `package.json` — added `"start"` script; added `NODE_OPTIONS=--no-warnings` to `test:e2e` and `test:e2e:ui` scripts
 - `scripts/lighthouse.js` — full rewrite: production build → production start → warmup → audit → clean stop; added `performance` category; set `REQUIRED_PERFORMANCE_SCORE = 90` with rationale comment; added `warmUpServer` helper
 - `README.md` — added Production mode section; updated Lighthouse test description
 - `project-context.md` — updated Step 5 (Lighthouse) to reflect production stack + performance scores + Playwright browser reinstall note; updated Step 4 (E2E) with Playwright reinstall guidance
+- `e2e/global-setup.ts` — new file; Playwright global setup that validates Chromium binary exists before test execution, with actionable error message
+- `playwright.config.ts` — added `globalSetup` reference to `./e2e/global-setup`; changed webServer `stdout`/`stderr` from `"pipe"` to `"ignore"` to suppress noise
 
 ### Change Log
 
-- 2026-03-19: Implemented Story 2.6 — root `start` script, Lighthouse production stack with performance gate (floor 90 desktop/100 mobile), README and project-context.md updated
+- 2026-03-19: Implemented Story 2.6 — root `start` script, Lighthouse production stack with performance gate (floor 90 desktop & mobile), README and project-context.md updated
+- 2026-03-19: Code review fixes — corrected File List (added e2e/global-setup.ts, playwright.config.ts; fixed package.json description); aligned performance threshold docs to 90 for both platforms; documented pkill cleanup risk as accepted

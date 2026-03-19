@@ -165,11 +165,11 @@ The script exits with a non-zero code if any score is below its required thresho
 
 | Category | Desktop | Mobile |
 |---|---|---|
-| Performance | **90** | **100** |
+| Performance | **90** | **90** |
 | Accessibility | **100** | **100** |
 | Best Practices | **100** | **100** |
 | SEO | **100** | **100** |
 
-Desktop performance floor is 90 (observed ~93–94) because the dynamic route blocks on the API fetch before streaming HTML, causing LCP ~1.7s. The fix (React Suspense streaming) is scoped to Story 3-1. All other categories must remain at 100 unless a drop is technically unavoidable — document reason and minimum in the story's Dev Agent Record.
+Performance floor is 90 for both platforms. Desktop observed ~93–94 (LCP ~1.7s due to dynamic route blocking on API fetch before streaming HTML); mobile observed 100 consistently. Improving the enforced floor is deferred to a later story. All other categories must remain at 100 unless a drop is technically unavoidable — document reason and minimum in the story's Dev Agent Record.
 
 > **Note:** The Chrome DevTools MCP server is NOT used for Lighthouse audits. The `test:lighthouse` script uses the `lighthouse` npm package directly with a headless Chrome flag.
