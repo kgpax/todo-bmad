@@ -172,3 +172,13 @@
 **Conclusion:** This was the most involved I got. Most stories were implemented without problem, but there were some technical issues with module resolution and network permissions within the sandbox which really got the agent stuck.
 
 For cases where we spot things which are not necessarily linked to the current story, but which we would like done (e.g., updates to testing, new DoD criteria) - I wonder what the best way to insert them is. So far I've been adding them within a story, even though they go beyond the scope of the story. Next time I might ask the scrum master if we should create a new story for these remedial actions and inset it before the next story.
+
+## `/bmad-retrospective`
+
+**Model used:** GPT-5.4
+
+- This felt a bit artificial at the start, with the various agent personas giving their "opinions" about how they felt the epic went, rather than in a structual, factual way
+- It was good to point out that DoD wasn't always strictly followed
+- I also pointed out that often I would have asked for changes in a story that weren't related to the story (e.g., change requests, hardening of unrelated tests, etc); I asked whether in future we should avoid polluting existing stories with additional requirements and instead create new stories to add to the sprint
+
+**Conclusion:** A worthwhile exercise - even if it just forces me to reflect on bits that I wasn't happy with that we could improve on going forward.
