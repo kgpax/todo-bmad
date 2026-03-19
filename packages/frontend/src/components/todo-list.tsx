@@ -5,9 +5,10 @@ import { TodoItem } from "@/components/todo-item";
 interface TodoListProps {
   todos: TodoWithMeta[];
   onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export function TodoList({ todos, onToggle }: TodoListProps) {
+export function TodoList({ todos, onToggle, onDelete }: TodoListProps) {
   const [animationParent] = useAutoAnimate({
     duration: 400,
     easing: "ease-in-out",
@@ -32,7 +33,7 @@ export function TodoList({ todos, onToggle }: TodoListProps) {
     >
       {activeTodos.map((todo) => (
         <div key={todo.id} role="listitem">
-          <TodoItem todo={todo} onToggle={onToggle} pendingAction={todo.pendingAction} />
+          <TodoItem todo={todo} onToggle={onToggle} onDelete={onDelete} pendingAction={todo.pendingAction} />
         </div>
       ))}
       {completedTodos.length > 0 && (
@@ -50,7 +51,7 @@ export function TodoList({ todos, onToggle }: TodoListProps) {
       )}
       {completedTodos.map((todo) => (
         <div key={todo.id} role="listitem">
-          <TodoItem todo={todo} onToggle={onToggle} pendingAction={todo.pendingAction} />
+          <TodoItem todo={todo} onToggle={onToggle} onDelete={onDelete} pendingAction={todo.pendingAction} />
         </div>
       ))}
     </div>

@@ -1,3 +1,4 @@
+import { X } from "lucide-react";
 import type { Todo } from "@todo-bmad/shared";
 import { Checkbox } from "@/components/ui/checkbox";
 import { formatTimestamp } from "@/lib/utils";
@@ -5,22 +6,31 @@ import { formatTimestamp } from "@/lib/utils";
 interface TodoItemProps {
   todo: Todo;
   onToggle: (id: string) => void;
+  onDelete: (id: string) => void;
   pendingAction?: "creating" | "toggling" | "deleting";
 }
 
-export function TodoItem({ todo, onToggle, pendingAction }: TodoItemProps) {
+export function TodoItem({ todo, onToggle, onDelete, pendingAction }: TodoItemProps) {
   const isToggling = pendingAction === "toggling";
+  const isDeleting = pendingAction === "deleting";
+
+  const cardOpacity = isDeleting
+    ? "opacity-50"
+    : todo.completed
+      ? "opacity-70"
+      : "";
 
   return (
     <div
       data-completed={todo.completed}
+      data-pending-deleting={isDeleting ? "true" : undefined}
       className={[
         "bg-surface rounded-xl p-4 flex items-start gap-3",
         "transition-[transform,box-shadow,opacity] duration-(--duration-fast) ease-out",
         "[box-shadow:var(--shadow-resting)] hover:[box-shadow:var(--shadow-hover)]",
         "hover:[-webkit-transform:translateY(-1px)] hover:transform-[translateY(-1px)]",
         "motion-reduce:hover:transform-none motion-reduce:hover:opacity-90",
-        todo.completed ? "opacity-70" : "",
+        cardOpacity,
       ]
         .filter(Boolean)
         .join(" ")}
@@ -53,6 +63,20 @@ export function TodoItem({ todo, onToggle, pendingAction }: TodoItemProps) {
           {formatTimestamp(todo.createdAt)}
         </p>
       </div>
+      <button
+        type="button"
+        onClick={() => onDelete(todo.id)}
+        disabled={!!pendingAction}
+        aria-label={`Delete: ${todo.text}`}
+        className={[
+          "shrink-0 p-1.5 rounded-md transition-[opacity,color] duration-(--duration-fast)",
+          "opacity-40 hover:opacity-100 hover:text-error focus:opacity-100 focus:text-error",
+          "focus-visible:outline-none focus-visible:[box-shadow:var(--shadow-focus)]",
+          "disabled:pointer-events-none",
+        ].join(" ")}
+      >
+        <X size={16} aria-hidden="true" />
+      </button>
     </div>
   );
 }

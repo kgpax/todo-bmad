@@ -2,6 +2,10 @@ import { type Locator, type Page } from "@playwright/test";
 
 const FOCUS_RING_PATTERN = /0px 0px 0px 3px/;
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export class TodoPage {
   readonly page: Page;
   readonly input: Locator;
@@ -85,6 +89,17 @@ export class TodoPage {
       const siblings = Array.from(itemEl.parentElement!.children);
       return siblings.indexOf(itemEl) > siblings.indexOf(dividerEl as Element);
     }, await divider.elementHandle());
+  }
+
+  deleteButton(todoText: string) {
+    return this.todoList
+      .locator('[role="listitem"]')
+      .filter({ hasText: todoText })
+      .getByRole("button", { name: new RegExp(`Delete:.*${escapeRegExp(todoText)}`, "i") });
+  }
+
+  async deleteTodo(todoText: string) {
+    await this.deleteButton(todoText).click();
   }
 
   async toggleTodo(text: string) {
