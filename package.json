@@ -19,7 +19,7 @@
     "test:lighthouse": "node scripts/lighthouse.js"
   },
   "devDependencies": {
-    "@playwright/test": "1.58.2",
+    "@playwright/test": "^1.58.2",
     "concurrently": "^9.1.2",
     "lighthouse": "^13.0.3"
   }
