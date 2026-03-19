@@ -27,25 +27,62 @@ Playwright tests must use Page Object Models (POMs) from `e2e/pages/` rather tha
 
 ## Git Branching Convention
 
-### ⚠️ CRITICAL — Create Feature Branch BEFORE Writing Any Code
+### 🚨 STOP — Git Pre-Flight is STEP ZERO. No Exceptions.
 
-Each story MUST be implemented on its own feature branch. The `main` branch is protected and only receives changes via pull request.
+This pre-flight has been missed multiple times. **Before loading the story file, before reading any source file, before running any command related to the story — complete all three checks below in order.** Skipping any step is a critical process violation.
 
 **Branch naming:** `feat/{story-key}` (e.g., `feat/1-1-project-scaffolding-shared-api-contract`)
 
-> **MANDATORY for AI Agents:** The very first action when starting any story implementation MUST be to create and check out the feature branch. Do NOT read files, do NOT write code, do NOT run tests until this step is complete. Implementing on `main` is a critical process violation.
+#### Pre-Flight Sequence (run these commands first, every time)
 
-**Workflow:**
+**1. Verify you are on `main`**
 
-1. **FIRST ACTION — before anything else:** create and check out the feature branch from `main`:
-   ```bash
-   git checkout main && git pull
-   git checkout -b feat/{story-key}
-   ```
-2. Verify you are on the correct branch (`git branch --show-current`) before proceeding.
-3. Commit work incrementally as tasks are completed. Use clear commit messages referencing the story (e.g., `feat(1.1): scaffold monorepo with npm workspaces`).
-4. When the story is complete and status is set to `review`, push the branch and inform the user so they can raise a PR to merge into `main`.
-5. Do NOT merge into `main` directly. Do NOT push to `main`.
+```bash
+git branch --show-current
+```
+
+If the output is not `main`, stop and check out main before continuing:
+
+```bash
+git checkout main
+```
+
+**2. Pull the latest from origin**
+
+```bash
+git fetch origin
+git pull --ff-only origin main
+```
+
+If `pull --ff-only` fails (diverged history), do not proceed — resolve the divergence manually and confirm with the user.
+
+**3. Create and check out the story branch**
+
+```bash
+git checkout -b feat/{story-key}
+```
+
+If the branch already exists (prior session), switch to it and note that work may have already started:
+
+```bash
+git checkout feat/{story-key}
+```
+
+Confirm you are on the correct branch before doing anything else:
+
+```bash
+git branch --show-current   # must print feat/{story-key}
+```
+
+Only after all three steps complete successfully may implementation begin.
+
+---
+
+**Ongoing workflow:**
+
+- Commit work incrementally as tasks are completed. Use clear commit messages referencing the story (e.g., `feat(1.1): scaffold monorepo with npm workspaces`).
+- When the story is complete and status is set to `review`, push the branch and inform the user so they can raise a PR to merge into `main`.
+- Do NOT merge into `main` directly. Do NOT push to `main`.
 
 ## Definition of Done
 

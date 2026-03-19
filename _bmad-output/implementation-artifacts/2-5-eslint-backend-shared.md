@@ -1,6 +1,6 @@
 # Story 2.5: ESLint for Backend & Shared Packages
 
-Status: ready-for-dev
+Status: review
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -30,28 +30,28 @@ So that all three workspace packages have consistent code quality enforcement be
 
 ## Tasks / Subtasks
 
-- [ ] Task 1: Install ESLint and typescript-eslint in backend package (AC: #1, #3)
-  - [ ] 1.1 Install `eslint` and `typescript-eslint` as devDependencies in `packages/backend`: `npm install -D eslint typescript-eslint -w packages/backend`
-  - [ ] 1.2 Create `packages/backend/eslint.config.mjs` using flat config with `typescript-eslint` recommended preset, targeting `src/**/*.ts`
-  - [ ] 1.3 Exclude `dist/`, `coverage/`, `drizzle/`, and `data/` directories via `globalIgnores`
-  - [ ] 1.4 Add `"lint": "eslint"` script to `packages/backend/package.json`
-  - [ ] 1.5 Run `npm run lint -w packages/backend` and fix any errors
+- [x] Task 1: Install ESLint and typescript-eslint in backend package (AC: #1, #3)
+  - [x] 1.1 Install `eslint` and `typescript-eslint` as devDependencies in `packages/backend`: `npm install -D eslint typescript-eslint -w packages/backend`
+  - [x] 1.2 Create `packages/backend/eslint.config.mjs` using flat config with `typescript-eslint` recommended preset, targeting `src/**/*.ts`
+  - [x] 1.3 Exclude `dist/`, `coverage/`, `drizzle/`, and `data/` directories via `globalIgnores`
+  - [x] 1.4 Add `"lint": "eslint"` script to `packages/backend/package.json`
+  - [x] 1.5 Run `npm run lint -w packages/backend` and fix any errors
 
-- [ ] Task 2: Install ESLint and typescript-eslint in shared package (AC: #2, #4)
-  - [ ] 2.1 Install `eslint` and `typescript-eslint` as devDependencies in `packages/shared`: `npm install -D eslint typescript-eslint -w packages/shared`
-  - [ ] 2.2 Create `packages/shared/eslint.config.mjs` using flat config with `typescript-eslint` recommended preset, targeting `src/**/*.ts`
-  - [ ] 2.3 Exclude `dist/` and `coverage/` directories via `globalIgnores`
-  - [ ] 2.4 Add `"lint": "eslint"` script to `packages/shared/package.json`
-  - [ ] 2.5 Run `npm run lint -w packages/shared` and fix any errors
+- [x] Task 2: Install ESLint and typescript-eslint in shared package (AC: #2, #4)
+  - [x] 2.1 Install `eslint` and `typescript-eslint` as devDependencies in `packages/shared`: `npm install -D eslint typescript-eslint -w packages/shared`
+  - [x] 2.2 Create `packages/shared/eslint.config.mjs` using flat config with `typescript-eslint` recommended preset, targeting `src/**/*.ts`
+  - [x] 2.3 Exclude `dist/` and `coverage/` directories via `globalIgnores`
+  - [x] 2.4 Add `"lint": "eslint"` script to `packages/shared/package.json`
+  - [x] 2.5 Run `npm run lint -w packages/shared` and fix any errors
 
-- [ ] Task 3: Update root lint script to cover all packages (AC: #5, #8)
-  - [ ] 3.1 Update root `package.json` `lint` script to: `npm run lint -w packages/shared && npm run lint -w packages/backend && npm run lint -w packages/frontend`
-  - [ ] 3.2 Run `npm run lint` from root and verify all three packages pass
+- [x] Task 3: Update root lint script to cover all packages (AC: #5, #8)
+  - [x] 3.1 Update root `package.json` `lint` script to: `npm run lint -w packages/shared && npm run lint -w packages/backend && npm run lint -w packages/frontend`
+  - [x] 3.2 Run `npm run lint` from root and verify all three packages pass
 
-- [ ] Task 4: Verify no regressions (AC: #7, #8)
-  - [ ] 4.1 Run `npm run build` — production build clean
-  - [ ] 4.2 Run `npm run test` — all tests pass with 100% coverage
-  - [ ] 4.3 Run `npm run lint` — 0 errors across all packages
+- [x] Task 4: Verify no regressions (AC: #7, #8)
+  - [x] 4.1 Run `npm run build` — production build clean
+  - [x] 4.2 Run `npm run test` — all tests pass with 100% coverage
+  - [x] 4.3 Run `npm run lint` — 0 errors across all packages
 
 ## Dev Notes
 
@@ -124,8 +124,32 @@ package-lock.json                      (auto-generated)
 
 ### Agent Model Used
 
+claude-4.6-sonnet-medium-thinking
+
 ### Debug Log References
+
+- Backend ESLint initially failed on `_request`/`_reply` in `todos.ts` — added `argsIgnorePattern: "^_"` and `varsIgnorePattern: "^_"` to the `no-unused-vars` rule override to honour the underscore-prefix convention already used in the codebase.
+- Both backend and shared configs required separating the `ignores` entry into its own standalone object (placed first) so ESLint treats them as global ignores rather than per-config file filters.
+- Shared package had the same `_`-prefix unused var pattern in `schemas.test.ts` — same rule override applied.
 
 ### Completion Notes List
 
+- Created `packages/backend/eslint.config.mjs` and `packages/shared/eslint.config.mjs` using ESLint 9 flat config with `typescript-eslint` recommended preset.
+- Both configs use standalone `{ ignores: [...] }` as the first entry so `dist/`, `coverage/`, `drizzle/` (backend), and `data/` (backend) are properly excluded as global ignores.
+- Both configs extend `recommended` with a `no-unused-vars` rule override allowing `_`-prefixed parameters and variables — consistent with existing code style.
+- Added `"lint": "eslint"` script to both `packages/backend/package.json` and `packages/shared/package.json`.
+- Updated root `package.json` `lint` script to chain all three workspaces: shared → backend → frontend.
+- All ACs verified: `npm run lint` exits 0 across all packages; build and full test suite (201 tests, 100% coverage) remain clean.
+
 ### File List
+
+- packages/backend/eslint.config.mjs (CREATED)
+- packages/shared/eslint.config.mjs (CREATED)
+- packages/backend/package.json (MODIFIED — added lint script + eslint/typescript-eslint devDeps)
+- packages/shared/package.json (MODIFIED — added lint script + eslint/typescript-eslint devDeps)
+- package.json (MODIFIED — updated root lint script to cover all three packages)
+- package-lock.json (auto-generated)
+
+## Change Log
+
+- 2026-03-19: Story implemented — ESLint flat config added to backend and shared packages, root lint script updated to cover all three workspaces. All tests pass, 100% coverage maintained, 0 lint errors.
