@@ -17,3 +17,11 @@ export async function seedTodos(request: APIRequestContext, texts: string[]) {
     await request.post(`${API_URL}/api/todos`, { data: { text } });
   }
 }
+
+export async function seedCompletedTodos(request: APIRequestContext, texts: string[]) {
+  for (const text of texts) {
+    const created = await request.post(`${API_URL}/api/todos`, { data: { text } });
+    const { todo } = await created.json();
+    await request.patch(`${API_URL}/api/todos/${todo.id}`, { data: { completed: true } });
+  }
+}
