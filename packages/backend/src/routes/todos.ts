@@ -44,7 +44,7 @@ export const todosRoutes = fp(async (app: FastifyInstance) => {
     app.db.insert(todos).values({ id, text, completed: false, createdAt }).run();
 
     return reply.status(201).send({
-      todo: { id, text, completed: false, createdAt },
+      todo: { id, text, completed: false, createdAt, completedAt: null },
     });
   });
 
@@ -70,10 +70,11 @@ export const todosRoutes = fp(async (app: FastifyInstance) => {
       });
     }
 
-    app.db.update(todos).set({ completed: parsed.completed }).where(eq(todos.id, request.params.id)).run();
+    const completedAt = parsed.completed ? new Date().toISOString() : null;
+    app.db.update(todos).set({ completed: parsed.completed, completedAt }).where(eq(todos.id, request.params.id)).run();
 
     return reply.status(200).send({
-      todo: { ...existing, completed: parsed.completed },
+      todo: { ...existing, completed: parsed.completed, completedAt },
     });
   });
 

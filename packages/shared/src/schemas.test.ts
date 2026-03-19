@@ -76,11 +76,28 @@ describe("todoSchema", () => {
     text: "Buy groceries",
     completed: false,
     createdAt: "2026-03-17T12:00:00.000Z",
+    completedAt: null,
   };
 
-  it("validates a complete Todo shape", () => {
+  it("validates a complete Todo shape with completedAt null", () => {
     const result = todoSchema.safeParse(validTodo);
     expect(result.success).toBe(true);
+  });
+
+  it("validates a Todo with completedAt as ISO datetime string", () => {
+    const result = todoSchema.safeParse({ ...validTodo, completedAt: "2026-03-17T13:00:00.000Z" });
+    expect(result.success).toBe(true);
+  });
+
+  it("fails when completedAt is an invalid datetime string", () => {
+    const result = todoSchema.safeParse({ ...validTodo, completedAt: "not-a-date" });
+    expect(result.success).toBe(false);
+  });
+
+  it("fails when completedAt is missing", () => {
+    const { completedAt: _c, ...rest } = validTodo;
+    const result = todoSchema.safeParse(rest);
+    expect(result.success).toBe(false);
   });
 
   it("fails with invalid UUID", () => {

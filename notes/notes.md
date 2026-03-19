@@ -182,3 +182,7 @@ For cases where we spot things which are not necessarily linked to the current s
 - I also pointed out that often I would have asked for changes in a story that weren't related to the story (e.g., change requests, hardening of unrelated tests, etc); I asked whether in future we should avoid polluting existing stories with additional requirements and instead create new stories to add to the sprint
 
 **Conclusion:** A worthwhile exercise - even if it just forces me to reflect on bits that I wasn't happy with that we could improve on going forward.
+
+## Epic 2, 3 and 4 continuation
+
+- Whenever I noticed a gap (e.g., linting was only performed on the frontend package, not on backend or shared), I started to ask for new stories to be created rather than absorbing such changes in an unrelated story.

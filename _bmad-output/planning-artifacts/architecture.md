@@ -36,7 +36,7 @@ _This document builds collaboratively through step-by-step discovery. Sections a
 ### Technical Constraints & Dependencies
 
 - Frontend framework must support ISR (Incremental Static Regeneration) with server-side data fetching and client-side hydration for dynamic CRUD operations
-- shadcn/ui + Radix UI primitives for accessible component foundations (prescribed by UX spec)
+- Radix UI primitives for accessible component foundations (shadcn/ui removed — see PRD Deviation Log)
 - Tailwind CSS for utility-first styling with design tokens as CSS custom properties
 - Outfit typeface via Google Fonts (web font performance implications for Lighthouse targets)
 - Single-user, no authentication in MVP — simplifies backend significantly but the API should not be designed in a way that makes auth impossible to add later
@@ -123,7 +123,7 @@ todo-bmad/
 TypeScript (strict mode) across all packages. Shared `tsconfig.base.json` with per-package extensions. Node.js runtime for backend, Next.js runtime for frontend.
 
 **Styling Solution:**
-Tailwind CSS v4 via create-next-app defaults. CSS custom properties for design tokens. shadcn/ui components as owned source code (not external dependency).
+Tailwind CSS v4 via create-next-app defaults. CSS custom properties for design tokens. Hand-built components using Radix UI primitives directly where accessibility behaviour is needed. **Do not use `npx shadcn add`** — shadcn is being removed (see PRD Deviation Log).
 
 **Build Tooling:**
 Next.js with Turbopack for frontend dev/build. tsx for backend development, tsc for backend production builds. Drizzle Kit for database migrations.
@@ -305,6 +305,7 @@ frontend/src/
 | Project Type | SSG with client-side hydration | ISR with server-side data fetching + client-side hydration | Stakeholder decision — serve real data on first paint, eliminate loading flash |
 | UX Spec | Optimistic UI with rollback | Pending state pattern with server-confirmed updates | Stakeholder decision — simpler implementation, UI reflects pending/confirmed states rather than assuming success |
 | Validation Library | Zod (unversioned) | Zod 4 (^4.3) | Zod 4 is now the stable release (as of March 2026). Key API changes: `.describe()` → `.meta()`, `.superRefine()` → `.check()`, `.merge()` → `.extend()`, error access via `error.issues`. `z.infer<>` and `.trim()/.min()/.max()` unchanged. If `fastify-type-provider-zod` lacks Zod 4 support, use direct `schema.parse()` in handlers. |
+| Design System | shadcn/ui as component foundation | Radix UI primitives directly, no shadcn | Stakeholder decision (Epic 2). shadcn was initialized during scaffolding but no components were ever added via `npx shadcn add`. Every component (TodoInput, TodoItem, EmptyState, etc.) was hand-built with custom styling. The shadcn CLI layer, `components.json`, `@radix-ui/react-slot`, and `class-variance-authority` are unused. Radix primitives are used directly where accessibility behaviour is needed (e.g. Checkbox). Utilities that predate shadcn (`clsx`, `tailwind-merge`, `lucide-react`) are retained independently. A cleanup story (2-4) removes shadcn artifacts. **Do not use `npx shadcn add` for any component.** |
 
 ## Implementation Patterns & Consistency Rules
 

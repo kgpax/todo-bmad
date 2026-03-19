@@ -52,7 +52,7 @@ describe("GET /api/todos", () => {
     expect(body.todos[1].text).toBe("Test todo");
   });
 
-  it("returns todos with camelCase fields (id, text, completed, createdAt)", async () => {
+  it("returns todos with camelCase fields (id, text, completed, createdAt, completedAt)", async () => {
     db.insert(todos)
       .values({
         id: "def-456",
@@ -70,7 +70,9 @@ describe("GET /api/todos", () => {
     expect(todo).toHaveProperty("text");
     expect(todo).toHaveProperty("completed");
     expect(todo).toHaveProperty("createdAt");
+    expect(todo).toHaveProperty("completedAt");
     expect(todo).not.toHaveProperty("created_at");
+    expect(todo).not.toHaveProperty("completed_at");
     expect(typeof todo.completed).toBe("boolean");
   });
 
@@ -111,7 +113,7 @@ describe("POST /api/todos", () => {
     await app.close();
   });
 
-  it("returns 201 with { todo } containing id, text, completed, createdAt for valid text", async () => {
+  it("returns 201 with { todo } containing id, text, completed, createdAt, completedAt for valid text", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/api/todos",
@@ -125,6 +127,8 @@ describe("POST /api/todos", () => {
     expect(todo).toHaveProperty("text");
     expect(todo).toHaveProperty("completed");
     expect(todo).toHaveProperty("createdAt");
+    expect(todo).toHaveProperty("completedAt");
+    expect(todo.completedAt).toBeNull();
   });
 
   it("returned id matches UUID v4 regex pattern", async () => {
@@ -215,7 +219,7 @@ describe("POST /api/todos", () => {
     expect(body.error).toBe("VALIDATION_ERROR");
   });
 
-  it("returns completed: false and valid ISO 8601 createdAt in response", async () => {
+  it("returns completed: false, valid ISO 8601 createdAt, and completedAt: null in response", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/api/todos",
@@ -225,6 +229,7 @@ describe("POST /api/todos", () => {
     const { todo } = JSON.parse(res.body);
     expect(todo.completed).toBe(false);
     expect(new Date(todo.createdAt).toISOString()).toBe(todo.createdAt);
+    expect(todo.completedAt).toBeNull();
   });
 
   it("rejects request body exceeding 10KB", async () => {
@@ -300,6 +305,56 @@ describe("PATCH /api/todos/:id", () => {
     expect(body.todo.completed).toBe(true);
   });
 
+  it("sets completedAt to ISO timestamp when completing a todo", async () => {
+    db.insert(todos)
+      .values({
+        id: "test-id-ca1",
+        text: "Complete me",
+        completed: false,
+        createdAt: "2026-03-17T10:00:00.000Z",
+      })
+      .run();
+
+    const before = new Date().toISOString();
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/test-id-ca1",
+      payload: { completed: true },
+    });
+    const after = new Date().toISOString();
+
+    expect(res.statusCode).toBe(200);
+    const { todo } = JSON.parse(res.body);
+    expect(todo.completedAt).not.toBeNull();
+    expect(typeof todo.completedAt).toBe("string");
+    expect(new Date(todo.completedAt).toISOString()).toBe(todo.completedAt);
+    expect(todo.completedAt >= before).toBe(true);
+    expect(todo.completedAt <= after).toBe(true);
+  });
+
+  it("sets completedAt to null when uncompleting a todo", async () => {
+    db.insert(todos)
+      .values({
+        id: "test-id-ca2",
+        text: "Uncomplete me",
+        completed: true,
+        createdAt: "2026-03-17T10:00:00.000Z",
+        completedAt: "2026-03-17T11:00:00.000Z",
+      })
+      .run();
+
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/test-id-ca2",
+      payload: { completed: false },
+    });
+
+    expect(res.statusCode).toBe(200);
+    const { todo } = JSON.parse(res.body);
+    expect(todo.completed).toBe(false);
+    expect(todo.completedAt).toBeNull();
+  });
+
   it("returns 200 with updated todo when completed todo is set to completed: false", async () => {
     db.insert(todos)
       .values({
@@ -321,7 +376,7 @@ describe("PATCH /api/todos/:id", () => {
     expect(body.todo.completed).toBe(false);
   });
 
-  it("response contains all fields (id, text, completed, createdAt) with correct values", async () => {
+  it("response contains all fields (id, text, completed, createdAt, completedAt) with correct values", async () => {
     db.insert(todos)
       .values({
         id: "test-id-3",
@@ -343,6 +398,7 @@ describe("PATCH /api/todos/:id", () => {
     expect(todo.text).toBe("Field check");
     expect(todo.completed).toBe(true);
     expect(todo.createdAt).toBe("2026-03-17T10:00:00.000Z");
+    expect(todo.completedAt).not.toBeNull();
   });
 
   it("returns 404 with NOT_FOUND error for non-existent todo ID", async () => {

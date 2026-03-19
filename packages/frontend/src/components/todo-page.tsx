@@ -12,7 +12,7 @@ interface TodoPageProps {
 }
 
 export function TodoPage({ initialTodos, emptyMessage }: TodoPageProps) {
-  const { todos, addTodo, isCreating, placeholderContext } = useTodos(initialTodos);
+  const { todos, addTodo, toggleTodo, isCreating, placeholderContext } = useTodos(initialTodos);
 
   return (
     <div className="pt-8 md:pt-12 lg:pt-16 flex flex-col gap-4">
@@ -22,7 +22,7 @@ export function TodoPage({ initialTodos, emptyMessage }: TodoPageProps) {
         disabled={isCreating}
       />
       {todos.length > 0 ? (
-        <TodoList todos={todos} />
+        <TodoList todos={todos} onToggle={toggleTodo} />
       ) : (
         <EmptyState message={emptyMessage} />
       )}

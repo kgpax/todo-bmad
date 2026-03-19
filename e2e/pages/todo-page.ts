@@ -34,6 +34,25 @@ export class TodoPage {
     return this.todoList.getByText(text);
   }
 
+  checkbox(todoText: string) {
+    return this.todoList
+      .locator('[role="listitem"]')
+      .filter({ hasText: todoText })
+      .getByRole("checkbox");
+  }
+
+  async toggleTodo(text: string) {
+    await this.checkbox(text).click();
+  }
+
+  async isCompleted(text: string): Promise<boolean> {
+    const item = this.todoList
+      .locator('[role="listitem"]')
+      .filter({ hasText: text });
+    const card = item.locator("[data-completed]").first();
+    return (await card.getAttribute("data-completed")) === "true";
+  }
+
   /**
    * Checks whether the input card's computed box-shadow contains the
    * 3px spread ring that signals the focus ring is visible.

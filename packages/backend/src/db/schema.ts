@@ -5,4 +5,5 @@ export const todos = sqliteTable("todos", {
   text: text("text").notNull(),
   completed: integer("completed", { mode: "boolean" }).notNull().default(false),
   createdAt: text("created_at").notNull(),
+  completedAt: text("completed_at"),
 });
