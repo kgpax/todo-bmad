@@ -94,6 +94,8 @@ claude-4.6-sonnet-medium-thinking
 - Performance floor set to `REQUIRED_PERFORMANCE_SCORE = 90` (observed desktop 93–94, mobile 100). Root cause documented in code comment: dynamic route requires React Suspense streaming to reach desktop 100, which is appropriately scoped to Story 3-1.
 - Updated `project-context.md` DoD Lighthouse section: now reflects production stack, includes performance in required scores, and documents the Playwright browser reinstall behaviour.
 - Updated `README.md`: added production mode section explaining `npm run build` + `npm run start` with note that `start` does not rebuild, and updated Lighthouse description to note it runs a fresh build targeting the production stack.
+- Fixed shared package module resolution for production: Node 22's native TypeScript support loads `.ts` source via `main` but fails on extensionless ESM imports. Fix: added `exports` field with `"development"` condition (→ `./src/index.ts` for tsx and Turbopack) and `"default"` (→ `./dist/index.js` for production `node`); compiled shared to CommonJS via tsconfig `"module": "CommonJS"`. Backend dev script passes `--conditions=development` to tsx.
+- Removed `--webpack` workaround from frontend dev script — Turbopack resolves the shared package correctly via the `"development"` export condition.
 
 ### File List
 
@@ -103,8 +105,13 @@ claude-4.6-sonnet-medium-thinking
 - `project-context.md` — updated Step 5 (Lighthouse) to reflect production stack + performance scores + Playwright browser reinstall note; updated Step 4 (E2E) with Playwright reinstall guidance
 - `e2e/global-setup.ts` — new file; Playwright global setup that validates Chromium binary exists before test execution, with actionable error message
 - `playwright.config.ts` — added `globalSetup` reference to `./e2e/global-setup`; changed webServer `stdout`/`stderr` from `"pipe"` to `"ignore"` to suppress noise
+- `packages/shared/package.json` — added `exports` field with `"development"` → source, `"default"` → compiled dist; `main` and `types` remain on source for dev tooling compatibility
+- `packages/shared/tsconfig.json` — added `"module": "CommonJS"` and `"moduleResolution": "node"` so compiled output is consumable by backend's `node dist/index.js`
+- `packages/backend/package.json` — dev script now passes `--conditions=development` to tsx for shared package source resolution
+- `packages/frontend/package.json` — removed `--webpack` flag from dev script; Turbopack now resolves shared package via `"development"` export condition
 
 ### Change Log
 
 - 2026-03-19: Implemented Story 2.6 — root `start` script, Lighthouse production stack with performance gate (floor 90 desktop & mobile), README and project-context.md updated
 - 2026-03-19: Code review fixes — corrected File List (added e2e/global-setup.ts, playwright.config.ts; fixed package.json description); aligned performance threshold docs to 90 for both platforms; documented pkill cleanup risk as accepted
+- 2026-03-19: Fixed shared package module resolution — added `exports` with development/default conditions, compiled shared to CommonJS, restored Turbopack in frontend dev
