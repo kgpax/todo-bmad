@@ -1,6 +1,6 @@
 # Story 2.3: Delete Todos
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -453,3 +453,4 @@ e2e/journey-3-review-tidy.test.ts
 ### Change Log
 
 - 2026-03-19: Implemented Story 2.3 — Delete Todos. Added `deleteTodo` to API client, `useTodos` hook, `TodoItem` component (X icon button, opacity states, ARIA), wired through `TodoList`/`TodoPage`, updated POM with `deleteButton`/`deleteTodo` methods, added Journey 3 E2E delete tests (delete active, delete completed, full Journey 3 flow).
+- 2026-03-19: **Code Review (AI)** — All 11 ACs verified as implemented. All 30 subtasks confirmed genuinely done. Git reality matches story File List exactly. 0 HIGH, 0 MEDIUM, 1 LOW issue found and fixed: POM `deleteButton()` regex now escapes special characters in `todoText` via `escapeRegExp()` helper. Architecture compliance verified (named exports, co-located tests, 4-step mutation flow, ARIA, reduced-motion, no CSS assertions). Status → done.

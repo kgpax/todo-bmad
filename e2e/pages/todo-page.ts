@@ -2,6 +2,10 @@ import { type Locator, type Page } from "@playwright/test";
 
 const FOCUS_RING_PATTERN = /0px 0px 0px 3px/;
 
+function escapeRegExp(str: string): string {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export class TodoPage {
   readonly page: Page;
   readonly input: Locator;
@@ -91,7 +95,7 @@ export class TodoPage {
     return this.todoList
       .locator('[role="listitem"]')
       .filter({ hasText: todoText })
-      .getByRole("button", { name: new RegExp(`Delete:.*${todoText}`, "i") });
+      .getByRole("button", { name: new RegExp(`Delete:.*${escapeRegExp(todoText)}`, "i") });
   }
 
   async deleteTodo(todoText: string) {
