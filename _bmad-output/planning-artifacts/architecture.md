@@ -449,7 +449,15 @@ todo-bmad/
 ├── .env.example                        (documents all env vars across packages)
 ├── README.md
 │
+├── scripts/
+│   ├── lighthouse.js                   (headless Lighthouse audit — builds, starts prod, audits, stops)
+│   └── db-reset.js                     (clears local SQLite database)
+│
 ├── e2e/                                (Playwright E2E tests — span both services)
+│   ├── global-setup.ts                 (validates Chromium binary exists before test run)
+│   ├── helpers.ts                      (shared utilities: deleteAllTodos, seedTodos)
+│   ├── pages/
+│   │   └── todo-page.ts               (Page Object Model for the home/todo page)
 │   ├── journey-1-first-visit.spec.ts   (empty state → first todo)
 │   ├── journey-2-quick-capture.spec.ts (returning user, mobile add)
 │   ├── journey-3-review-tidy.spec.ts   (complete, uncomplete, delete)
@@ -634,10 +642,17 @@ User action → useTodos.mutate()
 npm run dev          # runs frontend (port 3000) and backend (port 3001) concurrently
 ```
 
+**Production mode (after building):**
+```bash
+npm run build        # compile all packages (shared → backend → frontend)
+npm run start        # starts backend (node dist/index.js) and frontend (next start) together
+```
+
 **Running tests:**
 ```bash
-npm run test         # Jest unit/integration tests across all packages
-npm run test:e2e     # Playwright E2E tests (requires both services running)
+npm run test             # Jest unit/integration tests across all packages
+npm run test:e2e         # Playwright E2E tests (requires both services running)
+npm run test:lighthouse  # builds production stack, audits with Lighthouse, enforces score gates
 ```
 
 **Database operations:**
@@ -645,6 +660,14 @@ npm run test:e2e     # Playwright E2E tests (requires both services running)
 npm run db:generate  # Generate migration from schema changes (backend)
 npm run db:migrate   # Apply migrations (also runs automatically on server start)
 ```
+
+**Shared package module resolution:**
+
+The shared package uses the `exports` field with a `"development"` condition to resolve differently in dev vs production:
+- **Dev:** `"development"` → `./src/index.ts` (tsx and Turbopack transpile source directly)
+- **Production:** `"default"` → `./dist/index.js` (CommonJS compiled output for `node`)
+
+The backend dev script passes `--conditions=development` to tsx. Turbopack automatically honours the `"development"` condition in `next dev`.
 
 ## Architecture Validation Results
 

@@ -141,6 +141,7 @@ Do **not** use `/* istanbul ignore next */` to silence branches that are merely 
 ### Step 4 — E2E Tests
 
 > ⚠️ **ALWAYS run outside the sandbox** using `required_permissions: ["all"]` in the Shell tool. `npm run test:e2e` requires OS-level network access and a real Chromium binary — it will always fail inside the Cursor sandbox regardless of any other settings.
+> ⚠️ **If tests fail with "Executable doesn't exist"**: Cursor stores Playwright browser binaries in macOS's temp directory (`/var/folders/.../T/cursor-sandbox-cache/`), which is cleared on system restart. Fix by running `npx playwright install chromium` (with `required_permissions: ["all"]`) once after each reboot.
 
 ```bash
 npm run test:e2e  # ← Shell tool with required_permissions: ["all"]
@@ -150,20 +151,25 @@ npm run test:e2e  # ← Shell tool with required_permissions: ["all"]
 
 > ⚠️ **MANDATORY for any story that touches frontend files.**
 > ⚠️ **ALWAYS run outside the sandbox** using `required_permissions: ["all"]` — Lighthouse requires OS-level access to launch a headless Chromium binary.
+> ⚠️ **If Lighthouse fails with "Executable doesn't exist"**: run `npx playwright install chromium` (with `required_permissions: ["all"]`) to reinstall. Cursor stores browser binaries in macOS's temp directory (`/var/folders/.../T/cursor-sandbox-cache/`), which is cleared on system restart. This is expected — reinstall once after each reboot.
 
-The script starts the dev server, runs desktop and mobile audits headlessly (no visible browser window), prints scores, and stops the server automatically:
+The script always runs `npm run build` first (unless a server is already on port 3000), then starts the **production** stack (`npm run start`), runs desktop and mobile audits headlessly (no visible browser window), prints scores, and stops the production stack when done. Scores reflect the production build, not the dev server.
 
 ```bash
 npm run test:lighthouse   # ← Shell tool with required_permissions: ["all"]
 ```
 
-The script exits with a non-zero code if any score is below 100, so a clean exit (`Exit code: 0`) confirms all scores passed.
+The script exits with a non-zero code if any score is below its required threshold, so a clean exit (`Exit code: 0`) confirms all scores passed.
 
-**Required scores (both desktop and mobile):**
-- Accessibility: **100**
-- Best Practices: **100**
-- SEO: **100**
+**Required scores:**
 
-Scores must remain at 100 unless a drop is technically unavoidable — in which case document the reason and minimum acceptable score in the story's Dev Agent Record.
+| Category | Desktop | Mobile |
+|---|---|---|
+| Performance | **90** | **90** |
+| Accessibility | **100** | **100** |
+| Best Practices | **100** | **100** |
+| SEO | **100** | **100** |
+
+Performance floor is 90 for both platforms. Desktop observed ~93–94 (LCP ~1.7s due to dynamic route blocking on API fetch before streaming HTML); mobile observed 100 consistently. Improving the enforced floor is deferred to a later story. All other categories must remain at 100 unless a drop is technically unavoidable — document reason and minimum in the story's Dev Agent Record.
 
 > **Note:** The Chrome DevTools MCP server is NOT used for Lighthouse audits. The `test:lighthouse` script uses the `lighthouse` npm package directly with a headless Chrome flag.

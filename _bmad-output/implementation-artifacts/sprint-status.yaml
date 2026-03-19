@@ -64,7 +64,7 @@ development_status:
   2-3-delete-todos: done
   2-4-remove-shadcn-artifacts: done
   2-5-eslint-backend-shared: done
-  2-6-root-start-lighthouse-performance: backlog
+  2-6-root-start-lighthouse-performance: done
   epic-2-retrospective: optional
 
   # Epic 3: Resilient Experience

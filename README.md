@@ -12,11 +12,24 @@ In addition to the source code and the bmad files, in following folders you will
 
 ## Running the app
 
-To run locally:
+### Development mode
 
 ```bash
 npm run dev
 ```
+
+### Production mode
+
+Run a production build first, then start the built artifacts:
+
+```bash
+npm run build   # compile all packages (must run before start)
+npm run start   # starts backend (node dist/index.js) and frontend (next start) together
+```
+
+> **Note:** `npm run start` does **not** rebuild the project. Always run `npm run build` before `npm run start` to ensure the running code matches the current working tree.
+
+The app is available at `http://localhost:3000` and the API at `http://localhost:3001`.
 
 ## Testing the app
 
@@ -38,6 +51,8 @@ Lighthouse tests:
 ```bash
 npm run test:lighthouse
 ```
+
+> `npm run test:lighthouse` always runs `npm run build` first, then starts the **production** stack (not `npm run dev`), audits it, and stops the stack when done. Scores reflect the production build, not the dev server.
 
 ## Clearing the database
 
