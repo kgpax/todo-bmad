@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-17
-last_updated: 2026-03-19 # story 2-4 code review passed
+last_updated: 2026-03-19
 project: todo-bmad
 project_key: NOKEY
 tracking_system: file-system
@@ -63,7 +63,7 @@ development_status:
   2-2-completed-section-divider: done
   2-3-delete-todos: done
   2-4-remove-shadcn-artifacts: done
-  2-5-eslint-backend-shared: ready-for-dev
+  2-5-eslint-backend-shared: done
   2-6-root-start-lighthouse-performance: backlog
   epic-2-retrospective: optional
 
