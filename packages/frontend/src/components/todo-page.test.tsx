@@ -7,16 +7,18 @@ import type { Todo } from "@todo-bmad/shared";
 jest.mock("@/lib/api", () => ({
   createTodo: jest.fn(),
   toggleTodo: jest.fn(),
+  deleteTodo: jest.fn(),
 }));
 
 jest.mock("@/lib/actions", () => ({
   revalidateHome: jest.fn().mockResolvedValue(undefined),
 }));
 
-import { createTodo, toggleTodo } from "@/lib/api";
+import { createTodo, toggleTodo, deleteTodo } from "@/lib/api";
 
 const mockCreateTodo = createTodo as jest.MockedFunction<typeof createTodo>;
 const mockToggleTodo = toggleTodo as jest.MockedFunction<typeof toggleTodo>;
+const mockDeleteTodo = deleteTodo as jest.MockedFunction<typeof deleteTodo>;
 
 const existingTodo: Todo = {
   id: "existing-1",
@@ -113,6 +115,32 @@ describe("TodoPage", () => {
 
     await waitFor(() => {
       expect(screen.getByRole("checkbox")).toBeChecked();
+    });
+  });
+
+  it("wires deleteTodo through to the TodoList delete buttons", async () => {
+    const user = userEvent.setup();
+    mockDeleteTodo.mockResolvedValue(undefined);
+    render(<TodoPage initialTodos={[existingTodo]} emptyMessage="Nothing here yet" />);
+
+    const deleteButton = screen.getByRole("button", { name: `Delete: ${existingTodo.text}` });
+    await user.click(deleteButton);
+
+    await waitFor(() => {
+      expect(mockDeleteTodo).toHaveBeenCalledWith(existingTodo.id);
+    });
+  });
+
+  it("removes todo from list after successful delete", async () => {
+    const user = userEvent.setup();
+    mockDeleteTodo.mockResolvedValue(undefined);
+    render(<TodoPage initialTodos={[existingTodo]} emptyMessage="Nothing here yet" />);
+
+    const deleteButton = screen.getByRole("button", { name: `Delete: ${existingTodo.text}` });
+    await user.click(deleteButton);
+
+    await waitFor(() => {
+      expect(screen.queryByText(existingTodo.text)).not.toBeInTheDocument();
     });
   });
 });

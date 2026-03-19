@@ -1,4 +1,4 @@
-import { fetchTodos, createTodo, toggleTodo } from "./api";
+import { fetchTodos, createTodo, toggleTodo, deleteTodo } from "./api";
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch as typeof fetch;
@@ -160,6 +160,40 @@ describe("toggleTodo", () => {
     await expect(toggleTodo("1", true)).rejects.toEqual({
       error: "INTERNAL_ERROR",
       message: "Failed to update todo",
+    });
+  });
+});
+
+describe("deleteTodo", () => {
+  it("resolves void on 204 success", async () => {
+    mockFetch.mockResolvedValueOnce({ ok: true });
+
+    await expect(deleteTodo("1")).resolves.toBeUndefined();
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/todos/1"),
+      expect.objectContaining({ method: "DELETE" })
+    );
+  });
+
+  it("throws parsed ApiError when response is not ok with valid JSON error body", async () => {
+    const apiError = { error: "NOT_FOUND", message: "Todo not found" };
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: () => Promise.resolve(apiError),
+    });
+
+    await expect(deleteTodo("999")).rejects.toEqual(apiError);
+  });
+
+  it("throws fallback ApiError when response is not ok with invalid JSON body", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: () => Promise.reject(new Error("Invalid JSON")),
+    });
+
+    await expect(deleteTodo("1")).rejects.toEqual({
+      error: "INTERNAL_ERROR",
+      message: "Failed to delete todo",
     });
   });
 });

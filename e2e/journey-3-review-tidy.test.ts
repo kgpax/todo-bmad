@@ -118,4 +118,67 @@ test.describe("Journey 3: Review and Tidy", () => {
     expect(texts[2]).toBe("Later completed");
     expect(texts[3]).toBe("Earlier completed");
   });
+
+  test("deleting an active todo removes it from the list", async ({ request, page }) => {
+    await seedTodos(request, ["Buy milk", "Walk the dog"]);
+    todo = new TodoPage(page);
+    await todo.goto();
+
+    await expect(todo.todoByText("Buy milk")).toBeVisible();
+
+    await todo.deleteTodo("Buy milk");
+
+    await expect(todo.todoByText("Buy milk")).not.toBeVisible();
+    await expect(todo.todoByText("Walk the dog")).toBeVisible();
+  });
+
+  test("deleting a completed todo removes it from the completed section", async ({
+    request,
+    page,
+  }) => {
+    await seedCompletedTodos(request, ["Finished reading"]);
+    await seedTodos(request, ["Still active"]);
+    todo = new TodoPage(page);
+    await todo.goto();
+
+    await expect(todo.divider()).toBeVisible();
+    await expect(todo.todoByText("Finished reading")).toBeVisible();
+
+    await todo.deleteTodo("Finished reading");
+
+    await expect(todo.todoByText("Finished reading")).not.toBeVisible();
+    await expect(todo.divider()).not.toBeVisible();
+    await expect(todo.todoByText("Still active")).toBeVisible();
+  });
+
+  test("Journey 3 full flow: complete two, uncomplete one, delete another", async ({
+    request,
+    page,
+  }) => {
+    await seedTodos(request, ["Alpha", "Beta", "Gamma"]);
+    todo = new TodoPage(page);
+    await todo.goto();
+
+    // Complete Alpha and Beta
+    await todo.toggleTodo("Alpha");
+    await todo.toggleTodo("Beta");
+
+    await expect(todo.divider()).toBeVisible();
+    expect(await todo.isCompleted("Alpha")).toBe(true);
+    expect(await todo.isCompleted("Beta")).toBe(true);
+
+    // Uncomplete Alpha — it should return to active section
+    await todo.toggleTodo("Alpha");
+    expect(await todo.isCompleted("Alpha")).toBe(false);
+    expect(await todo.isTodoAboveDivider("Alpha")).toBe(true);
+
+    // Delete Beta — it should disappear from completed section
+    await todo.deleteTodo("Beta");
+    await expect(todo.todoByText("Beta")).not.toBeVisible();
+
+    // Only Alpha (active) and Gamma (active) remain — divider gone
+    await expect(todo.divider()).not.toBeVisible();
+    await expect(todo.todoByText("Alpha")).toBeVisible();
+    await expect(todo.todoByText("Gamma")).toBeVisible();
+  });
 });

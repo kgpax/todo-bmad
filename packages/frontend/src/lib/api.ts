@@ -55,3 +55,17 @@ export async function toggleTodo(id: string, completed: boolean): Promise<Todo> 
   const data = await response.json();
   return data.todo;
 }
+
+export async function deleteTodo(id: string): Promise<void> {
+  const response = await fetch(`${CLIENT_API_URL}/api/todos/${id}`, {
+    method: "DELETE",
+  });
+
+  if (!response.ok) {
+    const errorData: ApiError = await response.json().catch(() => ({
+      error: "INTERNAL_ERROR",
+      message: "Failed to delete todo",
+    }));
+    throw errorData;
+  }
+}

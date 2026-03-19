@@ -40,32 +40,41 @@ const noop = () => {};
 
 describe("TodoList", () => {
   it("renders a list container with role='list'", () => {
-    render(<TodoList todos={[activeTodo1]} onToggle={noop} />);
+    render(<TodoList todos={[activeTodo1]} onToggle={noop} onDelete={noop} />);
     expect(screen.getByRole("list")).toBeInTheDocument();
   });
 
   it("has aria-live='polite' for dynamic list updates", () => {
-    render(<TodoList todos={[activeTodo1]} onToggle={noop} />);
+    render(<TodoList todos={[activeTodo1]} onToggle={noop} onDelete={noop} />);
     expect(screen.getByRole("list")).toHaveAttribute("aria-live", "polite");
   });
 
   it("has an accessible label", () => {
-    render(<TodoList todos={[activeTodo1]} onToggle={noop} />);
+    render(<TodoList todos={[activeTodo1]} onToggle={noop} onDelete={noop} />);
     expect(screen.getByRole("list", { name: /todo list/i })).toBeInTheDocument();
   });
 
   it("renders nothing if todos array is empty", () => {
-    render(<TodoList todos={[]} onToggle={noop} />);
+    render(<TodoList todos={[]} onToggle={noop} onDelete={noop} />);
     expect(screen.getByRole("list")).toBeEmptyDOMElement();
   });
 
   it("calls onToggle with todo id when a checkbox is clicked", async () => {
     const user = userEvent.setup();
     const onToggle = jest.fn();
-    render(<TodoList todos={[activeTodo1, activeTodo2]} onToggle={onToggle} />);
+    render(<TodoList todos={[activeTodo1, activeTodo2]} onToggle={onToggle} onDelete={noop} />);
     const checkboxes = screen.getAllByRole("checkbox");
     await user.click(checkboxes[0]);
     expect(onToggle).toHaveBeenCalledWith("a1");
+  });
+
+  it("calls onDelete with todo id when a delete button is clicked", async () => {
+    const user = userEvent.setup();
+    const onDelete = jest.fn();
+    render(<TodoList todos={[activeTodo1, activeTodo2]} onToggle={noop} onDelete={onDelete} />);
+    const deleteButton = screen.getByRole("button", { name: `Delete: ${activeTodo1.text}` });
+    await user.click(deleteButton);
+    expect(onDelete).toHaveBeenCalledWith("a1");
   });
 
   it("passes pendingAction to each TodoItem", () => {
@@ -73,7 +82,7 @@ describe("TodoList", () => {
       { ...activeTodo1, pendingAction: "toggling" },
       activeTodo2,
     ];
-    render(<TodoList todos={todosWithPending} onToggle={noop} />);
+    render(<TodoList todos={todosWithPending} onToggle={noop} onDelete={noop} />);
     const checkboxes = screen.getAllByRole("checkbox");
     expect(checkboxes[0]).toBeDisabled();
     expect(checkboxes[1]).not.toBeDisabled();
@@ -83,26 +92,26 @@ describe("TodoList", () => {
 
   it("renders divider with role='separator' when both active and completed todos exist", () => {
     render(
-      <TodoList todos={[activeTodo1, completedTodo1]} onToggle={noop} />
+      <TodoList todos={[activeTodo1, completedTodo1]} onToggle={noop} onDelete={noop} />
     );
     expect(screen.getByRole("separator")).toBeInTheDocument();
   });
 
   it("divider displays 'Completed' text when rendered", () => {
     render(
-      <TodoList todos={[activeTodo1, completedTodo1]} onToggle={noop} />
+      <TodoList todos={[activeTodo1, completedTodo1]} onToggle={noop} onDelete={noop} />
     );
     expect(screen.getByRole("separator")).toHaveTextContent(/completed/i);
   });
 
   it("does NOT render divider when no completed todos exist", () => {
-    render(<TodoList todos={[activeTodo1, activeTodo2]} onToggle={noop} />);
+    render(<TodoList todos={[activeTodo1, activeTodo2]} onToggle={noop} onDelete={noop} />);
     expect(screen.queryByRole("separator")).not.toBeInTheDocument();
   });
 
   it("renders divider when ALL todos are completed", () => {
     render(
-      <TodoList todos={[completedTodo1, completedTodo2]} onToggle={noop} />
+      <TodoList todos={[completedTodo1, completedTodo2]} onToggle={noop} onDelete={noop} />
     );
     expect(screen.getByRole("separator")).toBeInTheDocument();
   });
@@ -111,7 +120,7 @@ describe("TodoList", () => {
 
   it("renders active items in provided order (newest-first from API)", () => {
     render(
-      <TodoList todos={[activeTodo1, activeTodo2]} onToggle={noop} />
+      <TodoList todos={[activeTodo1, activeTodo2]} onToggle={noop} onDelete={noop} />
     );
     const items = screen.getAllByRole("listitem");
     expect(items[0]).toHaveTextContent("Newer active");
@@ -120,7 +129,7 @@ describe("TodoList", () => {
 
   it("renders completed items ordered by completedAt descending (most recently completed first)", () => {
     render(
-      <TodoList todos={[completedTodo2, completedTodo1]} onToggle={noop} />
+      <TodoList todos={[completedTodo2, completedTodo1]} onToggle={noop} onDelete={noop} />
     );
     // completedTodo1 has later completedAt, so appears first
     const items = screen.getAllByRole("listitem");
@@ -133,6 +142,7 @@ describe("TodoList", () => {
       <TodoList
         todos={[activeTodo1, activeTodo2, completedTodo1, completedTodo2]}
         onToggle={noop}
+        onDelete={noop}
       />
     );
     const items = screen.getAllByRole("listitem");
@@ -151,7 +161,7 @@ describe("TodoList", () => {
       completedAt: null,
     };
     render(
-      <TodoList todos={[completedNoDate, completedTodo1]} onToggle={noop} />
+      <TodoList todos={[completedNoDate, completedTodo1]} onToggle={noop} onDelete={noop} />
     );
     const items = screen.getAllByRole("listitem");
     expect(items[0]).toHaveTextContent("Recently completed");
@@ -167,7 +177,7 @@ describe("TodoList", () => {
       completedAt: null,
     };
     render(
-      <TodoList todos={[completedTodo1, completedNoDate]} onToggle={noop} />
+      <TodoList todos={[completedTodo1, completedNoDate]} onToggle={noop} onDelete={noop} />
     );
     const items = screen.getAllByRole("listitem");
     expect(items[0]).toHaveTextContent("Recently completed");
@@ -179,6 +189,7 @@ describe("TodoList", () => {
       <TodoList
         todos={[activeTodo1, activeTodo2, completedTodo1, completedTodo2]}
         onToggle={noop}
+        onDelete={noop}
       />
     );
     expect(screen.getAllByRole("listitem")).toHaveLength(4);

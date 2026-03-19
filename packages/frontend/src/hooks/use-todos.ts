@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import type { Todo, ApiError } from "@todo-bmad/shared";
-import { createTodo, toggleTodo as apiToggleTodo } from "@/lib/api";
+import { createTodo, toggleTodo as apiToggleTodo, deleteTodo as apiDeleteTodo } from "@/lib/api";
 import { revalidateHome } from "@/lib/actions";
 
 export interface TodoWithMeta extends Todo {
@@ -84,5 +84,31 @@ export function useTodos(initialTodos: Todo[]) {
     }
   }
 
-  return { todos, addTodo, toggleTodo, isCreating, justAdded, placeholderContext, createError, cachedCreateText };
+  async function deleteTodo(id: string) {
+    const target = todos.find((t) => t.id === id);
+    if (!target || target.pendingAction) return;
+
+    setTodos((prev) =>
+      prev.map((t) =>
+        t.id === id ? { ...t, pendingAction: "deleting" as const, error: undefined } : t
+      )
+    );
+
+    try {
+      await apiDeleteTodo(id);
+      setTodos((prev) => prev.filter((t) => t.id !== id));
+      await revalidateHome();
+    } catch (err) {
+      const apiError = err as ApiError;
+      setTodos((prev) =>
+        prev.map((t) =>
+          t.id === id
+            ? { ...t, pendingAction: undefined, error: apiError?.message || "Failed to delete todo" }
+            : t
+        )
+      );
+    }
+  }
+
+  return { todos, addTodo, toggleTodo, deleteTodo, isCreating, justAdded, placeholderContext, createError, cachedCreateText };
 }

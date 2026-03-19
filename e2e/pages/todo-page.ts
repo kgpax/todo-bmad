@@ -87,6 +87,17 @@ export class TodoPage {
     }, await divider.elementHandle());
   }
 
+  deleteButton(todoText: string) {
+    return this.todoList
+      .locator('[role="listitem"]')
+      .filter({ hasText: todoText })
+      .getByRole("button", { name: new RegExp(`Delete:.*${todoText}`, "i") });
+  }
+
+  async deleteTodo(todoText: string) {
+    await this.deleteButton(todoText).click();
+  }
+
   async toggleTodo(text: string) {
     await this.checkbox(text).click();
   }

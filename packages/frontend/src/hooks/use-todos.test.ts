@@ -5,16 +5,18 @@ import type { Todo } from "@todo-bmad/shared";
 jest.mock("@/lib/api", () => ({
   createTodo: jest.fn(),
   toggleTodo: jest.fn(),
+  deleteTodo: jest.fn(),
 }));
 
 jest.mock("@/lib/actions", () => ({
   revalidateHome: jest.fn().mockResolvedValue(undefined),
 }));
 
-import { createTodo, toggleTodo } from "@/lib/api";
+import { createTodo, toggleTodo, deleteTodo } from "@/lib/api";
 
 const mockCreateTodo = createTodo as jest.MockedFunction<typeof createTodo>;
 const mockToggleTodo = toggleTodo as jest.MockedFunction<typeof toggleTodo>;
+const mockDeleteTodo = deleteTodo as jest.MockedFunction<typeof deleteTodo>;
 
 const existingTodo: Todo = {
   id: "existing-1",
@@ -392,6 +394,156 @@ describe("useTodos", () => {
 
     await act(async () => {
       await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].error).toBe("Oops");
+    expect(result.current.todos[1].error).toBeUndefined();
+  });
+
+  // deleteTodo tests
+  it("exposes deleteTodo function", () => {
+    const { result } = renderHook(() => useTodos([existingTodo]));
+    expect(typeof result.current.deleteTodo).toBe("function");
+  });
+
+  it("sets pendingAction to deleting during delete API call", async () => {
+    let resolveDelete!: () => void;
+    mockDeleteTodo.mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveDelete = resolve;
+      })
+    );
+
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    act(() => {
+      result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].pendingAction).toBe("deleting");
+
+    await act(async () => {
+      resolveDelete();
+    });
+  });
+
+  it("removes the todo from state on successful delete", async () => {
+    mockDeleteTodo.mockResolvedValue(undefined);
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos).toHaveLength(0);
+  });
+
+  it("calls apiDeleteTodo with the correct id", async () => {
+    mockDeleteTodo.mockResolvedValue(undefined);
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(mockDeleteTodo).toHaveBeenCalledWith(existingTodo.id);
+  });
+
+  it("clears pendingAction and sets error on delete failure", async () => {
+    mockDeleteTodo.mockRejectedValue({ error: "INTERNAL_ERROR", message: "Network failure" });
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].pendingAction).toBeUndefined();
+    expect(result.current.todos[0].error).toBe("Network failure");
+  });
+
+  it("falls back to default error message on delete failure with no message", async () => {
+    mockDeleteTodo.mockRejectedValue({});
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].error).toBe("Failed to delete todo");
+  });
+
+  it("falls back to default error message on delete failure with null thrown", async () => {
+    mockDeleteTodo.mockRejectedValue(null);
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].error).toBe("Failed to delete todo");
+  });
+
+  it("ignores deleteTodo when item already has a pendingAction", async () => {
+    mockDeleteTodo.mockResolvedValue(undefined);
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    act(() => {
+      result.current.deleteTodo(existingTodo.id);
+    });
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(mockDeleteTodo).toHaveBeenCalledTimes(1);
+
+    await act(async () => {});
+  });
+
+  it("ignores deleteTodo when todo id does not exist", async () => {
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.deleteTodo("non-existent-id");
+    });
+
+    expect(mockDeleteTodo).not.toHaveBeenCalled();
+  });
+
+  it("does not affect other todos in state when deleting one", async () => {
+    const anotherTodo: Todo = {
+      id: "another-3",
+      text: "Another todo",
+      completed: false,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+    };
+    mockDeleteTodo.mockResolvedValue(undefined);
+    const { result } = renderHook(() => useTodos([existingTodo, anotherTodo]));
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos).toHaveLength(1);
+    expect(result.current.todos[0].id).toBe("another-3");
+    expect(result.current.todos[0].error).toBeUndefined();
+    expect(result.current.todos[0].pendingAction).toBeUndefined();
+  });
+
+  it("preserves other todos when delete fails", async () => {
+    const anotherTodo: Todo = {
+      id: "another-4",
+      text: "Another todo",
+      completed: false,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+    };
+    mockDeleteTodo.mockRejectedValue({ error: "INTERNAL_ERROR", message: "Oops" });
+    const { result } = renderHook(() => useTodos([existingTodo, anotherTodo]));
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
     });
 
     expect(result.current.todos[0].error).toBe("Oops");
