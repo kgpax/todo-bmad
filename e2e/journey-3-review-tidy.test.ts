@@ -14,7 +14,7 @@ test.describe("Journey 3: Review and Tidy", () => {
     await deleteAllTodos(request);
   });
 
-  test("completing a todo applies completed styling (strikethrough, reduced opacity)", async ({ request, page }) => {
+  test("completing a todo marks it as completed", async ({ request, page }) => {
     await seedTodos(request, ["Buy groceries"]);
     todo = new TodoPage(page);
     await todo.goto();
@@ -29,7 +29,7 @@ test.describe("Journey 3: Review and Tidy", () => {
     expect(isNowCompleted).toBe(true);
   });
 
-  test("uncompleting a todo restores active styling", async ({ request, page }) => {
+  test("uncompleting a todo restores it to active", async ({ request, page }) => {
     await seedCompletedTodos(request, ["Walk the dog"]);
     todo = new TodoPage(page);
     await todo.goto();

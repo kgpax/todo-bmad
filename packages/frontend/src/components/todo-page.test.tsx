@@ -104,7 +104,7 @@ describe("TodoPage", () => {
     });
   });
 
-  it("updates todo to completed styling after successful toggle", async () => {
+  it("updates todo to completed state after successful toggle", async () => {
     const user = userEvent.setup();
     mockToggleTodo.mockResolvedValue(completedVersion);
     render(<TodoPage initialTodos={[existingTodo]} emptyMessage="Nothing here yet" />);

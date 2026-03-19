@@ -358,7 +358,7 @@ describe("useTodos", () => {
     expect(mockToggleTodo).not.toHaveBeenCalled();
   });
 
-  it("does not affect other todos in state when toggling one (covers non-matching branch in map)", async () => {
+  it("does not affect other todos in state when toggling one", async () => {
     const anotherTodo: Todo = {
       id: "another-1",
       text: "Another todo",
@@ -379,7 +379,7 @@ describe("useTodos", () => {
     expect(result.current.todos[1].pendingAction).toBeUndefined();
   });
 
-  it("preserves other todos when toggle fails (covers non-matching branch in error map)", async () => {
+  it("preserves other todos when toggle fails", async () => {
     const anotherTodo: Todo = {
       id: "another-2",
       text: "Other todo",
