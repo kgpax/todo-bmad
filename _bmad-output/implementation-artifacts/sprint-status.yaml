@@ -35,7 +35,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, different LLM recommended)
 
 generated: 2026-03-17
-last_updated: 2026-03-19 # added story 2-5 eslint-backend-shared
+last_updated: 2026-03-19 # story 2-2 done
 project: todo-bmad
 project_key: NOKEY
 tracking_system: file-system
@@ -60,7 +60,7 @@ development_status:
   # Epic 2: Complete Todo Lifecycle
   epic-2: in-progress
   2-1-complete-uncomplete-todos: done
-  2-2-completed-section-divider: backlog
+  2-2-completed-section-divider: done
   2-3-delete-todos: backlog
   2-4-remove-shadcn-artifacts: backlog
   2-5-eslint-backend-shared: ready-for-dev

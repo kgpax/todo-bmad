@@ -1,5 +1,9 @@
 import "@testing-library/jest-dom";
 
+jest.mock("@formkit/auto-animate/react", () => ({
+  useAutoAnimate: () => [jest.fn()],
+}));
+
 // jsdom does not implement matchMedia — polyfill it so application code
 // (e.g. isDesktopDevice) can call window.matchMedia without throwing.
 Object.defineProperty(window, "matchMedia", {
