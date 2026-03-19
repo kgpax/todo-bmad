@@ -10,6 +10,17 @@
 - For **user-generated or locale-specific content**: ensure the server and client render the same value, or defer the dynamic portion to a client-only effect after hydration with an explicit loading/placeholder state.
 - If a genuine mismatch is unavoidable, document it explicitly and use a client-only component that renders `null` on the server and populates after mount — never suppress the warning.
 
+### Never assert on CSS class names or inline styles in tests
+
+CSS class names and computed CSS styles are implementation details that can change without breaking behaviour. **Never** use `className`, `toHaveClass()`, `getAttribute("class")`, `getComputedStyle()`, or any other CSS inspection in test assertions.
+
+Instead, expose state through semantic attributes that are stable by design:
+
+- **Prefer `aria-` attributes** for state that maps to an ARIA concept (e.g. `aria-disabled`, `aria-checked`, `aria-expanded`).
+- **Use `data-` attributes** for custom application state that has no ARIA equivalent (e.g. `data-completed="true"` on a todo card).
+
+Add the attribute to the component and query it in both unit tests and POM methods.
+
 ### E2E tests must use Page Object Models
 
 Playwright tests must use Page Object Models (POMs) from `e2e/pages/` rather than inline locators. Each POM class encapsulates locators, actions, and query helpers for a page or major UI region. Keep all assertions in the test files — POMs should not import `expect` or contain assertion logic. When a test needs to verify a visual property (e.g. focus ring, hover state), the POM exposes a query method returning a value and the test asserts on it.

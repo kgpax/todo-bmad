@@ -13,6 +13,7 @@ export function TodoItem({ todo, onToggle, pendingAction }: TodoItemProps) {
 
   return (
     <div
+      data-completed={todo.completed}
       className={[
         "bg-surface rounded-xl p-4 flex items-start gap-3",
         "transition-[transform,box-shadow,opacity] duration-(--duration-fast) ease-out",

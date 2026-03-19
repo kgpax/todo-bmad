@@ -66,26 +66,14 @@ describe("TodoItem", () => {
     expect(onToggle).toHaveBeenCalledWith(mockActiveTodo.id);
   });
 
-  it("completed todo text has line-through styling class", () => {
-    render(<TodoItem todo={mockCompletedTodo} onToggle={noop} />);
-    const text = screen.getByText(mockCompletedTodo.text);
-    expect(text.className).toContain("line-through");
-  });
-
-  it("active todo has transparent text-decoration-color class", () => {
-    render(<TodoItem todo={mockActiveTodo} onToggle={noop} />);
-    const text = screen.getByText(mockActiveTodo.text);
-    expect(text.className).toContain("[text-decoration-color:transparent]");
-  });
-
-  it("completed todo card has reduced opacity class", () => {
+  it("completed todo card has data-completed=true", () => {
     const { container } = render(<TodoItem todo={mockCompletedTodo} onToggle={noop} />);
-    expect(container.firstChild).toHaveClass("opacity-70");
+    expect(container.firstChild).toHaveAttribute("data-completed", "true");
   });
 
-  it("active todo card does not have reduced opacity class", () => {
+  it("active todo card has data-completed=false", () => {
     const { container } = render(<TodoItem todo={mockActiveTodo} onToggle={noop} />);
-    expect(container.firstChild).not.toHaveClass("opacity-70");
+    expect(container.firstChild).toHaveAttribute("data-completed", "false");
   });
 
   it("checkbox is disabled and has pending class when pendingAction is toggling", () => {

@@ -49,9 +49,8 @@ export class TodoPage {
     const item = this.todoList
       .locator('[role="listitem"]')
       .filter({ hasText: text });
-    const card = item.locator("> div").first();
-    const classes = await card.getAttribute("class");
-    return classes?.includes("opacity-70") ?? false;
+    const card = item.locator("[data-completed]").first();
+    return (await card.getAttribute("data-completed")) === "true";
   }
 
   /**
