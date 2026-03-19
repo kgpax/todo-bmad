@@ -45,6 +45,21 @@ describe("App", () => {
     expect(res.headers["access-control-allow-origin"]).toBeUndefined();
   });
 
+  it("CORS preflight allows PATCH and DELETE methods", async () => {
+    const res = await app.inject({
+      method: "OPTIONS",
+      url: "/api/todos/some-id",
+      headers: {
+        origin: "http://localhost:3000",
+        "access-control-request-method": "PATCH",
+        "access-control-request-headers": "content-type",
+      },
+    });
+    expect(res.statusCode).toBe(204);
+    expect(res.headers["access-control-allow-methods"]).toContain("PATCH");
+    expect(res.headers["access-control-allow-methods"]).toContain("DELETE");
+  });
+
   it("unhandled errors return { error, message } format without internals", async () => {
     app.get("/throw", async () => {
       throw new Error("secret internal message");

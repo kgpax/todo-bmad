@@ -1,25 +1,29 @@
 import React from "react";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { TodoPage } from "./todo-page";
 import type { Todo } from "@todo-bmad/shared";
 
 jest.mock("@/lib/api", () => ({
   createTodo: jest.fn(),
+  toggleTodo: jest.fn(),
 }));
 
 jest.mock("@/lib/actions", () => ({
   revalidateHome: jest.fn().mockResolvedValue(undefined),
 }));
 
-import { createTodo } from "@/lib/api";
+import { createTodo, toggleTodo } from "@/lib/api";
 
 const mockCreateTodo = createTodo as jest.MockedFunction<typeof createTodo>;
+const mockToggleTodo = toggleTodo as jest.MockedFunction<typeof toggleTodo>;
 
 const existingTodo: Todo = {
   id: "existing-1",
   text: "Existing todo",
   completed: false,
   createdAt: new Date().toISOString(),
+  completedAt: null,
 };
 
 const newTodo: Todo = {
@@ -27,6 +31,13 @@ const newTodo: Todo = {
   text: "Walk the dog",
   completed: false,
   createdAt: new Date().toISOString(),
+  completedAt: null,
+};
+
+const completedVersion: Todo = {
+  ...existingTodo,
+  completed: true,
+  completedAt: new Date().toISOString(),
 };
 
 describe("TodoPage", () => {
@@ -77,6 +88,31 @@ describe("TodoPage", () => {
     await waitFor(() => {
       expect(screen.queryByRole("status")).not.toBeInTheDocument();
       expect(screen.getByRole("list")).toBeInTheDocument();
+    });
+  });
+
+  it("wires toggleTodo through to the TodoList checkboxes", async () => {
+    const user = userEvent.setup();
+    mockToggleTodo.mockResolvedValue(completedVersion);
+    render(<TodoPage initialTodos={[existingTodo]} emptyMessage="Nothing here yet" />);
+
+    const checkbox = screen.getByRole("checkbox");
+    await user.click(checkbox);
+
+    await waitFor(() => {
+      expect(mockToggleTodo).toHaveBeenCalledWith(existingTodo.id, true);
+    });
+  });
+
+  it("updates todo to completed styling after successful toggle", async () => {
+    const user = userEvent.setup();
+    mockToggleTodo.mockResolvedValue(completedVersion);
+    render(<TodoPage initialTodos={[existingTodo]} emptyMessage="Nothing here yet" />);
+
+    await user.click(screen.getByRole("checkbox"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("checkbox")).toBeChecked();
     });
   });
 });

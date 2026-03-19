@@ -645,6 +645,36 @@ So that I can keep my list clean and focused on what matters.
 **When** a user completes two items, uncompletes one, and deletes another
 **Then** the list correctly reflects all state changes with proper section placement
 
+### Story 2.4: Remove shadcn Artifacts
+
+As a developer,
+I want unused shadcn/ui scaffolding removed from the frontend package,
+So that the codebase only contains dependencies and configuration that are actually used.
+
+**Background:** shadcn/ui was initialized during project scaffolding (Story 1.1) but no components were ever added via `npx shadcn add`. Every component was hand-built using Radix UI primitives directly with custom Tailwind styling. The shadcn CLI layer and several of its dependencies are unused dead weight.
+
+**Acceptance Criteria:**
+
+**Given** the frontend package
+**When** `components.json` is inspected
+**Then** it has been deleted (shadcn CLI config is no longer needed)
+
+**Given** the frontend `package.json`
+**When** dependencies are inspected
+**Then** `@radix-ui/react-slot` and `class-variance-authority` have been removed (unused shadcn dependencies)
+
+**Given** the frontend codebase
+**When** all source files are inspected
+**Then** no file imports from `@radix-ui/react-slot` or `class-variance-authority`
+
+**Given** dependencies that remain (`clsx`, `tailwind-merge`, `lucide-react`, `@radix-ui/react-checkbox`)
+**When** the project builds and all tests pass
+**Then** no functionality is affected by the removal
+
+**Given** `npm run test` and `npm run build`
+**When** executed after removal
+**Then** both pass cleanly with no errors
+
 ## Epic 3: Resilient Experience
 
 User receives friendly, personality-driven error feedback when things go wrong. Loading states keep the interface composed. Failed creates preserve input. The app shell renders even when the API is unavailable.

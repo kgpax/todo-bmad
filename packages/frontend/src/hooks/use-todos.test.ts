@@ -4,21 +4,24 @@ import type { Todo } from "@todo-bmad/shared";
 
 jest.mock("@/lib/api", () => ({
   createTodo: jest.fn(),
+  toggleTodo: jest.fn(),
 }));
 
 jest.mock("@/lib/actions", () => ({
   revalidateHome: jest.fn().mockResolvedValue(undefined),
 }));
 
-import { createTodo } from "@/lib/api";
+import { createTodo, toggleTodo } from "@/lib/api";
 
 const mockCreateTodo = createTodo as jest.MockedFunction<typeof createTodo>;
+const mockToggleTodo = toggleTodo as jest.MockedFunction<typeof toggleTodo>;
 
 const existingTodo: Todo = {
   id: "existing-1",
   text: "Existing todo",
   completed: false,
   createdAt: new Date().toISOString(),
+  completedAt: null,
 };
 
 const newTodo: Todo = {
@@ -26,6 +29,13 @@ const newTodo: Todo = {
   text: "New todo",
   completed: false,
   createdAt: new Date().toISOString(),
+  completedAt: null,
+};
+
+const completedTodo: Todo = {
+  ...existingTodo,
+  completed: true,
+  completedAt: new Date().toISOString(),
 };
 
 describe("useTodos", () => {
@@ -220,5 +230,171 @@ describe("useTodos", () => {
     await act(async () => {
       resolveCreate(newTodo);
     });
+  });
+
+  // toggleTodo tests
+  it("exposes toggleTodo function", () => {
+    const { result } = renderHook(() => useTodos([existingTodo]));
+    expect(typeof result.current.toggleTodo).toBe("function");
+  });
+
+  it("sets pendingAction to toggling during toggle API call", async () => {
+    let resolveToggle!: (value: Todo) => void;
+    mockToggleTodo.mockReturnValue(
+      new Promise<Todo>((resolve) => {
+        resolveToggle = resolve;
+      })
+    );
+
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    act(() => {
+      result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].pendingAction).toBe("toggling");
+
+    await act(async () => {
+      resolveToggle(completedTodo);
+    });
+  });
+
+  it("updates todo completed and completedAt on successful toggle", async () => {
+    mockToggleTodo.mockResolvedValue(completedTodo);
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].completed).toBe(true);
+    expect(result.current.todos[0].completedAt).not.toBeNull();
+    expect(result.current.todos[0].pendingAction).toBeUndefined();
+  });
+
+  it("calls apiToggleTodo with correct arguments (toggling active → true)", async () => {
+    mockToggleTodo.mockResolvedValue(completedTodo);
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(mockToggleTodo).toHaveBeenCalledWith(existingTodo.id, true);
+  });
+
+  it("calls apiToggleTodo with false when toggling a completed todo", async () => {
+    mockToggleTodo.mockResolvedValue(existingTodo);
+    const { result } = renderHook(() => useTodos([completedTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo(completedTodo.id);
+    });
+
+    expect(mockToggleTodo).toHaveBeenCalledWith(completedTodo.id, false);
+  });
+
+  it("clears pendingAction and sets error on toggle failure", async () => {
+    mockToggleTodo.mockRejectedValue({ error: "INTERNAL_ERROR", message: "Network failure" });
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].pendingAction).toBeUndefined();
+    expect(result.current.todos[0].error).toBe("Network failure");
+  });
+
+  it("falls back to default error message on toggle failure with no message", async () => {
+    mockToggleTodo.mockRejectedValue({});
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].error).toBe("Failed to update todo");
+  });
+
+  it("falls back to default error message on toggle failure with null thrown", async () => {
+    mockToggleTodo.mockRejectedValue(null);
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].error).toBe("Failed to update todo");
+  });
+
+  it("ignores toggleTodo when item already has a pendingAction", async () => {
+    mockToggleTodo.mockResolvedValue(completedTodo);
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    // Start first toggle without awaiting
+    act(() => {
+      result.current.toggleTodo(existingTodo.id);
+    });
+
+    // Try to toggle again while pending
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(mockToggleTodo).toHaveBeenCalledTimes(1);
+
+    // Let the first toggle complete
+    await act(async () => {});
+  });
+
+  it("ignores toggleTodo when todo id does not exist", async () => {
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo("non-existent-id");
+    });
+
+    expect(mockToggleTodo).not.toHaveBeenCalled();
+  });
+
+  it("does not affect other todos in state when toggling one (covers non-matching branch in map)", async () => {
+    const anotherTodo: Todo = {
+      id: "another-1",
+      text: "Another todo",
+      completed: false,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+    };
+    mockToggleTodo.mockResolvedValue(completedTodo);
+    const { result } = renderHook(() => useTodos([existingTodo, anotherTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].completed).toBe(true);
+    expect(result.current.todos[1].id).toBe("another-1");
+    expect(result.current.todos[1].completed).toBe(false);
+    expect(result.current.todos[1].pendingAction).toBeUndefined();
+  });
+
+  it("preserves other todos when toggle fails (covers non-matching branch in error map)", async () => {
+    const anotherTodo: Todo = {
+      id: "another-2",
+      text: "Other todo",
+      completed: false,
+      createdAt: new Date().toISOString(),
+      completedAt: null,
+    };
+    mockToggleTodo.mockRejectedValue({ error: "INTERNAL_ERROR", message: "Oops" });
+    const { result } = renderHook(() => useTodos([existingTodo, anotherTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].error).toBe("Oops");
+    expect(result.current.todos[1].error).toBeUndefined();
   });
 });

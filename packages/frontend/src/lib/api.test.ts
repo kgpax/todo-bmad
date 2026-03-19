@@ -1,4 +1,4 @@
-import { fetchTodos, createTodo } from "./api";
+import { fetchTodos, createTodo, toggleTodo } from "./api";
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch as typeof fetch;
@@ -10,7 +10,7 @@ beforeEach(() => {
 describe("fetchTodos", () => {
   it("returns todos array on success", async () => {
     const todos = [
-      { id: "1", text: "Test", completed: false, createdAt: "2026-01-01T00:00:00.000Z" },
+      { id: "1", text: "Test", completed: false, createdAt: "2026-01-01T00:00:00.000Z", completedAt: null },
     ];
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -63,6 +63,7 @@ describe("createTodo", () => {
       text: "Test",
       completed: false,
       createdAt: "2026-01-01T00:00:00.000Z",
+      completedAt: null,
     };
     mockFetch.mockResolvedValueOnce({
       ok: true,
@@ -92,6 +93,73 @@ describe("createTodo", () => {
     await expect(createTodo("Test")).rejects.toEqual({
       error: "INTERNAL_ERROR",
       message: "Failed to create todo",
+    });
+  });
+});
+
+describe("toggleTodo", () => {
+  const updatedTodo = {
+    id: "1",
+    text: "Test",
+    completed: true,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    completedAt: "2026-03-19T10:00:00.000Z",
+  };
+
+  it("returns updated todo on success (completing)", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ todo: updatedTodo }),
+    });
+
+    const result = await toggleTodo("1", true);
+    expect(result).toEqual(updatedTodo);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/todos/1"),
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ completed: true }),
+      })
+    );
+  });
+
+  it("returns updated todo on success (uncompleting)", async () => {
+    const uncompleted = { ...updatedTodo, completed: false, completedAt: null };
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ todo: uncompleted }),
+    });
+
+    const result = await toggleTodo("1", false);
+    expect(result).toEqual(uncompleted);
+    expect(mockFetch).toHaveBeenCalledWith(
+      expect.stringContaining("/api/todos/1"),
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ completed: false }),
+      })
+    );
+  });
+
+  it("throws parsed ApiError when response is not ok with valid JSON error body", async () => {
+    const apiError = { error: "NOT_FOUND", message: "Todo not found" };
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: () => Promise.resolve(apiError),
+    });
+
+    await expect(toggleTodo("999", true)).rejects.toEqual(apiError);
+  });
+
+  it("throws fallback ApiError when response is not ok with invalid JSON body", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: () => Promise.reject(new Error("Invalid JSON")),
+    });
+
+    await expect(toggleTodo("1", true)).rejects.toEqual({
+      error: "INTERNAL_ERROR",
+      message: "Failed to update todo",
     });
   });
 });

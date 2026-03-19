@@ -15,4 +15,5 @@ export const todoSchema = z.object({
   text: z.string(),
   completed: z.boolean(),
   createdAt: z.string().datetime(),
+  completedAt: z.string().datetime().nullable(),
 });
