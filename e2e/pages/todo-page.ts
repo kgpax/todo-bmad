@@ -35,10 +35,56 @@ export class TodoPage {
   }
 
   checkbox(todoText: string) {
+    // Exclude [data-disabled] to avoid matching auto-animate exit-animation clones,
+    // which are briefly in the DOM alongside the real element during FLIP transitions.
     return this.todoList
       .locator('[role="listitem"]')
       .filter({ hasText: todoText })
-      .getByRole("checkbox");
+      .locator('[role="checkbox"]:not([data-disabled])');
+  }
+
+  divider() {
+    return this.todoList.locator('[role="separator"]');
+  }
+
+  /**
+   * Returns the todo text (first <p>) for each listitem in DOM order.
+   * Because the divider has role="separator" (not "listitem"), it is excluded.
+   * Active items come first, then completed items.
+   */
+  async orderedTodoTexts(): Promise<string[]> {
+    const items = this.todoList.locator('[role="listitem"]');
+    const count = await items.count();
+    const texts: string[] = [];
+    for (let i = 0; i < count; i++) {
+      const text = await items.nth(i).locator("p").first().textContent();
+      if (text) texts.push(text.trim());
+    }
+    return texts;
+  }
+
+  async isTodoAboveDivider(text: string): Promise<boolean> {
+    const item = this.todoList
+      .locator('[role="listitem"]')
+      .filter({ hasText: text })
+      .first();
+    const divider = this.divider();
+    return item.evaluate((itemEl, dividerEl) => {
+      const siblings = Array.from(itemEl.parentElement!.children);
+      return siblings.indexOf(itemEl) < siblings.indexOf(dividerEl as Element);
+    }, await divider.elementHandle());
+  }
+
+  async isTodoBelowDivider(text: string): Promise<boolean> {
+    const item = this.todoList
+      .locator('[role="listitem"]')
+      .filter({ hasText: text })
+      .first();
+    const divider = this.divider();
+    return item.evaluate((itemEl, dividerEl) => {
+      const siblings = Array.from(itemEl.parentElement!.children);
+      return siblings.indexOf(itemEl) > siblings.indexOf(dividerEl as Element);
+    }, await divider.elementHandle());
   }
 
   async toggleTodo(text: string) {
@@ -46,11 +92,13 @@ export class TodoPage {
   }
 
   async isCompleted(text: string): Promise<boolean> {
-    const item = this.todoList
+    // Use the enabled checkbox's checked state rather than data-completed, so that
+    // auto-animate exit-animation clones (which have [data-disabled]) are excluded.
+    const checkbox = this.todoList
       .locator('[role="listitem"]')
-      .filter({ hasText: text });
-    const card = item.locator("[data-completed]").first();
-    return (await card.getAttribute("data-completed")) === "true";
+      .filter({ hasText: text })
+      .locator('[role="checkbox"]:not([data-disabled])');
+    return await checkbox.isChecked();
   }
 
   /**
