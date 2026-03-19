@@ -497,7 +497,6 @@ todo-bmad/
 │       ├── tsconfig.json
 │       ├── next.config.ts              (ISR config, API_URL env)
 │       ├── jest.config.ts
-│       ├── components.json             (shadcn/ui config)
 │       ├── .env.local                  (NEXT_PUBLIC_API_URL, API_URL — gitignored)
 │       ├── .env.example
 │       ├── public/

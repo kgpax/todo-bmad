@@ -1,6 +1,6 @@
 # Story 2.4: Remove shadcn Artifacts
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -204,3 +204,4 @@ No issues encountered. Straightforward cleanup story with no source code changes
 ### Change Log
 
 - 2026-03-19: Deleted `components.json`; removed `@radix-ui/react-slot`, `class-variance-authority`, `jiti` from `packages/frontend/package.json`; regenerated `package-lock.json` via clean install. All tests, build, lint, E2E, and Lighthouse gates pass.
+- 2026-03-19: Code review passed. All 6 ACs verified implemented. All 14 subtasks confirmed complete. Git changes fully consistent with story File List. Lint, build, 201 tests (100% coverage) verified independently. Zero issues found. Status → done.
