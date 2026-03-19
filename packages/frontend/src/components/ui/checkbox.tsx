@@ -24,9 +24,9 @@ export function Checkbox({ checked, onCheckedChange, "aria-label": ariaLabel, pe
           : "border-text-placeholder bg-transparent",
         pending ? "opacity-50 cursor-not-allowed animate-pulse" : "cursor-pointer",
       ].join(" ")}
-      style={checked ? { backgroundColor: "var(--color-accent)", borderColor: "var(--color-accent)" } : undefined}
     >
       <CheckboxPrimitive.Indicator
+        forceMount
         className="flex items-center justify-center transition-transform duration-[var(--duration-fast)] ease-out data-[state=checked]:scale-100 data-[state=unchecked]:scale-0"
       >
         <Check className="h-3 w-3 text-white" strokeWidth={3} />

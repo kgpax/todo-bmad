@@ -1,14 +1,15 @@
-import { test, expect } from "@playwright/test";
+import { test, expect, type APIRequestContext } from "@playwright/test";
 import { deleteAllTodos, seedTodos } from "./helpers";
 import { TodoPage } from "./pages/todo-page";
 
 const API_URL = "http://localhost:3001";
 
-async function seedCompletedTodo(request: ConstructorParameters<typeof Object>[0] & { post: Function; patch: Function }, text: string) {
+async function seedCompletedTodo(request: APIRequestContext, text: string) {
   const created = await request.post(`${API_URL}/api/todos`, { data: { text } });
   const { todo } = await created.json();
-  await request.patch(`${API_URL}/api/todos/${todo.id}`, { data: { completed: true } });
-  return todo;
+  const patched = await request.patch(`${API_URL}/api/todos/${todo.id}`, { data: { completed: true } });
+  const { todo: completedTodo } = await patched.json();
+  return completedTodo;
 }
 
 test.describe("Journey 3: Review and Tidy", () => {

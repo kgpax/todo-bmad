@@ -1,6 +1,6 @@
 # Story 2.1: Complete & Uncomplete Todos
 
-Status: review
+Status: done
 
 <!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
@@ -639,7 +639,12 @@ claude-4.6-sonnet-medium-thinking (2026-03-19)
 - `packages/frontend/src/components/todo-page.test.tsx`
 - `e2e/pages/todo-page.ts`
 - `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/planning-artifacts/architecture.md`
+- `_bmad-output/planning-artifacts/epics.md`
+- `project-context.md`
+- `packages/frontend/package.json`
 
 ### Change Log
 
 - 2026-03-19: Implemented Story 2.1 — complete/uncomplete todos with checkbox UI, completedAt field, per-item pending state, CORS fix for PATCH method
+- 2026-03-19: Code review fixes — added forceMount to Checkbox Indicator for check-in animation (M1), documented missing files in File List (M2), removed redundant inline style on Checkbox (L1), fixed E2E seedCompletedTodo typing and return value (L2)

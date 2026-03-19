@@ -675,6 +675,48 @@ So that the codebase only contains dependencies and configuration that are actua
 **When** executed after removal
 **Then** both pass cleanly with no errors
 
+### Story 2.5: ESLint for Backend & Shared Packages
+
+As a developer,
+I want ESLint configured for the backend and shared packages with the same rigor as the frontend,
+So that all three workspace packages have consistent code quality enforcement beyond what TypeScript's type checker alone catches.
+
+**Background:** During the Story 2.1 code review, it was discovered that only the frontend package has ESLint configured. The backend and shared packages rely solely on TypeScript's `tsc` for type checking, missing code quality issues that ESLint catches (unused variables, inconsistent patterns, etc.).
+
+**Acceptance Criteria:**
+
+**Given** the backend package
+**When** `eslint.config.mjs` is inspected
+**Then** it configures `typescript-eslint` with recommended rules for TypeScript files in `src/`
+
+**Given** the shared package
+**When** `eslint.config.mjs` is inspected
+**Then** it configures `typescript-eslint` with recommended rules for TypeScript files in `src/`
+
+**Given** the backend ESLint config
+**When** `npm run lint -w packages/backend` is run
+**Then** all existing source files pass with 0 errors and 0 warnings
+
+**Given** the shared ESLint config
+**When** `npm run lint -w packages/shared` is run
+**Then** all existing source files pass with 0 errors and 0 warnings
+
+**Given** the root `package.json`
+**When** `npm run lint` is run
+**Then** it lints all three packages: shared, backend, and frontend
+
+**Given** both new ESLint configs
+**When** generated output directories are inspected
+**Then** `dist/`, `coverage/`, and `drizzle/` (backend only) directories are excluded from linting
+
+**Given** the existing frontend ESLint config
+**When** inspected after this story
+**Then** it is unchanged — no regressions to frontend linting
+
+**Given** all three packages
+**When** `npm run lint` is run from the root
+**Then** the command exits 0 with no errors across any package
+
 ## Epic 3: Resilient Experience
 
 User receives friendly, personality-driven error feedback when things go wrong. Loading states keep the interface composed. Failed creates preserve input. The app shell renders even when the API is unavailable.
