@@ -86,10 +86,22 @@ function isServerRunning(url) {
 }
 
 function warmUpServer(url) {
+  const start = Date.now();
   return new Promise((resolve) => {
     require("http")
-      .get(url, (res) => { res.resume(); resolve(); })
-      .on("error", () => resolve()); // ignore errors — warmup is best-effort
+      .get(url, (res) => {
+        res.resume(); // drain body
+        res.on("end", () => {
+          const elapsed = Date.now() - start;
+          log(`   Warmup response: HTTP ${res.statusCode} in ${elapsed} ms`);
+          resolve();
+        });
+      })
+      .on("error", (err) => {
+        const elapsed = Date.now() - start;
+        log(`   Warmup error after ${elapsed} ms: ${err.message}`);
+        resolve(); // best-effort — don't abort the audit
+      });
   });
 }
 
