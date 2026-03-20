@@ -170,6 +170,28 @@ The script exits with a non-zero code if any score is below its required thresho
 | Best Practices | **100** | **100** |
 | SEO | **100** | **100** |
 
-Performance floor is 90 for both platforms. Desktop observed ~93–94 (LCP ~1.7s due to dynamic route blocking on API fetch before streaming HTML); mobile observed 100 consistently. Improving the enforced floor is deferred to a later story. All other categories must remain at 100 unless a drop is technically unavoidable — document reason and minimum in the story's Dev Agent Record.
+Performance floor is 90 for both platforms. Desktop observed ~93–94 (LCP ~1.7s due to dynamic route blocking on API fetch before streaming HTML); mobile observed 100 consistently. All other categories must remain at 100 unless a drop is technically unavoidable — document reason and minimum in the story's Dev Agent Record.
 
 > **Note:** The Chrome DevTools MCP server is NOT used for Lighthouse audits. The `test:lighthouse` script uses the `lighthouse` npm package directly with a headless Chrome flag.
+
+### ADR: React Suspense streaming via `loading.tsx` rejected (2026-03-20)
+
+**Context:** Story 3-1 proposed adding `packages/frontend/src/app/loading.tsx` to create a Suspense boundary around `page.tsx`. The hypothesis was that streaming would improve desktop Lighthouse performance by sending a skeleton shell immediately while the API fetch resolved, reducing both FCP and LCP.
+
+**Decision:** The `loading.tsx` streaming approach was implemented, tested, and **rejected**. All implementation was fully reverted.
+
+**Measured results:**
+
+| Metric | Without `loading.tsx` | With `loading.tsx` |
+|---|---|---|
+| FCP | ~1.7 s | ~0.8 s |
+| LCP | ~1.7 s (consistent) | 1.7–2.4 s (variable) |
+| Desktop Lighthouse Performance | 93–94 (stable) | 87–93 (fails ≥90 in ~70% of runs) |
+
+**Root cause:** Suspense streaming splits the render into two phases — skeleton HTML arrives immediately (FCP), then real content arrives as a streaming chunk after `fetchTodos()` resolves and React processes the `$RC()` update (LCP). Phase 2 LCP is dominated by JavaScript bundle execution time during React hydration in headless Chrome. V8 JIT warm-up and CPU scheduler variability cause LCP to swing by up to 700 ms between runs. Without streaming, FCP and LCP are the same single-phase render event, so LCP is consistent.
+
+**Consequences:**
+- The 90 performance floor is preserved. Desktop LCP remains at ~1.7 s (consistent).
+- **Do not re-attempt `loading.tsx`** or any App Router Suspense streaming boundary on this stack without first solving the two-phase LCP variability problem (e.g., by reducing the JavaScript bundle size enough that Phase 2 hydration is negligible).
+- The SkeletonLoader component concept is still valid for **client-side** loading states (e.g., error-retry flows in stories 3-3 and 3-4), but must not be delivered via a route-level Suspense boundary.
+- Stories 3-3 (Initial Load Error) and 3-4 (Graceful Degradation) need their SkeletonLoader/`loading.tsx` references revisited to use a client-side approach instead.

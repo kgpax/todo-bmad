@@ -1,8 +1,14 @@
 # Story 3.1: Loading State & Skeleton Loader
 
-Status: ready-for-dev
+Status: cancelled
 
-<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
+## Cancellation Summary
+
+**Cancelled 2026-03-20** — React Suspense streaming via `loading.tsx` was implemented and tested. It improved FCP (~1.7 s → ~0.8 s) but caused an LCP regression (consistent ~1.7 s → variable 1.7–2.4 s), dropping desktop Lighthouse performance from a stable 93–94 to 87–93 and failing the enforced 90 floor in ~70% of runs. The two-phase streaming render introduced V8 JIT and CPU scheduler variability that made LCP unreliable.
+
+Kevin decided the performance regression was not acceptable: the skeleton loader did not offer enough user value to justify a consistently slower LCP. All implementation was fully reverted. The `loading.tsx` streaming approach is recorded as a rejected architectural decision in `project-context.md`.
+
+**Downstream impact:** Stories 3-3 (Initial Load Error) and 3-4 (Graceful Degradation) reference the SkeletonLoader and `loading.tsx`. These stories need their approaches revisited — the SkeletonLoader component may still be useful in client-side error/retry flows, but the `loading.tsx` Suspense boundary mechanism is off the table. See the ADR in `project-context.md` for details.
 
 ## Story
 

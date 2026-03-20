@@ -190,3 +190,4 @@ For cases where we spot things which are not necessarily linked to the current s
   - It suggested that story 3-1 to introduce the loading state would improve this, but it actually ended up making it worse (dropped to 87/100)
   - Despite this, the agent wanted to push ahead and drop the threshold from 90 to 85, which I had to stop and tell it that performance regressions are not an option
   - In the end, I asked it to abandon the loading skeleton implementation; as it didn't offer enough user value to justify a consistently slower LCP
+  - The story was marked as cancelled
