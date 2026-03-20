@@ -2,7 +2,7 @@
 title: 'Docker Compose Containerization'
 slug: 'docker-compose-containerization'
 created: '2026-03-20'
-status: 'ready-for-dev'
+status: 'completed'
 stepsCompleted: [1, 2, 3, 4]
 tech_stack: [docker, docker-compose, node-alpine, multi-stage-builds]
 files_to_modify: [packages/frontend/next.config.ts]
@@ -125,7 +125,7 @@ Add production-optimized Dockerfiles for the frontend and backend services, plus
 
 ### Tasks
 
-- [ ] Task 1: Create root `.dockerignore`
+- [x] Task 1: Create root `.dockerignore`
   - File: `.dockerignore` (create)
   - Action: Create a `.dockerignore` file at the monorepo root that excludes files not needed in the Docker build context. This keeps image builds fast by reducing the context sent to the Docker daemon.
   - Content to exclude:
@@ -140,7 +140,7 @@ Add production-optimized Dockerfiles for the frontend and backend services, plus
     - `_bmad*` (planning artifacts not needed in production images)
     - `*.md` (documentation not needed in production images)
 
-- [ ] Task 2: Add `output: 'standalone'` to Next.js config
+- [x] Task 2: Add `output: 'standalone'` to Next.js config
   - File: `packages/frontend/next.config.ts` (modify)
   - Action: Add `output: "standalone"` to the `nextConfig` object. The existing `outputFileTracingRoot` remains unchanged.
   - Result after change:
@@ -152,7 +152,7 @@ Add production-optimized Dockerfiles for the frontend and backend services, plus
     ```
   - Notes: This changes the production build output format — `next build` will now also produce a `.next/standalone/` directory on the host. This is gitignored and does not affect `next dev` or `next start` on the host, but it does add to the build output structure. No functional impact to existing workflows.
 
-- [ ] Task 3: Create backend Dockerfile
+- [x] Task 3: Create backend Dockerfile
   - File: `packages/backend/Dockerfile` (create)
   - Action: Create a multi-stage Dockerfile for the backend service.
   - **CRITICAL:** Both stages MUST use the exact same `node:20-alpine` tag so that native `better-sqlite3` bindings compiled in the build stage are binary-compatible when copied to the production stage.
@@ -179,7 +179,7 @@ Add production-optimized Dockerfiles for the frontend and backend services, plus
     10. Expose port `3001`
     11. `CMD ["node", "packages/backend/dist/index.js"]`
 
-- [ ] Task 4: Create frontend Dockerfile
+- [x] Task 4: Create frontend Dockerfile
   - File: `packages/frontend/Dockerfile` (create)
   - Action: Create a multi-stage Dockerfile for the frontend service.
   - **Stage 1 — `builder`** (based on `node:20-alpine`):
@@ -209,7 +209,7 @@ Add production-optimized Dockerfiles for the frontend and backend services, plus
     10. `CMD ["node", "packages/frontend/server.js"]`
   - Notes: The `COPY .next/standalone/ /app/` flattens the standalone output into `/app/`. The server entry becomes `/app/packages/frontend/server.js`. The static assets must land at `/app/packages/frontend/.next/static/` relative to where the server expects them.
 
-- [ ] Task 5: Create `docker-compose.yml`
+- [x] Task 5: Create `docker-compose.yml`
   - File: `docker-compose.yml` (create)
   - Action: Create a Docker Compose file orchestrating both services.
   - Content:
@@ -271,6 +271,14 @@ Add production-optimized Dockerfiles for the frontend and backend services, plus
 - [ ] AC 10: Given the backend container is running, when I run `docker compose exec backend node -e "process.exit(0)"`, then it exits successfully, confirming the Node.js runtime is functional inside the container.
 
 - [ ] AC 11: Given both containers are running, when I run `docker compose down` (not `down -v`), then the containers stop within a few seconds (confirming `init: true` provides proper signal handling rather than waiting for the 10-second SIGKILL timeout).
+
+## Review Notes
+
+- Adversarial review completed
+- Findings: 12 total, 8 fixed, 4 skipped (noise/low-impact)
+- Resolution approach: auto-fix
+- Fixed: F1 (wget flag), F2 (dangling workspace symlink), F3 (.dockerignore glob depth), F4 (Next.js telemetry), F8 (HOSTNAME baked into image), F9 (OS artifacts in .dockerignore), F10 (docker-compose name), F12 (env file patterns)
+- Skipped as noise: F5 (ENV ordering style), F6 (PORT default is correct), F7 (resource limits out of scope), F11 (standalone tracing handles devDep exclusion)
 
 ## Additional Context
 
