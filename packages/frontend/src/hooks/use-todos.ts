@@ -8,6 +8,7 @@ import { revalidateHome } from "@/lib/actions";
 export interface TodoWithMeta extends Todo {
   pendingAction?: "creating" | "toggling" | "deleting";
   error?: string;
+  errorType?: "toggle" | "delete";
 }
 
 export function useTodos(initialTodos: Todo[]) {
@@ -29,6 +30,10 @@ export function useTodos(initialTodos: Todo[]) {
     : todos.length === 0
       ? "empty"
       : "hasItems";
+
+  function clearCreateError() {
+    setCreateError(null);
+  }
 
   async function addTodo(text: string) {
     const trimmed = text.trim();
@@ -77,7 +82,12 @@ export function useTodos(initialTodos: Todo[]) {
       setTodos((prev) =>
         prev.map((t) =>
           t.id === id
-            ? { ...t, pendingAction: undefined, error: apiError?.message || "Failed to update todo" }
+            ? {
+                ...t,
+                pendingAction: undefined,
+                error: apiError?.message || "Failed to update todo",
+                errorType: "toggle" as const,
+              }
             : t
         )
       );
@@ -103,12 +113,28 @@ export function useTodos(initialTodos: Todo[]) {
       setTodos((prev) =>
         prev.map((t) =>
           t.id === id
-            ? { ...t, pendingAction: undefined, error: apiError?.message || "Failed to delete todo" }
+            ? {
+                ...t,
+                pendingAction: undefined,
+                error: apiError?.message || "Failed to delete todo",
+                errorType: "delete" as const,
+              }
             : t
         )
       );
     }
   }
 
-  return { todos, addTodo, toggleTodo, deleteTodo, isCreating, justAdded, placeholderContext, createError, cachedCreateText };
+  return {
+    todos,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    isCreating,
+    justAdded,
+    placeholderContext,
+    createError,
+    cachedCreateText,
+    clearCreateError,
+  };
 }

@@ -12,7 +12,17 @@ interface TodoPageProps {
 }
 
 export function TodoPage({ initialTodos, emptyMessage }: TodoPageProps) {
-  const { todos, addTodo, toggleTodo, deleteTodo, isCreating, placeholderContext } = useTodos(initialTodos);
+  const {
+    todos,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    isCreating,
+    placeholderContext,
+    createError,
+    cachedCreateText,
+    clearCreateError,
+  } = useTodos(initialTodos);
 
   return (
     <div className="pt-8 md:pt-12 lg:pt-16 flex flex-col gap-4">
@@ -20,6 +30,9 @@ export function TodoPage({ initialTodos, emptyMessage }: TodoPageProps) {
         onSubmit={addTodo}
         placeholderContext={placeholderContext}
         disabled={isCreating}
+        createError={createError}
+        cachedCreateText={cachedCreateText}
+        onClearError={clearCreateError}
       />
       {todos.length > 0 ? (
         <TodoList todos={todos} onToggle={toggleTodo} onDelete={deleteTodo} />

@@ -126,4 +126,41 @@ export class TodoPage {
     );
     return FOCUS_RING_PATTERN.test(boxShadow);
   }
+
+  /**
+   * Returns the create error callout by its stable id.
+   * This avoids matching the Next.js route announcer which also uses role="alert".
+   */
+  createErrorCallout() {
+    return this.page.locator('[id="error-callout-create"]');
+  }
+
+  /**
+   * Returns the error callout (role="alert") for a specific todo item.
+   * Uses the stable id pattern: error-callout-{todoId}.
+   */
+  getItemErrorCallout(todoText: string) {
+    return this.todoList
+      .locator('[role="listitem"]')
+      .filter({ hasText: todoText })
+      .locator('[role="alert"]:not([id="__next-route-announcer__"])');
+  }
+
+  /**
+   * Clicks the "Restore" button inside the create error callout.
+   */
+  async restoreText() {
+    await this.page.getByRole("button", { name: /restore/i }).click();
+  }
+
+  /**
+   * Returns true if the element for the given todo has data-error-animate="true".
+   */
+  async isCardShaking(todoText: string): Promise<boolean> {
+    const card = this.todoList
+      .locator('[role="listitem"]')
+      .filter({ hasText: todoText })
+      .locator("[data-completed]");
+    return (await card.getAttribute("data-error-animate")) === "true";
+  }
 }

@@ -7,6 +7,7 @@ import {
   HAS_ITEMS_PLACEHOLDERS,
   JUST_ADDED_PLACEHOLDERS,
 } from "@/config/placeholders";
+import { ErrorCallout } from "@/components/error-callout";
 
 type PlaceholderContext = "empty" | "hasItems" | "justAdded";
 
@@ -14,6 +15,9 @@ interface TodoInputProps {
   onSubmit: (text: string) => void;
   placeholderContext: PlaceholderContext;
   disabled?: boolean;
+  createError?: string | null;
+  cachedCreateText?: string;
+  onClearError?: () => void;
 }
 
 function getPlaceholderBank(context: PlaceholderContext) {
@@ -22,7 +26,14 @@ function getPlaceholderBank(context: PlaceholderContext) {
   return EMPTY_LIST_PLACEHOLDERS;
 }
 
-export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputProps) {
+export function TodoInput({
+  onSubmit,
+  placeholderContext,
+  disabled,
+  createError,
+  cachedCreateText,
+  onClearError,
+}: TodoInputProps) {
   const [text, setText] = useState("");
   const [placeholder, setPlaceholder] = useState("");
   const [focused, setFocused] = useState(false);
@@ -75,34 +86,50 @@ export function TodoInput({ onSubmit, placeholderContext, disabled }: TodoInputP
     }
   }
 
+  const calloutId = "error-callout-create";
+
   return (
-    <div
-      className="bg-surface rounded-xl p-4 md:p-5 flex items-center gap-3 transition-shadow [box-shadow:var(--shadow-resting)] data-[focused=true]:[box-shadow:0_0_0_3px_var(--color-accent),var(--shadow-hover)]"
-      data-focused={focused}
-    >
-      <input
-        ref={inputRef}
-        type="text"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        onKeyDown={handleKeyDown}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        placeholder={placeholder}
-        disabled={disabled}
-        aria-label="New todo"
-        className="flex-1 bg-transparent text-text-primary placeholder:text-text-placeholder outline-none text-base min-h-[44px]"
-      />
-      {text.trim().length > 0 && (
-        <button
-          onClick={submitText}
+    <>
+      <div
+        className="bg-surface rounded-xl p-4 md:p-5 flex items-center gap-3 transition-shadow [box-shadow:var(--shadow-resting)] data-[focused=true]:[box-shadow:0_0_0_3px_var(--color-accent),var(--shadow-hover)]"
+        data-focused={focused}
+        data-error-animate={createError ? "true" : undefined}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          value={text}
+          onChange={(e) => {
+            setText(e.target.value);
+            onClearError?.();
+          }}
+          onKeyDown={handleKeyDown}
+          onFocus={() => setFocused(true)}
+          onBlur={() => setFocused(false)}
+          placeholder={placeholder}
           disabled={disabled}
-          aria-label="Add todo"
-          className="px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50 bg-accent text-white"
-        >
-          Add
-        </button>
+          aria-label="New todo"
+          aria-describedby={createError ? calloutId : undefined}
+          className="flex-1 bg-transparent text-text-primary placeholder:text-text-placeholder outline-none text-base min-h-[44px]"
+        />
+        {text.trim().length > 0 && (
+          <button
+            onClick={submitText}
+            disabled={disabled}
+            aria-label="Add todo"
+            className="px-3 py-1.5 rounded-lg text-sm font-medium transition-opacity disabled:opacity-50 bg-accent text-white"
+          >
+            Add
+          </button>
+        )}
+      </div>
+      {createError && (
+        <ErrorCallout
+          type="create"
+          id={calloutId}
+          onRestore={cachedCreateText ? () => setText(cachedCreateText) : undefined}
+        />
       )}
-    </div>
+    </>
   );
 }
