@@ -35,7 +35,13 @@ export class TodoPage {
   }
 
   todoByText(text: string) {
-    return this.todoList.getByText(text);
+    // Filter through listitem to exclude auto-animate exit-animation clones,
+    // which are briefly in the DOM alongside the real element during FLIP transitions.
+    return this.todoList
+      .locator('[role="listitem"]')
+      .filter({ hasText: text })
+      .locator("p")
+      .first();
   }
 
   checkbox(todoText: string) {
