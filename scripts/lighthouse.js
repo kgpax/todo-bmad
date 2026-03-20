@@ -194,7 +194,7 @@ async function main() {
     log("🔥 Warming up server (pre-audit page load)...");
     await warmUpServer(URL);
     // Give the server a moment to settle after the warmup response.
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 5000));
     log("✅ Server warmed up\n");
 
     const results = [];

@@ -761,6 +761,8 @@ So that I know my data is on its way and the app feels alive rather than frozen.
 **When** the API response is delayed
 **Then** the skeleton loader appears, and once data arrives, real content replaces it
 
+> **⚠️ Story 3.1 CANCELLED (2026-03-20):** The `loading.tsx` Suspense streaming approach was implemented and rejected due to LCP regression (desktop Lighthouse dropped from stable 93–94 to variable 87–93). See the ADR in `project-context.md` and the story file for full details. Stories 3-3 and 3-4 reference the SkeletonLoader and `loading.tsx` — these references need updating to use a client-side loading approach instead of a route-level Suspense boundary.
+
 ### Story 3.2: Error Handling for Mutations
 
 As a user,
