@@ -62,6 +62,7 @@ export function useTodos(initialTodos: Todo[], initialFetchFailed = false) {
     try {
       const newTodo = await createTodo(trimmed);
       setTodos((prev) => [newTodo, ...prev]);
+      setLoadError(false);
       setCachedCreateText("");
       setJustAdded(true);
       if (justAddedTimerRef.current) clearTimeout(justAddedTimerRef.current);

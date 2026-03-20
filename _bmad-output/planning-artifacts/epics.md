@@ -911,6 +911,8 @@ So that I see a working page rather than a broken or blank screen.
 **When** the test exercises all error types: initial load failure with retry, create failure with text recovery, toggle failure with retry, delete failure with retry
 **Then** all error states show friendly messages, all retry paths succeed, and no data is lost
 
+> **⚠️ Story 3.4 CANCELLED (2026-03-20):** ~95% of this story's scope was delivered by Story 3-3 (Initial Load Error), which implemented the full graceful degradation chain: server-side error signaling, `LoadError` component, `SkeletonLoader` for retry, `retryLoad()` in `useTodos`, and 214 passing unit tests with 100% coverage. The single remaining gap — `addTodo` not clearing `loadError` on success — is a 1-line fix that will be addressed as review feedback on Story 3-3 rather than a separate story.
+
 ## Epic 4: Accessibility & Polish
 
 Every user — mobile, desktop, keyboard-only, or using assistive technology — gets a fully functional, polished experience. Purposeful animations bring every interaction to life with reduced-motion alternatives.
