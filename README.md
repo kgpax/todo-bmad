@@ -83,3 +83,10 @@ To clear the local database for a fresh start, run:
 ```bash
 npm run db:reset
 ```
+
+## Security review
+
+See [./chats/13-security-review.md](./chats/13-security-review.md) for the chat transcript when I asked for a security review.
+
+I opted for brevity to fix the critical and high issues via the "quick spec" and "quick dev" approach.
+
