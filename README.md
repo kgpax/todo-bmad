@@ -23,11 +23,18 @@ npm run dev
 Run a production build first, then start the built artifacts:
 
 ```bash
-npm run build   # compile all packages (must run before start)
-npm run start   # starts backend (node dist/index.js) and frontend (next start) together
+npm run build # compile all packages (must run before start)
+npm run start # starts backend (node dist/index.js) and frontend (next start) together
 ```
 
 > **Note:** `npm run start` does **not** rebuild the project. Always run `npm run build` before `npm run start` to ensure the running code matches the current working tree.
+
+### Via Docker
+
+```bash
+docker compose up   # build and start both backend and frontend apps
+docker compose down # teardown both backend and frontend apps
+```
 
 The app is available at `http://localhost:3000` and the API at `http://localhost:3001`.
 

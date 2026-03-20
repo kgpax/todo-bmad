@@ -14,6 +14,7 @@ const config = {
     "!src/lib/actions.ts",
     "!src/app/layout.tsx",
     "!src/app/page.tsx",
+    "!src/app/api/health/route.ts",
   ],
   coverageDirectory: "coverage",
   coverageReporters: ["text", "lcov"],

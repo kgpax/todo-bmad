@@ -3,6 +3,7 @@ import { AppConfig } from "./config";
 import { getDb } from "./db/client";
 import { corsPlugin } from "./plugins/cors";
 import { errorHandlerPlugin } from "./plugins/error-handler";
+import { healthRoutes } from "./routes/health";
 import { todosRoutes } from "./routes/todos";
 
 type DbInstance = ReturnType<typeof getDb>;
@@ -26,6 +27,7 @@ export function buildApp(config: AppConfig, db: DbInstance) {
 
   app.register(corsPlugin, { origin: config.CORS_ORIGIN });
   app.register(errorHandlerPlugin);
+  app.register(healthRoutes);
   app.register(todosRoutes);
 
   app.addHook("onSend", async (request, reply) => {

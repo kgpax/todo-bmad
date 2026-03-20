@@ -195,3 +195,10 @@ For cases where we spot things which are not necessarily linked to the current s
 ## ⚠️ Epic 4 cancelled!!!
 
 - I was approaching my token limit, so I opted to cancel epic 4 as what had been built up to that point was acceptable for MVP and didn't warrent risking eating all my tokens before the next bit
+
+## Dockerisation
+
+- Up to now, I had intentionally left out any mention of containerising this application, even though I knew it was coming
+- My hope was that I could ask the @pm persona at a later stage to add this requirement
+- It suggested that this could be "quick spec" rather than an epic, given how much work would be involved
+- I opted to agree, and went down the "quick spec" and "quick dev" route for this piece of work
