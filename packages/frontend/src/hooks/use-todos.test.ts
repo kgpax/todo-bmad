@@ -236,6 +236,32 @@ describe("useTodos", () => {
     });
   });
 
+  it("addTodo clears loadError on success when initialFetchFailed=true", async () => {
+    mockCreateTodo.mockResolvedValue(newTodo);
+    const { result } = renderHook(() => useTodos([], true));
+    expect(result.current.loadError).toBe(true);
+
+    await act(async () => {
+      await result.current.addTodo("New todo");
+    });
+
+    expect(result.current.loadError).toBe(false);
+    expect(result.current.todos).toHaveLength(1);
+  });
+
+  it("addTodo does NOT clear loadError on failure when initialFetchFailed=true", async () => {
+    mockCreateTodo.mockRejectedValue({ message: "Still down" });
+    const { result } = renderHook(() => useTodos([], true));
+    expect(result.current.loadError).toBe(true);
+
+    await act(async () => {
+      await result.current.addTodo("New todo");
+    });
+
+    expect(result.current.loadError).toBe(true);
+    expect(result.current.createError).toBe("Still down");
+  });
+
   // toggleTodo tests
   it("exposes toggleTodo function", () => {
     const { result } = renderHook(() => useTodos([existingTodo]));

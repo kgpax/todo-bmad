@@ -277,6 +277,39 @@ describe("TodoPage", () => {
     });
   });
 
+  it("transitions from LoadError to TodoList after successful addTodo", async () => {
+    mockCreateTodo.mockResolvedValue(newTodo);
+    render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" fetchFailed={true} />);
+
+    expect(getAlertByType("load")).toBeInTheDocument();
+
+    const input = screen.getByRole("textbox", { name: /new todo/i });
+    fireEvent.change(input, { target: { value: "Walk the dog" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(queryAlertByType("load")).not.toBeInTheDocument();
+      expect(screen.getByRole("list")).toBeInTheDocument();
+      expect(screen.getByText("Walk the dog")).toBeInTheDocument();
+    });
+  });
+
+  it("keeps LoadError visible after failed addTodo, shows create error callout", async () => {
+    mockCreateTodo.mockRejectedValue({ message: "Server error" });
+    render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" fetchFailed={true} />);
+
+    expect(getAlertByType("load")).toBeInTheDocument();
+
+    const input = screen.getByRole("textbox", { name: /new todo/i });
+    fireEvent.change(input, { target: { value: "Walk the dog" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(getAlertByType("load")).toBeInTheDocument();
+      expect(getAlertByType("create")).toBeInTheDocument();
+    });
+  });
+
   it("retry failure: LoadError reappears after failed retry", async () => {
     mockFetchTodosClient.mockRejectedValue({ error: "INTERNAL_ERROR" });
     render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" fetchFailed={true} />);

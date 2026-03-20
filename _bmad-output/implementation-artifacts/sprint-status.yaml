@@ -73,7 +73,7 @@ development_status:
   3-1-loading-state-skeleton-loader: cancelled
   3-2-error-handling-for-mutations: done
   3-3-initial-load-error: review
-  3-4-graceful-degradation: backlog
+  3-4-graceful-degradation: cancelled
   epic-3-retrospective: optional
 
   # Epic 4: Accessibility & Polish
