@@ -4,7 +4,7 @@ import { TodoPage } from "./pages/todo-page";
 
 const pause = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-test.describe.serial("Journey 3: Review and Tidy", () => {
+test.describe("Journey 3: Review and Tidy", () => {
   let todo: TodoPage;
 
   test.beforeEach(async ({ request, page }) => {

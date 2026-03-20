@@ -4,7 +4,7 @@ import { TodoPage } from "./pages/todo-page";
 
 const API_URL = "http://localhost:3001";
 
-test.describe.serial("Journey 4: Error Recovery — Mutation Errors", () => {
+test.describe("Journey 4: Error Recovery — Mutation Errors", () => {
   let todo: TodoPage;
 
   test.beforeEach(async ({ request, page }) => {
