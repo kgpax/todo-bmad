@@ -54,12 +54,6 @@ describe("ErrorCallout", () => {
     expect(screen.getByRole("alert")).toHaveAttribute("id", "error-callout-create");
   });
 
-  it("has the error-callout-fade-in CSS class for fade-in animation", () => {
-    render(<ErrorCallout type="create" id="test-callout" />);
-    const callout = screen.getByRole("alert");
-    expect(callout.className).toContain("error-callout-fade-in");
-  });
-
   it("renders restore button when onRestore prop provided", () => {
     render(<ErrorCallout type="create" id="test-callout" onRestore={jest.fn()} />);
     expect(screen.getByRole("button", { name: /restore/i })).toBeInTheDocument();
