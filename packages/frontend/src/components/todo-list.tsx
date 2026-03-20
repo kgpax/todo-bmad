@@ -33,7 +33,7 @@ export function TodoList({ todos, onToggle, onDelete }: TodoListProps) {
     >
       {activeTodos.map((todo) => (
         <div key={todo.id} role="listitem">
-          <TodoItem todo={todo} onToggle={onToggle} onDelete={onDelete} pendingAction={todo.pendingAction} />
+          <TodoItem todo={todo} onToggle={onToggle} onDelete={onDelete} pendingAction={todo.pendingAction} error={todo.error} errorType={todo.errorType} />
         </div>
       ))}
       {completedTodos.length > 0 && (
@@ -51,7 +51,7 @@ export function TodoList({ todos, onToggle, onDelete }: TodoListProps) {
       )}
       {completedTodos.map((todo) => (
         <div key={todo.id} role="listitem">
-          <TodoItem todo={todo} onToggle={onToggle} onDelete={onDelete} pendingAction={todo.pendingAction} />
+          <TodoItem todo={todo} onToggle={onToggle} onDelete={onDelete} pendingAction={todo.pendingAction} error={todo.error} errorType={todo.errorType} />
         </div>
       ))}
     </div>

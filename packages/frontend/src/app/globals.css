@@ -56,12 +56,39 @@
   --font-sans: var(--font-outfit);
 }
 
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.error-callout-fade-in {
+  animation: fade-in var(--duration-fast) ease-out forwards;
+}
+
+@keyframes error-shake {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-4px); }
+  30% { transform: translateX(4px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+  90% { transform: translateX(2px); }
+}
+
+[data-error-animate="true"] {
+  animation: error-shake var(--duration-shake) ease-in-out;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --duration-fast: 0ms;
     --duration-normal: 0ms;
     --duration-slow: 0ms;
     --duration-shake: 0ms;
+  }
+
+  [data-error-animate="true"] {
+    animation: none;
   }
 }
 
