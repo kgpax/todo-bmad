@@ -2,6 +2,8 @@ import Fastify from "fastify";
 import { AppConfig } from "./config";
 import { getDb } from "./db/client";
 import { corsPlugin } from "./plugins/cors";
+import { rateLimitPlugin } from "./plugins/rate-limit";
+import { helmetPlugin } from "./plugins/helmet";
 import { errorHandlerPlugin } from "./plugins/error-handler";
 import { healthRoutes } from "./routes/health";
 import { todosRoutes } from "./routes/todos";
@@ -26,6 +28,8 @@ export function buildApp(config: AppConfig, db: DbInstance) {
   app.decorate("db", db);
 
   app.register(corsPlugin, { origin: config.CORS_ORIGIN });
+  app.register(rateLimitPlugin, { max: config.RATE_LIMIT_MAX });
+  app.register(helmetPlugin);
   app.register(errorHandlerPlugin);
   app.register(healthRoutes);
   app.register(todosRoutes);

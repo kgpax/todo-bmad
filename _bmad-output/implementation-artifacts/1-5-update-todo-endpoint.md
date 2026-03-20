@@ -221,7 +221,7 @@ Only 2 files are modified. No new files. No new directories.
 
 **From Story 1.4 (done):**
 - ZodError handling: `try { schema.parse(body) } catch (err) { if (err instanceof z.ZodError) → 400 }` — reuse this exact pattern
-- `stripHtmlTags` helper is defined in `routes/todos.ts` — PATCH does not need it (no text modification)
+- `stripHtmlTags` helper was previously defined in `routes/todos.ts` but was removed in the security hardening spec (`tech-spec-security-hardening-critical-high`) — PATCH does not need it (no text modification)
 - POST handler is at line 19, PATCH handler goes after it (around line 49+)
 - Imports at top: `randomUUID` from `crypto`, `FastifyInstance` from `fastify`, `fp` from `fastify-plugin`, `desc` from `drizzle-orm`, `z` from `zod`, `createTodoSchema` and `VALIDATION_ERROR` from `@todo-bmad/shared`, `todos` from `../db/schema`
 - `randomUUID` import is NOT needed for PATCH

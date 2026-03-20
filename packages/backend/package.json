@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@fastify/cors": "^11.2.0",
+    "@fastify/helmet": "^13.0.2",
+    "@fastify/rate-limit": "^10.3.0",
     "@todo-bmad/shared": "*",
     "better-sqlite3": "^12.8.0",
     "drizzle-orm": "^0.45.1",

@@ -6,9 +6,8 @@ import { z } from "zod";
 import { createTodoSchema, updateTodoSchema, VALIDATION_ERROR, NOT_FOUND } from "@todo-bmad/shared";
 import { todos } from "../db/schema";
 
-function stripHtmlTags(text: string): string {
-  return text.replace(/<[^>]*>/g, "");
-}
+// Lowercase-only: randomUUID() always emits lowercase hex; uppercase IDs can never exist in this DB.
+const UUID_REGEX = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 export const todosRoutes = fp(async (app: FastifyInstance) => {
   app.get("/api/todos", async (_request, _reply) => {
@@ -30,13 +29,7 @@ export const todosRoutes = fp(async (app: FastifyInstance) => {
       throw err;
     }
 
-    const text = stripHtmlTags(parsed.text).trim();
-    if (text.length === 0) {
-      return reply.status(400).send({
-        error: VALIDATION_ERROR,
-        message: "Text must not be empty",
-      });
-    }
+    const text = parsed.text; // Zod schema already calls .trim() and enforces min(1)/max(128)
 
     const id = randomUUID();
     const createdAt = new Date().toISOString();
@@ -49,6 +42,10 @@ export const todosRoutes = fp(async (app: FastifyInstance) => {
   });
 
   app.patch<{ Params: { id: string } }>("/api/todos/:id", async (request, reply) => {
+    if (!UUID_REGEX.test(request.params.id)) {
+      return reply.status(400).send({ error: VALIDATION_ERROR, message: "Invalid todo id" });
+    }
+
     let parsed;
     try {
       parsed = updateTodoSchema.parse(request.body);
@@ -79,6 +76,10 @@ export const todosRoutes = fp(async (app: FastifyInstance) => {
   });
 
   app.delete<{ Params: { id: string } }>("/api/todos/:id", async (request, reply) => {
+    if (!UUID_REGEX.test(request.params.id)) {
+      return reply.status(400).send({ error: VALIDATION_ERROR, message: "Invalid todo id" });
+    }
+
     const existing = app.db.select().from(todos).where(eq(todos.id, request.params.id)).get();
     if (!existing) {
       return reply.status(404).send({

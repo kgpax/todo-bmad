@@ -305,3 +305,4 @@ No debug issues encountered. Implementation was straightforward following Dev No
 
 - 2026-03-17: Implemented POST /api/todos endpoint with validation, HTML sanitization, UUID generation, Drizzle insert, and 10 test cases (Story 1.4)
 - 2026-03-17: Code review — fixed 3 issues: (H1) added post-sanitization empty-text guard after HTML stripping, (M1) strengthened malformed JSON test to assert VALIDATION_ERROR code, (M2) added project-context.md to File List. 23 backend tests now pass.
+- **Post-story amendment (2026-03-20):** `stripHtmlTags` helper and its associated tests were removed in the security hardening spec (`tech-spec-security-hardening-critical-high`). React JSX escaping at render is the correct and complete XSS protection layer for this stack. Storing text verbatim and rendering it safely via `{todo.text}` is the intended pattern going forward.
