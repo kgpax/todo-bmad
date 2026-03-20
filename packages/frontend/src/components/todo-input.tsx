@@ -35,7 +35,13 @@ export function TodoInput({
   onClearError,
 }: TodoInputProps) {
   const [text, setText] = useState("");
-  const [placeholder, setPlaceholder] = useState("");
+  // Initialize with the first item in the bank so the placeholder is non-empty
+  // in the SSR-rendered HTML. Both server and client resolve the same deterministic
+  // value, avoiding a hydration mismatch. The useEffect randomises it immediately
+  // after hydration so interactive users still see varied prompts.
+  const [placeholder, setPlaceholder] = useState<string>(
+    () => getPlaceholderBank(placeholderContext)[0]
+  );
   const [focused, setFocused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const wasDisabledRef = useRef(false);

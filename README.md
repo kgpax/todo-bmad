@@ -53,7 +53,7 @@ Unit tests:
 npm run test
 ```
 
-**220** unit tests over all three packages giving **100%** coverage with the exception of some excluded framework-level files.
+**288** unit tests over all three packages giving **100%** coverage with the exception of some excluded framework-level files.
 
 E2E tests:
 
@@ -89,4 +89,3 @@ npm run db:reset
 See [./chats/13-security-review.md](./chats/13-security-review.md) for the chat transcript when I asked for a security review.
 
 I opted for brevity to fix the critical and high issues via the "quick spec" and "quick dev" approach.
-

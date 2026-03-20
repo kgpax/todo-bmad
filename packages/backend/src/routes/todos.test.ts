@@ -152,7 +152,7 @@ describe("POST /api/todos", () => {
     expect(todo.text).toBe("trimmed");
   });
 
-  it("strips HTML tags from text before storing", async () => {
+  it("stores text containing HTML characters as-is without stripping", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/api/todos",
@@ -160,18 +160,18 @@ describe("POST /api/todos", () => {
     });
     expect(res.statusCode).toBe(201);
     const { todo } = JSON.parse(res.body);
-    expect(todo.text).toBe("hello");
+    expect(todo.text).toBe("<b>hello</b>");
   });
 
-  it("returns 400 with VALIDATION_ERROR when text is only HTML tags", async () => {
+  it("accepts and stores text that consists entirely of HTML tags", async () => {
     const res = await app.inject({
       method: "POST",
       url: "/api/todos",
       payload: { text: "<b></b>" },
     });
-    expect(res.statusCode).toBe(400);
-    const body = JSON.parse(res.body);
-    expect(body.error).toBe("VALIDATION_ERROR");
+    expect(res.statusCode).toBe(201);
+    const { todo } = JSON.parse(res.body);
+    expect(todo.text).toBe("<b></b>");
   });
 
   it("returns 400 with VALIDATION_ERROR for empty text", async () => {
@@ -286,7 +286,7 @@ describe("PATCH /api/todos/:id", () => {
   it("returns 200 with updated todo when active todo is set to completed: true", async () => {
     db.insert(todos)
       .values({
-        id: "test-id-1",
+        id: "11111111-0000-4000-a000-000000000001",
         text: "Test todo",
         completed: false,
         createdAt: "2026-03-17T10:00:00.000Z",
@@ -295,7 +295,7 @@ describe("PATCH /api/todos/:id", () => {
 
     const res = await app.inject({
       method: "PATCH",
-      url: "/api/todos/test-id-1",
+      url: "/api/todos/11111111-0000-4000-a000-000000000001",
       payload: { completed: true },
     });
 
@@ -308,7 +308,7 @@ describe("PATCH /api/todos/:id", () => {
   it("sets completedAt to ISO timestamp when completing a todo", async () => {
     db.insert(todos)
       .values({
-        id: "test-id-ca1",
+        id: "11111111-0000-4000-a000-000000000002",
         text: "Complete me",
         completed: false,
         createdAt: "2026-03-17T10:00:00.000Z",
@@ -318,7 +318,7 @@ describe("PATCH /api/todos/:id", () => {
     const before = new Date().toISOString();
     const res = await app.inject({
       method: "PATCH",
-      url: "/api/todos/test-id-ca1",
+      url: "/api/todos/11111111-0000-4000-a000-000000000002",
       payload: { completed: true },
     });
     const after = new Date().toISOString();
@@ -335,7 +335,7 @@ describe("PATCH /api/todos/:id", () => {
   it("sets completedAt to null when uncompleting a todo", async () => {
     db.insert(todos)
       .values({
-        id: "test-id-ca2",
+        id: "11111111-0000-4000-a000-000000000003",
         text: "Uncomplete me",
         completed: true,
         createdAt: "2026-03-17T10:00:00.000Z",
@@ -345,7 +345,7 @@ describe("PATCH /api/todos/:id", () => {
 
     const res = await app.inject({
       method: "PATCH",
-      url: "/api/todos/test-id-ca2",
+      url: "/api/todos/11111111-0000-4000-a000-000000000003",
       payload: { completed: false },
     });
 
@@ -358,7 +358,7 @@ describe("PATCH /api/todos/:id", () => {
   it("returns 200 with updated todo when completed todo is set to completed: false", async () => {
     db.insert(todos)
       .values({
-        id: "test-id-2",
+        id: "11111111-0000-4000-a000-000000000004",
         text: "Done todo",
         completed: true,
         createdAt: "2026-03-17T10:00:00.000Z",
@@ -367,7 +367,7 @@ describe("PATCH /api/todos/:id", () => {
 
     const res = await app.inject({
       method: "PATCH",
-      url: "/api/todos/test-id-2",
+      url: "/api/todos/11111111-0000-4000-a000-000000000004",
       payload: { completed: false },
     });
 
@@ -379,7 +379,7 @@ describe("PATCH /api/todos/:id", () => {
   it("response contains all fields (id, text, completed, createdAt, completedAt) with correct values", async () => {
     db.insert(todos)
       .values({
-        id: "test-id-3",
+        id: "11111111-0000-4000-a000-000000000005",
         text: "Field check",
         completed: false,
         createdAt: "2026-03-17T10:00:00.000Z",
@@ -388,13 +388,13 @@ describe("PATCH /api/todos/:id", () => {
 
     const res = await app.inject({
       method: "PATCH",
-      url: "/api/todos/test-id-3",
+      url: "/api/todos/11111111-0000-4000-a000-000000000005",
       payload: { completed: true },
     });
 
     expect(res.statusCode).toBe(200);
     const { todo } = JSON.parse(res.body);
-    expect(todo.id).toBe("test-id-3");
+    expect(todo.id).toBe("11111111-0000-4000-a000-000000000005");
     expect(todo.text).toBe("Field check");
     expect(todo.completed).toBe(true);
     expect(todo.createdAt).toBe("2026-03-17T10:00:00.000Z");
@@ -404,7 +404,7 @@ describe("PATCH /api/todos/:id", () => {
   it("returns 404 with NOT_FOUND error for non-existent todo ID", async () => {
     const res = await app.inject({
       method: "PATCH",
-      url: "/api/todos/non-existent-id",
+      url: "/api/todos/99999999-0000-4000-a000-000000000000",
       payload: { completed: true },
     });
 
@@ -414,10 +414,22 @@ describe("PATCH /api/todos/:id", () => {
     expect(body).toHaveProperty("message");
   });
 
+  it("returns 400 with VALIDATION_ERROR when id is not a valid UUID", async () => {
+    const res = await app.inject({
+      method: "PATCH",
+      url: "/api/todos/not-a-uuid",
+      payload: { completed: true },
+    });
+    expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("VALIDATION_ERROR");
+    expect(body).toHaveProperty("message");
+  });
+
   it("returns 400 with VALIDATION_ERROR when completed field is missing", async () => {
     const res = await app.inject({
       method: "PATCH",
-      url: "/api/todos/any-id",
+      url: "/api/todos/00000000-0000-4000-a000-000000000000",
       payload: {},
     });
 
@@ -429,7 +441,7 @@ describe("PATCH /api/todos/:id", () => {
   it("returns 400 with VALIDATION_ERROR when completed is a string (e.g. 'true')", async () => {
     const res = await app.inject({
       method: "PATCH",
-      url: "/api/todos/any-id",
+      url: "/api/todos/00000000-0000-4000-a000-000000000000",
       payload: { completed: "true" },
     });
 
@@ -441,7 +453,7 @@ describe("PATCH /api/todos/:id", () => {
   it("returns 400 with VALIDATION_ERROR for empty body", async () => {
     const res = await app.inject({
       method: "PATCH",
-      url: "/api/todos/any-id",
+      url: "/api/todos/00000000-0000-4000-a000-000000000000",
       headers: { "content-type": "application/json" },
       payload: "{}",
     });
@@ -454,7 +466,7 @@ describe("PATCH /api/todos/:id", () => {
   it("updated todo reflects change in subsequent GET /api/todos", async () => {
     db.insert(todos)
       .values({
-        id: "test-id-4",
+        id: "11111111-0000-4000-a000-000000000006",
         text: "Integration todo",
         completed: false,
         createdAt: "2026-03-17T10:00:00.000Z",
@@ -463,7 +475,7 @@ describe("PATCH /api/todos/:id", () => {
 
     await app.inject({
       method: "PATCH",
-      url: "/api/todos/test-id-4",
+      url: "/api/todos/11111111-0000-4000-a000-000000000006",
       payload: { completed: true },
     });
 
@@ -528,7 +540,7 @@ describe("PATCH /api/todos/:id - non-ZodError re-throw", () => {
 
     const res = await app.inject({
       method: "PATCH",
-      url: "/api/todos/any-id",
+      url: "/api/todos/00000000-0000-4000-a000-000000000001",
       payload: { completed: true },
     });
 
@@ -554,7 +566,7 @@ describe("DELETE /api/todos/:id", () => {
   it("returns 204 with empty body when deleting an existing todo", async () => {
     db.insert(todos)
       .values({
-        id: "test-id-1",
+        id: "22222222-0000-4000-a000-000000000001",
         text: "Test todo",
         completed: false,
         createdAt: "2026-03-17T10:00:00.000Z",
@@ -563,7 +575,7 @@ describe("DELETE /api/todos/:id", () => {
 
     const res = await app.inject({
       method: "DELETE",
-      url: "/api/todos/test-id-1",
+      url: "/api/todos/22222222-0000-4000-a000-000000000001",
     });
 
     expect(res.statusCode).toBe(204);
@@ -573,7 +585,7 @@ describe("DELETE /api/todos/:id", () => {
   it("returns 404 with NOT_FOUND error for non-existent todo ID", async () => {
     const res = await app.inject({
       method: "DELETE",
-      url: "/api/todos/non-existent-id",
+      url: "/api/todos/99999999-0000-4000-a000-000000000001",
     });
 
     expect(res.statusCode).toBe(404);
@@ -585,14 +597,14 @@ describe("DELETE /api/todos/:id", () => {
   it("deleted todo no longer appears in GET /api/todos", async () => {
     db.insert(todos)
       .values({
-        id: "test-id-1",
+        id: "22222222-0000-4000-a000-000000000001",
         text: "To be deleted",
         completed: false,
         createdAt: "2026-03-17T10:00:00.000Z",
       })
       .run();
 
-    await app.inject({ method: "DELETE", url: "/api/todos/test-id-1" });
+    await app.inject({ method: "DELETE", url: "/api/todos/22222222-0000-4000-a000-000000000001" });
 
     const getRes = await app.inject({ method: "GET", url: "/api/todos" });
     const body = JSON.parse(getRes.body);
@@ -602,22 +614,106 @@ describe("DELETE /api/todos/:id", () => {
   it("returns 404 when deleting an already-deleted todo (idempotency boundary)", async () => {
     db.insert(todos)
       .values({
-        id: "test-id-1",
+        id: "22222222-0000-4000-a000-000000000001",
         text: "Test todo",
         completed: false,
         createdAt: "2026-03-17T10:00:00.000Z",
       })
       .run();
 
-    await app.inject({ method: "DELETE", url: "/api/todos/test-id-1" });
+    await app.inject({ method: "DELETE", url: "/api/todos/22222222-0000-4000-a000-000000000001" });
 
     const res = await app.inject({
       method: "DELETE",
-      url: "/api/todos/test-id-1",
+      url: "/api/todos/22222222-0000-4000-a000-000000000001",
     });
 
     expect(res.statusCode).toBe(404);
     const body = JSON.parse(res.body);
     expect(body.error).toBe("NOT_FOUND");
+  });
+
+  it("returns 400 with VALIDATION_ERROR when id is not a valid UUID", async () => {
+    const res = await app.inject({
+      method: "DELETE",
+      url: "/api/todos/not-a-uuid",
+    });
+    expect(res.statusCode).toBe(400);
+    const body = JSON.parse(res.body);
+    expect(body.error).toBe("VALIDATION_ERROR");
+    expect(body).toHaveProperty("message");
+  });
+});
+
+describe("Rate limiting", () => {
+  let app: ReturnType<typeof buildApp>;
+  let db: ReturnType<typeof getDb>;
+
+  beforeEach(() => {
+    const config = { ...getConfig(), LOG_LEVEL: "silent" };
+    db = getDb(":memory:");
+    runMigrations(db);
+    app = buildApp(config, db);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it("returns 429 after exceeding 120 requests per minute from the same source", async () => {
+    // Under app.inject(), @fastify/rate-limit keys by request.ip, which defaults
+    // to "127.0.0.1" for all injected requests — so all 121 requests are treated
+    // as the same client and the limit is correctly triggered on the 121st.
+    for (let i = 0; i < 119; i++) {
+      await app.inject({ method: "GET", url: "/api/todos" });
+    }
+    // The 120th request must succeed (still within the limit)
+    const withinLimit = await app.inject({ method: "GET", url: "/api/todos" });
+    expect(withinLimit.statusCode).toBe(200);
+    // The 121st request must be rate-limited
+    const overLimit = await app.inject({ method: "GET", url: "/api/todos" });
+    expect(overLimit.statusCode).toBe(429);
+  });
+});
+
+describe("Security headers (Helmet)", () => {
+  let app: ReturnType<typeof buildApp>;
+  let db: ReturnType<typeof getDb>;
+
+  beforeEach(() => {
+    const config = { ...getConfig(), LOG_LEVEL: "silent" };
+    db = getDb(":memory:");
+    runMigrations(db);
+    app = buildApp(config, db);
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it("sets X-Content-Type-Options: nosniff on responses", async () => {
+    const res = await app.inject({ method: "GET", url: "/api/todos" });
+    expect(res.headers["x-content-type-options"]).toBe("nosniff");
+  });
+
+  it("sets X-Frame-Options on responses", async () => {
+    const res = await app.inject({ method: "GET", url: "/api/todos" });
+    expect(res.headers["x-frame-options"]).toBeDefined();
+  });
+
+  it("sets Cross-Origin-Opener-Policy and Referrer-Policy headers", async () => {
+    const res = await app.inject({ method: "GET", url: "/api/todos" });
+    expect(res.headers["cross-origin-opener-policy"]).toBeDefined();
+    expect(res.headers["referrer-policy"]).toBeDefined();
+  });
+
+  it("sets security headers on rate-limited 429 responses", async () => {
+    for (let i = 0; i < 120; i++) {
+      await app.inject({ method: "GET", url: "/api/todos" });
+    }
+    const res = await app.inject({ method: "GET", url: "/api/todos" });
+    expect(res.statusCode).toBe(429);
+    expect(res.headers["x-content-type-options"]).toBe("nosniff");
+    expect(res.headers["x-frame-options"]).toBeDefined();
   });
 });

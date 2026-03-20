@@ -202,3 +202,10 @@ For cases where we spot things which are not necessarily linked to the current s
 - My hope was that I could ask the @pm persona at a later stage to add this requirement
 - It suggested that this could be "quick spec" rather than an epic, given how much work would be involved
 - I opted to agree, and went down the "quick spec" and "quick dev" route for this piece of work
+
+## Security review
+
+- As a last step, I asked the @pm agen who should do a security review
+- I was pushed towards the `/bmad-review-adversarial-general` workflow, so I used that indicating that I wanted focus on potential security issues
+- I then wend down the "quick spec" and "quick dev" flows to cover the most critical of them
+- It made me think that a security review really should have ben a part of the DoD for every story, which would have prevented a big-bang review at then end (or would at least have reduced the number of findings)

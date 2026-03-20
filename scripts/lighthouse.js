@@ -32,11 +32,14 @@ const URL = "http://localhost:3000";
 // Score thresholds — lower only when environment prevents stable 100 scores;
 // document reason here and in the story Dev Agent Record.
 const REQUIRED_SCORE = 100;
-// Performance floor set to 90: desktop LCP is consistently ~1.7 s (score 93–94) because the
-// dynamic route blocks on the backend API fetch before sending any HTML. Fixing the LCP to
-// reach desktop 100 requires React Suspense streaming architecture, which is scoped to
-// Story 3-1 (loading-state-skeleton-loader). Mobile consistently scores 100.
-// Floor set to 90 to enforce a meaningful gate while giving a safety margin below observed 93–94.
+// Performance floor set to 90: desktop LCP is consistently ~1.5 s (score 93–94).
+// LCP element: input placeholder pseudo-element (600 px wide, visible from SSR).
+// Critical-path: simulated TTFB (~460 ms) + optional-font block period (~750 ms) + render.
+// font-display:'optional' is required — 'swap' caused Lighthouse's simulation to treat
+// the font-swap repaint as the LCP event, adding ~1580 ms of simulated font-load latency.
+// Reaching desktop 100 requires reducing simulated TTFB (server-render latency), scoped
+// to Story 3-1 (streaming/skeleton). Mobile consistently scores 100.
+// Floor set to 90 as a meaningful gate with safety margin below observed 93–94.
 const REQUIRED_PERFORMANCE_SCORE = 90;
 
 const CATEGORIES = ["performance", "accessibility", "best-practices", "seo"];

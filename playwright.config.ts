@@ -19,7 +19,7 @@ export default defineConfig({
     },
   ],
   webServer: {
-    command: "npm run dev",
+    command: "RATE_LIMIT_MAX=10000 npm run dev",
     url: "http://localhost:3000",
     reuseExistingServer: true,
     timeout: 60_000,

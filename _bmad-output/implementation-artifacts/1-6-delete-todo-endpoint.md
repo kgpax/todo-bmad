@@ -179,7 +179,7 @@ Only 2 files are modified. No new files. No new directories.
 - 33 tests currently pass across the backend
 
 **From Story 1.4 (done):**
-- `stripHtmlTags` helper exists in `routes/todos.ts` — DELETE does not need it
+- `stripHtmlTags` helper was previously in `routes/todos.ts` but was removed in the security hardening spec (`tech-spec-security-hardening-critical-high`) — DELETE does not need it
 - POST handler generates UUIDs with `randomUUID()` — DELETE does not need it
 
 **From Story 1.2 (done):**
