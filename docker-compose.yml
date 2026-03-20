@@ -21,7 +21,7 @@ services:
     volumes:
       - todo-data:/app/packages/backend/data
     healthcheck:
-      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:3001/api/todos"]
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3001/api/todos"]
       interval: 5s
       timeout: 3s
       retries: 5
