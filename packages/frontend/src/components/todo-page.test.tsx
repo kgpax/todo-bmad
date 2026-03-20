@@ -143,4 +143,61 @@ describe("TodoPage", () => {
       expect(screen.queryByText(existingTodo.text)).not.toBeInTheDocument();
     });
   });
+
+  it("shows error callout when create fails", async () => {
+    mockCreateTodo.mockRejectedValue({ message: "Server error" });
+    render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" />);
+
+    const input = screen.getByRole("textbox", { name: /new todo/i });
+    fireEvent.change(input, { target: { value: "Buy milk" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+  });
+
+  it("passes createError and cachedCreateText props to TodoInput — error clears on re-type", async () => {
+    mockCreateTodo.mockRejectedValue({ message: "Server error" });
+    render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" />);
+
+    const input = screen.getByRole("textbox", { name: /new todo/i });
+    fireEvent.change(input, { target: { value: "Buy milk" } });
+    fireEvent.keyDown(input, { key: "Enter" });
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+
+    // Typing again should clear the error via onClearError
+    fireEvent.change(input, { target: { value: "a" } });
+
+    await waitFor(() => {
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+  });
+
+  it("shows item error callout when toggle fails", async () => {
+    const user = userEvent.setup();
+    mockToggleTodo.mockRejectedValue({ message: "Network failure" });
+    render(<TodoPage initialTodos={[existingTodo]} emptyMessage="Nothing here yet" />);
+
+    await user.click(screen.getByRole("checkbox"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+  });
+
+  it("shows item error callout when delete fails", async () => {
+    const user = userEvent.setup();
+    mockDeleteTodo.mockRejectedValue({ message: "Network failure" });
+    render(<TodoPage initialTodos={[existingTodo]} emptyMessage="Nothing here yet" />);
+
+    await user.click(screen.getByRole("button", { name: `Delete: ${existingTodo.text}` }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+  });
 });

@@ -88,6 +88,27 @@ describe("TodoList", () => {
     expect(checkboxes[1]).not.toBeDisabled();
   });
 
+  it("passes error and errorType to TodoItem — toggle error renders callout", () => {
+    const todosWithError: TodoWithMeta[] = [
+      { ...activeTodo1, error: "Failed to update", errorType: "toggle" },
+    ];
+    render(<TodoList todos={todosWithError} onToggle={noop} onDelete={noop} />);
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("passes error and errorType to TodoItem — delete error renders callout", () => {
+    const todosWithError: TodoWithMeta[] = [
+      { ...activeTodo1, error: "Failed to delete", errorType: "delete" },
+    ];
+    render(<TodoList todos={todosWithError} onToggle={noop} onDelete={noop} />);
+    expect(screen.getByRole("alert")).toBeInTheDocument();
+  });
+
+  it("does not render error callout when todo has no error", () => {
+    render(<TodoList todos={[activeTodo1]} onToggle={noop} onDelete={noop} />);
+    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+  });
+
   // Divider visibility
 
   it("renders divider with role='separator' when both active and completed todos exist", () => {

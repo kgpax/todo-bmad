@@ -143,4 +143,109 @@ describe("TodoItem", () => {
     const { container } = render(<TodoItem todo={mockActiveTodo} onToggle={noop} onDelete={noop} />);
     expect(container.firstChild).not.toHaveAttribute("data-pending-deleting", "true");
   });
+
+  describe("error callout", () => {
+    it("renders ErrorCallout when error and errorType are set (toggle)", async () => {
+      render(
+        <TodoItem
+          todo={mockActiveTodo}
+          onToggle={noop}
+          onDelete={noop}
+          error="Failed to update"
+          errorType="toggle"
+        />
+      );
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+
+    it("renders ErrorCallout when error and errorType are set (delete)", async () => {
+      render(
+        <TodoItem
+          todo={mockActiveTodo}
+          onToggle={noop}
+          onDelete={noop}
+          error="Failed to delete"
+          errorType="delete"
+        />
+      );
+      expect(screen.getByRole("alert")).toBeInTheDocument();
+    });
+
+    it("does not render ErrorCallout when error is not set", () => {
+      render(<TodoItem todo={mockActiveTodo} onToggle={noop} onDelete={noop} />);
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("does not render ErrorCallout when error is set but errorType is not", () => {
+      render(
+        <TodoItem
+          todo={mockActiveTodo}
+          onToggle={noop}
+          onDelete={noop}
+          error="Failed to update"
+        />
+      );
+      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+    });
+
+    it("sets data-error-animate on the card when error is truthy", () => {
+      const { container } = render(
+        <TodoItem
+          todo={mockActiveTodo}
+          onToggle={noop}
+          onDelete={noop}
+          error="Failed"
+          errorType="toggle"
+        />
+      );
+      const card = container.firstChild as HTMLElement;
+      expect(card).toHaveAttribute("data-error-animate", "true");
+    });
+
+    it("does not set data-error-animate on the card when error is not set", () => {
+      const { container } = render(
+        <TodoItem todo={mockActiveTodo} onToggle={noop} onDelete={noop} />
+      );
+      const card = container.firstChild as HTMLElement;
+      expect(card).not.toHaveAttribute("data-error-animate", "true");
+    });
+
+    it("sets aria-describedby on the card when error is set", () => {
+      const { container } = render(
+        <TodoItem
+          todo={mockActiveTodo}
+          onToggle={noop}
+          onDelete={noop}
+          error="Failed"
+          errorType="toggle"
+        />
+      );
+      const card = container.firstChild as HTMLElement;
+      expect(card).toHaveAttribute("aria-describedby", `error-callout-${mockActiveTodo.id}`);
+    });
+
+    it("does not set aria-describedby on the card when no error", () => {
+      const { container } = render(
+        <TodoItem todo={mockActiveTodo} onToggle={noop} onDelete={noop} />
+      );
+      const card = container.firstChild as HTMLElement;
+      expect(card).not.toHaveAttribute("aria-describedby");
+    });
+
+    it("ErrorCallout id matches card aria-describedby", () => {
+      const { container } = render(
+        <TodoItem
+          todo={mockActiveTodo}
+          onToggle={noop}
+          onDelete={noop}
+          error="Failed"
+          errorType="toggle"
+        />
+      );
+      const card = container.firstChild as HTMLElement;
+      const calloutId = card.getAttribute("aria-describedby")!;
+      const callout = screen.getByRole("alert");
+      expect(callout).toHaveAttribute("id", calloutId);
+    });
+  });
 });

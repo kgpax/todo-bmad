@@ -549,4 +549,96 @@ describe("useTodos", () => {
     expect(result.current.todos[0].error).toBe("Oops");
     expect(result.current.todos[1].error).toBeUndefined();
   });
+
+  // clearCreateError tests
+  it("exposes clearCreateError function", () => {
+    const { result } = renderHook(() => useTodos([]));
+    expect(typeof result.current.clearCreateError).toBe("function");
+  });
+
+  it("clearCreateError sets createError to null", async () => {
+    mockCreateTodo.mockRejectedValue({ message: "Server error" });
+    const { result } = renderHook(() => useTodos([]));
+
+    await act(async () => {
+      await result.current.addTodo("Some todo");
+    });
+
+    expect(result.current.createError).toBe("Server error");
+
+    act(() => {
+      result.current.clearCreateError();
+    });
+
+    expect(result.current.createError).toBeNull();
+  });
+
+  // errorType tests
+  it("sets errorType to 'toggle' on toggle failure", async () => {
+    mockToggleTodo.mockRejectedValue({ message: "Network failure" });
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].errorType).toBe("toggle");
+  });
+
+  it("sets errorType to 'delete' on delete failure", async () => {
+    mockDeleteTodo.mockRejectedValue({ message: "Network failure" });
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].errorType).toBe("delete");
+  });
+
+  it("clears error and errorType on successful toggle retry", async () => {
+    mockToggleTodo.mockRejectedValueOnce({ message: "Network failure" });
+    const completedVersion: Todo = {
+      ...existingTodo,
+      completed: true,
+      completedAt: new Date().toISOString(),
+    };
+    mockToggleTodo.mockResolvedValueOnce(completedVersion);
+
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].error).toBeDefined();
+    expect(result.current.todos[0].errorType).toBe("toggle");
+
+    await act(async () => {
+      await result.current.toggleTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].error).toBeUndefined();
+    expect(result.current.todos[0].errorType).toBeUndefined();
+  });
+
+  it("clears error and errorType on successful delete retry", async () => {
+    mockDeleteTodo.mockRejectedValueOnce({ message: "Network failure" });
+    mockDeleteTodo.mockResolvedValueOnce(undefined);
+
+    const { result } = renderHook(() => useTodos([existingTodo]));
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos[0].error).toBeDefined();
+    expect(result.current.todos[0].errorType).toBe("delete");
+
+    await act(async () => {
+      await result.current.deleteTodo(existingTodo.id);
+    });
+
+    expect(result.current.todos).toHaveLength(0);
+  });
 });
