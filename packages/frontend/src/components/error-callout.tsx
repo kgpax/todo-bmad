@@ -37,6 +37,7 @@ export function ErrorCallout({ type, id, message, onRestore }: ErrorCalloutProps
     <div
       id={id}
       role="alert"
+      data-alert-type={type}
       className="mt-2 text-sm text-error error-callout-fade-in"
     >
       <span>{message ?? copy}</span>

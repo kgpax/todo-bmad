@@ -134,22 +134,23 @@ export class TodoPage {
   }
 
   /**
-   * Returns the create error callout by its stable id.
-   * This avoids matching the Next.js route announcer which also uses role="alert".
+   * Returns the create error callout. Uses `data-alert-type="create"` so we do not
+   * match the Next.js route announcer (`role="alert"` without this attribute).
    */
   createErrorCallout() {
-    return this.page.locator('[id="error-callout-create"]');
+    return this.page.locator('[role="alert"][data-alert-type="create"]');
   }
 
   /**
-   * Returns the error callout (role="alert") for a specific todo item.
-   * Uses the stable id pattern: error-callout-{todoId}.
+   * Returns the error callout for a specific todo item (toggle or delete).
    */
   getItemErrorCallout(todoText: string) {
     return this.todoList
       .locator('[role="listitem"]')
       .filter({ hasText: todoText })
-      .locator('[role="alert"]:not([id="__next-route-announcer__"])');
+      .locator(
+        '[role="alert"][data-alert-type="toggle"], [role="alert"][data-alert-type="delete"]'
+      );
   }
 
   /**

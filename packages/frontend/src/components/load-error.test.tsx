@@ -28,6 +28,11 @@ describe("LoadError", () => {
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
+  it("sets data-alert-type='load'", () => {
+    render(<LoadError onRetry={jest.fn()} />);
+    expect(screen.getByRole("alert")).toHaveAttribute("data-alert-type", "load");
+  });
+
   it("retry button has a descriptive aria-label", () => {
     render(<LoadError onRetry={jest.fn()} />);
     const button = screen.getByRole("button", { name: /retry loading todos/i });

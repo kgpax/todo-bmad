@@ -44,6 +44,22 @@ const completedVersion: Todo = {
   completedAt: new Date().toISOString(),
 };
 
+type AlertType = "load" | "create" | "toggle" | "delete";
+
+function getAlertByType(type: AlertType) {
+  return screen.getByRole("alert", {
+    name: (_accessibleName, element) =>
+      element.getAttribute("data-alert-type") === type,
+  });
+}
+
+function queryAlertByType(type: AlertType) {
+  return screen.queryByRole("alert", {
+    name: (_accessibleName, element) =>
+      element.getAttribute("data-alert-type") === type,
+  });
+}
+
 describe("TodoPage", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -155,7 +171,7 @@ describe("TodoPage", () => {
     fireEvent.keyDown(input, { key: "Enter" });
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(getAlertByType("create")).toBeInTheDocument();
     });
   });
 
@@ -168,14 +184,14 @@ describe("TodoPage", () => {
     fireEvent.keyDown(input, { key: "Enter" });
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(getAlertByType("create")).toBeInTheDocument();
     });
 
     // Typing again should clear the error via onClearError
     fireEvent.change(input, { target: { value: "a" } });
 
     await waitFor(() => {
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(queryAlertByType("create")).not.toBeInTheDocument();
     });
   });
 
@@ -187,7 +203,7 @@ describe("TodoPage", () => {
     await user.click(screen.getByRole("checkbox"));
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(getAlertByType("toggle")).toBeInTheDocument();
     });
   });
 
@@ -199,14 +215,14 @@ describe("TodoPage", () => {
     await user.click(screen.getByRole("button", { name: `Delete: ${existingTodo.text}` }));
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(getAlertByType("delete")).toBeInTheDocument();
     });
   });
 
   // LoadError / SkeletonLoader tests
   it("renders LoadError when fetchFailed=true", () => {
     render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" fetchFailed={true} />);
-    expect(screen.getByRole("alert")).toBeInTheDocument();
+    expect(getAlertByType("load")).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /retry loading todos/i })).toBeInTheDocument();
   });
 
@@ -268,7 +284,7 @@ describe("TodoPage", () => {
     fireEvent.click(screen.getByRole("button", { name: /retry loading todos/i }));
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(getAlertByType("load")).toBeInTheDocument();
       expect(screen.getByRole("button", { name: /retry loading todos/i })).toBeInTheDocument();
     });
   });

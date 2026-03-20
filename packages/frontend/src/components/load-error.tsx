@@ -20,6 +20,7 @@ export function LoadError({ onRetry }: LoadErrorProps) {
     <div
       id="load-error"
       role="alert"
+      data-alert-type="load"
       className="bg-surface rounded-xl p-6 text-center [box-shadow:var(--shadow-resting)]"
     >
       <p className="text-text-secondary mb-4">{message}</p>

@@ -49,6 +49,15 @@ describe("ErrorCallout", () => {
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
+  it("sets data-alert-type from the type prop", () => {
+    const { rerender } = render(<ErrorCallout type="create" id="test-callout" />);
+    expect(screen.getByRole("alert")).toHaveAttribute("data-alert-type", "create");
+    rerender(<ErrorCallout type="toggle" id="test-callout" />);
+    expect(screen.getByRole("alert")).toHaveAttribute("data-alert-type", "toggle");
+    rerender(<ErrorCallout type="delete" id="test-callout" />);
+    expect(screen.getByRole("alert")).toHaveAttribute("data-alert-type", "delete");
+  });
+
   it("has the id attribute for aria-describedby linking", () => {
     render(<ErrorCallout type="create" id="error-callout-create" />);
     expect(screen.getByRole("alert")).toHaveAttribute("id", "error-callout-create");
