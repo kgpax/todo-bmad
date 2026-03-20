@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import type { Todo, ApiError } from "@todo-bmad/shared";
-import { createTodo, toggleTodo as apiToggleTodo, deleteTodo as apiDeleteTodo } from "@/lib/api";
+import { createTodo, toggleTodo as apiToggleTodo, deleteTodo as apiDeleteTodo, fetchTodosClient } from "@/lib/api";
 import { revalidateHome } from "@/lib/actions";
 
 export interface TodoWithMeta extends Todo {
@@ -11,8 +11,10 @@ export interface TodoWithMeta extends Todo {
   errorType?: "toggle" | "delete";
 }
 
-export function useTodos(initialTodos: Todo[]) {
+export function useTodos(initialTodos: Todo[], initialFetchFailed = false) {
   const [todos, setTodos] = useState<TodoWithMeta[]>(initialTodos);
+  const [loadError, setLoadError] = useState(initialFetchFailed);
+  const [isLoading, setIsLoading] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [cachedCreateText, setCachedCreateText] = useState("");
   const [justAdded, setJustAdded] = useState(false);
@@ -30,6 +32,20 @@ export function useTodos(initialTodos: Todo[]) {
     : todos.length === 0
       ? "empty"
       : "hasItems";
+
+  async function retryLoad() {
+    setIsLoading(true);
+    setLoadError(false);
+    try {
+      const freshTodos = await fetchTodosClient();
+      setTodos(freshTodos);
+      await revalidateHome();
+    } catch {
+      setLoadError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   function clearCreateError() {
     setCreateError(null);
@@ -136,5 +152,8 @@ export function useTodos(initialTodos: Todo[]) {
     createError,
     cachedCreateText,
     clearCreateError,
+    loadError,
+    isLoading,
+    retryLoad,
   };
 }

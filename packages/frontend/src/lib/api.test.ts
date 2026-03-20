@@ -1,4 +1,4 @@
-import { fetchTodos, createTodo, toggleTodo, deleteTodo } from "./api";
+import { fetchTodos, fetchTodosClient, createTodo, toggleTodo, deleteTodo } from "./api";
 
 const mockFetch = jest.fn();
 global.fetch = mockFetch as typeof fetch;
@@ -8,7 +8,7 @@ beforeEach(() => {
 });
 
 describe("fetchTodos", () => {
-  it("returns todos array on success", async () => {
+  it("returns { todos, fetchFailed: false } on success", async () => {
     const todos = [
       { id: "1", text: "Test", completed: false, createdAt: "2026-01-01T00:00:00.000Z", completedAt: null },
     ];
@@ -18,21 +18,79 @@ describe("fetchTodos", () => {
     });
 
     const result = await fetchTodos();
-    expect(result).toEqual(todos);
+    expect(result).toEqual({ todos, fetchFailed: false });
   });
 
-  it("returns [] when response is not ok", async () => {
+  it("returns { todos: [], fetchFailed: true } when response is not ok", async () => {
     mockFetch.mockResolvedValueOnce({ ok: false });
 
     const result = await fetchTodos();
-    expect(result).toEqual([]);
+    expect(result).toEqual({ todos: [], fetchFailed: true });
   });
 
-  it("returns [] when fetch throws a network error", async () => {
+  it("returns { todos: [], fetchFailed: true } when fetch throws a network error", async () => {
     mockFetch.mockRejectedValueOnce(new Error("Network error"));
 
     const result = await fetchTodos();
-    expect(result).toEqual([]);
+    expect(result).toEqual({ todos: [], fetchFailed: true });
+  });
+
+  it("returns { todos: [], fetchFailed: false } when data.todos is not an array", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ todos: "not-an-array" }),
+    });
+
+    const result = await fetchTodos();
+    expect(result).toEqual({ todos: [], fetchFailed: false });
+  });
+
+  it("returns { todos: [], fetchFailed: false } when data itself is null", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve(null),
+    });
+
+    const result = await fetchTodos();
+    expect(result).toEqual({ todos: [], fetchFailed: false });
+  });
+});
+
+describe("fetchTodosClient", () => {
+  const todos = [
+    { id: "1", text: "Test", completed: false, createdAt: "2026-01-01T00:00:00.000Z", completedAt: null },
+  ];
+
+  it("returns todos array on success", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: true,
+      json: () => Promise.resolve({ todos }),
+    });
+
+    const result = await fetchTodosClient();
+    expect(result).toEqual(todos);
+  });
+
+  it("throws parsed ApiError when response is not ok with valid JSON error body", async () => {
+    const apiError = { error: "INTERNAL_ERROR", message: "Server error" };
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: () => Promise.resolve(apiError),
+    });
+
+    await expect(fetchTodosClient()).rejects.toEqual(apiError);
+  });
+
+  it("throws fallback ApiError when response is not ok with invalid JSON body", async () => {
+    mockFetch.mockResolvedValueOnce({
+      ok: false,
+      json: () => Promise.reject(new Error("Invalid JSON")),
+    });
+
+    await expect(fetchTodosClient()).rejects.toEqual({
+      error: "INTERNAL_ERROR",
+      message: "Failed to load todos",
+    });
   });
 
   it("returns [] when data.todos is not an array", async () => {
@@ -41,17 +99,17 @@ describe("fetchTodos", () => {
       json: () => Promise.resolve({ todos: "not-an-array" }),
     });
 
-    const result = await fetchTodos();
+    const result = await fetchTodosClient();
     expect(result).toEqual([]);
   });
 
-  it("returns [] when data itself is null (data?.todos null branch)", async () => {
+  it("returns [] when data itself is null", async () => {
     mockFetch.mockResolvedValueOnce({
       ok: true,
       json: () => Promise.resolve(null),
     });
 
-    const result = await fetchTodos();
+    const result = await fetchTodosClient();
     expect(result).toEqual([]);
   });
 });

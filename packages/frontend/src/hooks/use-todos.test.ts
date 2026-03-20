@@ -6,17 +6,19 @@ jest.mock("@/lib/api", () => ({
   createTodo: jest.fn(),
   toggleTodo: jest.fn(),
   deleteTodo: jest.fn(),
+  fetchTodosClient: jest.fn(),
 }));
 
 jest.mock("@/lib/actions", () => ({
   revalidateHome: jest.fn().mockResolvedValue(undefined),
 }));
 
-import { createTodo, toggleTodo, deleteTodo } from "@/lib/api";
+import { createTodo, toggleTodo, deleteTodo, fetchTodosClient } from "@/lib/api";
 
 const mockCreateTodo = createTodo as jest.MockedFunction<typeof createTodo>;
 const mockToggleTodo = toggleTodo as jest.MockedFunction<typeof toggleTodo>;
 const mockDeleteTodo = deleteTodo as jest.MockedFunction<typeof deleteTodo>;
+const mockFetchTodosClient = fetchTodosClient as jest.MockedFunction<typeof fetchTodosClient>;
 
 const existingTodo: Todo = {
   id: "existing-1",
@@ -548,6 +550,84 @@ describe("useTodos", () => {
 
     expect(result.current.todos[0].error).toBe("Oops");
     expect(result.current.todos[1].error).toBeUndefined();
+  });
+
+  // loadError / isLoading / retryLoad tests
+  it("initializes loadError=false by default", () => {
+    const { result } = renderHook(() => useTodos([]));
+    expect(result.current.loadError).toBe(false);
+  });
+
+  it("initializes loadError=true when initialFetchFailed=true", () => {
+    const { result } = renderHook(() => useTodos([], true));
+    expect(result.current.loadError).toBe(true);
+  });
+
+  it("initializes isLoading=false", () => {
+    const { result } = renderHook(() => useTodos([]));
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it("retryLoad: sets isLoading=true and clears loadError before fetch completes", async () => {
+    let resolveClient!: (value: typeof existingTodo[]) => void;
+    mockFetchTodosClient.mockReturnValue(
+      new Promise<typeof existingTodo[]>((resolve) => {
+        resolveClient = resolve;
+      })
+    );
+
+    const { result } = renderHook(() => useTodos([], true));
+    expect(result.current.loadError).toBe(true);
+
+    act(() => {
+      result.current.retryLoad();
+    });
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.loadError).toBe(false);
+
+    await act(async () => {
+      resolveClient([]);
+    });
+
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it("retryLoad: sets todos and clears isLoading on success", async () => {
+    mockFetchTodosClient.mockResolvedValue([existingTodo]);
+    const { result } = renderHook(() => useTodos([], true));
+
+    await act(async () => {
+      await result.current.retryLoad();
+    });
+
+    expect(result.current.todos).toEqual([existingTodo]);
+    expect(result.current.loadError).toBe(false);
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it("retryLoad: calls revalidateHome on success", async () => {
+    const { revalidateHome } = jest.requireMock("@/lib/actions");
+    mockFetchTodosClient.mockResolvedValue([]);
+    const { result } = renderHook(() => useTodos([], true));
+
+    await act(async () => {
+      await result.current.retryLoad();
+    });
+
+    expect(revalidateHome).toHaveBeenCalled();
+  });
+
+  it("retryLoad: sets loadError=true and clears isLoading on failure", async () => {
+    mockFetchTodosClient.mockRejectedValue({ error: "INTERNAL_ERROR" });
+    const { result } = renderHook(() => useTodos([], false));
+
+    await act(async () => {
+      await result.current.retryLoad();
+    });
+
+    expect(result.current.loadError).toBe(true);
+    expect(result.current.isLoading).toBe(false);
   });
 
   // clearCreateError tests
