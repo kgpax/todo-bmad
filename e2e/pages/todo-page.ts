@@ -154,34 +154,6 @@ export class TodoPage {
   }
 
   /**
-   * Returns the LoadError component by its stable id.
-   */
-  loadError() {
-    return this.page.locator('[id="load-error"]');
-  }
-
-  /**
-   * Returns the retry button inside the LoadError component.
-   */
-  retryButton() {
-    return this.page.getByRole("button", { name: /retry loading todos/i });
-  }
-
-  /**
-   * Returns the SkeletonLoader container (aria-busy="true").
-   */
-  skeletonLoader() {
-    return this.page.locator('[aria-busy="true"]');
-  }
-
-  /**
-   * Returns true if the SkeletonLoader is currently visible.
-   */
-  async isSkeletonVisible(): Promise<boolean> {
-    return this.skeletonLoader().isVisible();
-  }
-
-  /**
    * Returns true if the element for the given todo has data-error-animate="true".
    */
   async isCardShaking(todoText: string): Promise<boolean> {
