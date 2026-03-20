@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 import { deleteAllTodos, seedTodos } from "./helpers";
 import { TodoPage } from "./pages/todo-page";
 
-test.describe("Journey 2: Quick Capture", () => {
+test.describe.serial("Journey 2: Quick Capture", () => {
   let todo: TodoPage;
 
   test.beforeEach(async ({ request, page }) => {
