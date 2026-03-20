@@ -174,6 +174,21 @@ Performance floor is 90 for both platforms. Desktop observed ~93–94 (LCP ~1.7s
 
 > **Note:** The Chrome DevTools MCP server is NOT used for Lighthouse audits. The `test:lighthouse` script uses the `lighthouse` npm package directly with a headless Chrome flag.
 
+### ADR: SSR failure scenarios tested at unit level, not E2E (2026-03-20)
+
+**Context:** Story 3-3 required E2E tests for AC #12–14: initial load failure showing `LoadError`, retry success showing skeleton then content, and retry failure showing `LoadError` again. These scenarios involve the initial `fetchTodos()` call failing server-side during SSR.
+
+**Decision:** E2E tests for AC #12–14 were implemented, reviewed, and **removed**. The SSR failure path is covered by unit tests only.
+
+**Root cause of removal:** Playwright's `page.route()` intercepts only browser-level network requests. When Next.js server components execute `fetchTodos()`, that HTTP call originates from the Node.js server process — a separate OS process that Playwright cannot observe or mock. The only way to simulate SSR failure in E2E is to kill the backend process. An initial implementation using `lsof -ti:3001 | xargs kill -9` accidentally killed the Playwright worker itself (it had open TCP connections to port 3001). A refined implementation using `pkill -9 -f 'tsx.*conditions=development'` worked, but killing OS processes in an automated test suite is inherently fragile and dangerous in CI environments.
+
+**Why unit tests are sufficient for this path:** The SSR failure path is shallow and fully deterministic: `fetchTodos()` returns `{ fetchFailed: true }` → `page.tsx` passes `fetchFailed={true}` to `<TodoPage>` → `useTodos` initialises `loadError=true` → `<TodoPage>` renders `<LoadError>`. Every step of this chain has direct unit test coverage. There is no browser behaviour, animation, or user interaction involved that a unit test cannot verify.
+
+**Consequences:**
+- Do not add E2E tests for SSR-initiated error states unless a test seam is introduced (e.g. an env var that makes `fetchTodos()` return `fetchFailed: true` without a real network call, readable server-side without a process restart).
+- Client-side retry flows (AC #4–6) remain appropriate for E2E testing via `page.route()`, since the retry fetch originates in the browser.
+- This pattern generalises: any behaviour that originates server-side in a Next.js server component should be tested at the unit/integration level, not E2E, unless a proper test seam exists.
+
 ### ADR: React Suspense streaming via `loading.tsx` rejected (2026-03-20)
 
 **Context:** Story 3-1 proposed adding `packages/frontend/src/app/loading.tsx` to create a Suspense boundary around `page.tsx`. The hypothesis was that streaming would improve desktop Lighthouse performance by sending a skeleton shell immediately while the API fetch resolved, reducing both FCP and LCP.

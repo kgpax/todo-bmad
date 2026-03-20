@@ -6,12 +6,12 @@ import { pickRandom } from "@/lib/utils";
 export const revalidate = false;
 
 export default async function Home() {
-  const todos = await fetchTodos();
+  const { todos, fetchFailed } = await fetchTodos();
   const emptyMessage = pickRandom(EMPTY_STATE_MESSAGES);
   return (
     <main className="min-h-screen px-4 md:px-6">
       <div className="max-w-[640px] mx-auto">
-        <TodoPage initialTodos={todos} emptyMessage={emptyMessage} />
+        <TodoPage initialTodos={todos} emptyMessage={emptyMessage} fetchFailed={fetchFailed} />
       </div>
     </main>
   );

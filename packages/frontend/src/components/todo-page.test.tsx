@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { TodoPage } from "./todo-page";
 import type { Todo } from "@todo-bmad/shared";
@@ -8,17 +8,19 @@ jest.mock("@/lib/api", () => ({
   createTodo: jest.fn(),
   toggleTodo: jest.fn(),
   deleteTodo: jest.fn(),
+  fetchTodosClient: jest.fn(),
 }));
 
 jest.mock("@/lib/actions", () => ({
   revalidateHome: jest.fn().mockResolvedValue(undefined),
 }));
 
-import { createTodo, toggleTodo, deleteTodo } from "@/lib/api";
+import { createTodo, toggleTodo, deleteTodo, fetchTodosClient } from "@/lib/api";
 
 const mockCreateTodo = createTodo as jest.MockedFunction<typeof createTodo>;
 const mockToggleTodo = toggleTodo as jest.MockedFunction<typeof toggleTodo>;
 const mockDeleteTodo = deleteTodo as jest.MockedFunction<typeof deleteTodo>;
+const mockFetchTodosClient = fetchTodosClient as jest.MockedFunction<typeof fetchTodosClient>;
 
 const existingTodo: Todo = {
   id: "existing-1",
@@ -41,6 +43,22 @@ const completedVersion: Todo = {
   completed: true,
   completedAt: new Date().toISOString(),
 };
+
+type AlertType = "load" | "create" | "toggle" | "delete";
+
+function getAlertByType(type: AlertType) {
+  return screen.getByRole("alert", {
+    name: (_accessibleName, element) =>
+      element.getAttribute("data-alert-type") === type,
+  });
+}
+
+function queryAlertByType(type: AlertType) {
+  return screen.queryByRole("alert", {
+    name: (_accessibleName, element) =>
+      element.getAttribute("data-alert-type") === type,
+  });
+}
 
 describe("TodoPage", () => {
   beforeEach(() => {
@@ -153,7 +171,7 @@ describe("TodoPage", () => {
     fireEvent.keyDown(input, { key: "Enter" });
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(getAlertByType("create")).toBeInTheDocument();
     });
   });
 
@@ -166,14 +184,14 @@ describe("TodoPage", () => {
     fireEvent.keyDown(input, { key: "Enter" });
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(getAlertByType("create")).toBeInTheDocument();
     });
 
     // Typing again should clear the error via onClearError
     fireEvent.change(input, { target: { value: "a" } });
 
     await waitFor(() => {
-      expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+      expect(queryAlertByType("create")).not.toBeInTheDocument();
     });
   });
 
@@ -185,7 +203,7 @@ describe("TodoPage", () => {
     await user.click(screen.getByRole("checkbox"));
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(getAlertByType("toggle")).toBeInTheDocument();
     });
   });
 
@@ -197,7 +215,77 @@ describe("TodoPage", () => {
     await user.click(screen.getByRole("button", { name: `Delete: ${existingTodo.text}` }));
 
     await waitFor(() => {
-      expect(screen.getByRole("alert")).toBeInTheDocument();
+      expect(getAlertByType("delete")).toBeInTheDocument();
+    });
+  });
+
+  // LoadError / SkeletonLoader tests
+  it("renders LoadError when fetchFailed=true", () => {
+    render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" fetchFailed={true} />);
+    expect(getAlertByType("load")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /retry loading todos/i })).toBeInTheDocument();
+  });
+
+  it("does not render LoadError when fetchFailed is false (default)", () => {
+    render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" />);
+    expect(screen.queryByRole("button", { name: /retry loading todos/i })).not.toBeInTheDocument();
+    expect(screen.getByRole("status")).toBeInTheDocument();
+  });
+
+  it("SkeletonLoader renders during retry (isLoading=true)", async () => {
+    let resolveClient!: (value: typeof existingTodo[]) => void;
+    mockFetchTodosClient.mockReturnValue(
+      new Promise<typeof existingTodo[]>((resolve) => {
+        resolveClient = resolve;
+      })
+    );
+
+    render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" fetchFailed={true} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /retry loading todos/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("list", { name: /loading todos/i })).toBeInTheDocument();
+    });
+
+    await act(async () => {
+      resolveClient([]);
+    });
+  });
+
+  it("retry success: LoadError transitions to content", async () => {
+    mockFetchTodosClient.mockResolvedValue([existingTodo]);
+    render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" fetchFailed={true} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /retry loading todos/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: /retry loading todos/i })).not.toBeInTheDocument();
+      expect(screen.getByText(existingTodo.text)).toBeInTheDocument();
+    });
+  });
+
+  it("retry success with empty list: shows EmptyState", async () => {
+    mockFetchTodosClient.mockResolvedValue([]);
+    render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" fetchFailed={true} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /retry loading todos/i }));
+
+    await waitFor(() => {
+      expect(screen.queryByRole("button", { name: /retry loading todos/i })).not.toBeInTheDocument();
+      expect(screen.getByRole("status")).toBeInTheDocument();
+    });
+  });
+
+  it("retry failure: LoadError reappears after failed retry", async () => {
+    mockFetchTodosClient.mockRejectedValue({ error: "INTERNAL_ERROR" });
+    render(<TodoPage initialTodos={[]} emptyMessage="Nothing here yet" fetchFailed={true} />);
+
+    fireEvent.click(screen.getByRole("button", { name: /retry loading todos/i }));
+
+    await waitFor(() => {
+      expect(getAlertByType("load")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /retry loading todos/i })).toBeInTheDocument();
     });
   });
 });

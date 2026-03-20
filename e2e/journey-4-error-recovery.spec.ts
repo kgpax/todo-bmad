@@ -4,7 +4,7 @@ import { TodoPage } from "./pages/todo-page";
 
 const API_URL = "http://localhost:3001";
 
-test.describe("Journey 4: Error Recovery", () => {
+test.describe("Journey 4: Error Recovery — Mutation Errors", () => {
   let todo: TodoPage;
 
   test.beforeEach(async ({ request, page }) => {
@@ -129,3 +129,4 @@ test.describe("Journey 4: Error Recovery", () => {
     await expect(todo.todoByText("Take out trash")).not.toBeVisible();
   });
 });
+
