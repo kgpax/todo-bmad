@@ -45,6 +45,12 @@ services:
       # which is unreachable from the host through Docker port mapping.
       HOSTNAME: 0.0.0.0
       NODE_ENV: production
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+      start_period: 15s
     depends_on:
       backend:
         condition: service_healthy
