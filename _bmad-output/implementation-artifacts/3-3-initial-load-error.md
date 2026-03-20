@@ -1,6 +1,6 @@
 # Story 3.3: Initial Load Error
 
-Status: review
+Status: done
 
 ## Story
 

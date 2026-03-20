@@ -191,3 +191,7 @@ For cases where we spot things which are not necessarily linked to the current s
   - Despite this, the agent wanted to push ahead and drop the threshold from 90 to 85, which I had to stop and tell it that performance regressions are not an option
   - In the end, I asked it to abandon the loading skeleton implementation; as it didn't offer enough user value to justify a consistently slower LCP
   - The story was marked as cancelled
+
+## ⚠️ Epic 4 cancelled!!!
+
+- I was approaching my token limit, so I opted to cancel epic 4 as what had been built up to that point was acceptable for MVP and didn't warrent risking eating all my tokens before the next bit
